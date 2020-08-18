@@ -3,26 +3,26 @@ import datetime
 import random
 import discord
 from config import cfg
+import shared
 
 last_gecizes = datetime.datetime.now()
 
 
-async def handle_on_typing(bot, channel, user, when,statuses):
-    print("channel: {0}, user: {1}, when: {2}".format(channel, user, when))
+async def handle_on_typing(bot, channel, user, when):
     await bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
     await asyncio.sleep(5)
-    await bot.change_presence(activity=discord.Game(random.choice(statuses)))
+    await bot.change_presence(activity=discord.Game(random.choice(shared.statuses)))
 
 
 async def handle_on_message(bot, message):
     global last_gecizes
     now = datetime.datetime.now()
 
-    if (now - last_gecizes).total_seconds() > 10 \
-            and message.author.id in cfg["goofies"] and cfg["prefix"] not in message.content \
+    if (now - last_gecizes).total_seconds() > 120 \
+            and cfg["prefix"] not in message.content \
             and random.choice([True, False]):
         last_gecizes = datetime.datetime.now()
-        await message.channel.send("kit érdekel <@{}>".format(message.author.id))
+        await message.channel.send(random.choice(shared.beszolasok).format(message.author.id))
 
 
     if message.tts:
