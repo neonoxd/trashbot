@@ -77,25 +77,30 @@ async def check_and_notify(ctx, oldstate, newstate):
 
 async def check_streams(ctx):
     while True:
-        print("checking stream")
-        streams = {}
-        for usr, channel in config.trash_list["yt"].items():
-            print("checking: {} : {} -> ".format(usr, channel), end="")
-            streams[usr] = check_user_yt(channel)
-            print(streams[usr]['islive'])
-        for usr, channel in config.trash_list["twitch"].items():
-            print("checking: {} : {} -> ".format(usr, channel), end="")
-            streams[usr] = check_user_twitch(channel)
-            print(streams[usr]['islive'])
+        print("check_streams triggered")
 
-        print(streams)
-        if "streamstate" not in shared.state["attachedChannels"][ctx.channel.id]:
-            print("no stream state yet, adding last")
-            shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
-            await check_and_notify(ctx, None, streams)
-        elif shared.state["attachedChannels"][ctx.channel.id]["streamstate"] != streams:
-            await check_and_notify(ctx, shared.state["attachedChannels"][ctx.channel.id]["streamstate"], streams)
-            shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
+        if bool({k: v for k, v in shared.state["attachedChannels"].items() if v['attached']}):
+            print("checking channels")
+            streams = {}
+            for usr, channel in config.trash_list["yt"].items():
+                print("checking: {} : {} -> ".format(usr, channel), end="")
+                streams[usr] = check_user_yt(channel)
+                print(streams[usr]['islive'])
+            for usr, channel in config.trash_list["twitch"].items():
+                print("checking: {} : {} -> ".format(usr, channel), end="")
+                streams[usr] = check_user_twitch(channel)
+                print(streams[usr]['islive'])
+
+            print(streams)
+            if "streamstate" not in shared.state["attachedChannels"][ctx.channel.id]:
+                print("no stream state yet, adding last")
+                shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
+                await check_and_notify(ctx, None, streams)
+            elif shared.state["attachedChannels"][ctx.channel.id]["streamstate"] != streams:
+                await check_and_notify(ctx, shared.state["attachedChannels"][ctx.channel.id]["streamstate"], streams)
+                shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
+        else:
+            print("no channels are attached to trashwatch")
         await asyncio.sleep(config.cfg["trashwatch_interval"])
 
 

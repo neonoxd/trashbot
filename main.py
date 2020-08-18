@@ -56,7 +56,10 @@ async def trashwatch(ctx, *args):
         print("adding stream checker bot loop task")
         bot.loop.create_task(check_streams(ctx))
 
-    await ctx.send("TrashWatch {}".format(shared.state["attachedChannels"][ctx.channel.id]["attached"]))
+    if shared.state["attachedChannels"][ctx.channel.id]["attached"]:
+        await ctx.send("TrashWatch:tm: Bekapcsolva")
+    else:
+        await ctx.send("TrashWatch:tm: Kikapcsolva")
 
 
 
@@ -75,6 +78,7 @@ async def on_typing(channel, user, when):
 @bot.event
 async def on_message(message):
     from eventhandlers import handle_on_message
+
     if message.author == bot.user:
         return
     await handle_on_message(bot, message)
