@@ -8,7 +8,6 @@ last_gecizes = datetime.datetime.now()
 
 
 async def handle_on_typing(bot, channel, user, when,statuses):
-    print("channel: {0}, user: {1}, when: {2}".format(channel, user, when))
     await bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
     await asyncio.sleep(5)
     await bot.change_presence(activity=discord.Game(random.choice(statuses)))
