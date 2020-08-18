@@ -1,74 +1,50 @@
-import io
-import random
-import time
 import os
-
+import random
 import discord
-import requests
-from PIL import Image
 from discord.ext import commands
 from dotenv import load_dotenv
-
 from config import cfg
-
-load_dotenv()
-
-TOKEN = os.getenv("DISCORD_TOKEN")
-PHToken = "92a95ab0a3f4d2de"
-
-with open('zene.txt', 'r', encoding="utf8") as file:
-    zenek = file.read().split("\n\n")
-
-
-def getCaptcha(captchaId):
-    response = requests.get('https://hardverapro.hu/captcha/{0}.png'.format(captchaId), params={'t': time.time()})
-    img = io.BytesIO(response.content)
-
-    image = Image.open(img).convert("RGBA")
-    bg = Image.open('bg.png', 'r')
-    text_img = Image.new('RGBA', (600, 320), (0, 0, 0, 0))
-    text_img.paste(bg, ((text_img.width - bg.width) // 2, (text_img.height - bg.height) // 2))
-    text_img.paste(image, ((text_img.width - image.width) // 2, (text_img.height - image.height) // 2), image)
-    imgByteArr = io.BytesIO()
-    text_img.save(imgByteArr, format='PNG')
-    imgByteArr.seek(0)
-    return imgByteArr
-
+from utils import Slapper
 
 bot = commands.Bot(command_prefix=cfg["prefix"])
+load_dotenv()
+TOKEN = os.getenv("DISCORD_TOKEN")
+PHToken = "92a95ab0a3f4d2de"
+with open('zene.txt', 'r', encoding="utf8") as file:
+    legjob_zene_list = file.read().split("\n\n")
+with open('idle_statuses.txt', 'r', encoding="utf8") as file:
+    statuses = file.read().split("\n")
 
-class Slapper(commands.Converter):
-    async def convert(self, ctx, argument):
-        to_slap = random.choice(ctx.guild.members)
-        return '{0.author.mention} pofán csapta {1.mention}-t egy jó büdös hallal mert *{2}*'.format(ctx, to_slap, argument)
+print(statuses)
 
 @bot.command(name='hal')
 async def slap(ctx, *, reason: Slapper):
     await ctx.send(reason)
 
+
 @bot.event
 async def on_message(message):
+    from eventhandlers import handle_on_message
     if message.author == bot.user:
         return
-    #if message.author.id == 232184416259014657 and cfg["prefix"] not in message.content:
-    #    await message.channel.send("kit érdekel <@{}>".format(message.author.id))
-    await bot.process_commands(message)
+    await handle_on_message(bot, message)
 
 
 @bot.command(name='captcha', description="random PH captcha")
 async def captcha(ctx):
-    cimg = getCaptcha(PHToken)
+    from utils import get_captcha
+    cimg = get_captcha(PHToken)
     await ctx.send(file=discord.File(cimg, 'geci.png'))
 
 
 @bot.command(name='zene', description="random leg job zene idézet")
 async def zene(ctx):
-    await ctx.send(random.choice(zenek))
+    await ctx.send(random.choice(legjob_zene_list))
 
 
 @bot.command(name='arena', description="ketrecharc bunyo, hasznalat: {0}arena @user1 @user2 ...".format(cfg["prefix"]))
 async def fight(ctx, *args):
-    if len(args)==0:
+    if len(args) == 0:
         return
     await ctx.send("a ketrec harc gyöz tese: {}".format(random.choice(args)))
 
@@ -86,5 +62,8 @@ async def on_ready():
 
 @bot.event
 async def on_typing(channel, user, when):
-    await bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
+    from eventhandlers import handle_on_typing
+    await handle_on_typing(bot,channel,user,when,statuses)
+
+
 bot.run(TOKEN)
