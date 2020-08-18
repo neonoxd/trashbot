@@ -20,10 +20,9 @@ async def handle_on_message(bot, message):
 
     if (now - last_gecizes).total_seconds() > 120 \
             and cfg["prefix"] not in message.content \
-            and random.choice([True, False]):
+            and random.randrange(0,100) < 11:
         last_gecizes = datetime.datetime.now()
         await message.channel.send(random.choice(shared.beszolasok).format(message.author.id))
-
 
     if message.tts:
         await message.add_reaction("🇬")

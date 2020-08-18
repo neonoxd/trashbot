@@ -7,42 +7,43 @@ import time
 import os
 from dotenv import load_dotenv
 from discord.ext import commands
+import config
+import shared
 
 load_dotenv()
 
 
-def checkUser(user):
-    TWITCH_STREAM_API_ENDPOINT_V5 = "https://api.twitch.tv/kraken/streams/{}"
+def check_user_twitch(user):
+    endpoint = "https://api.twitch.tv/kraken/streams/{}"
 
     API_HEADERS = {
         'Client-ID': os.getenv("TWITCH_CLIENTID"),
         'Accept': 'application/vnd.twitchtv.v5+json',
     }
-    url = TWITCH_STREAM_API_ENDPOINT_V5.format(user)
+    url = endpoint.format(user)
 
     try:
         req = requests.get(url, headers=API_HEADERS)
         jsondata = req.json()
-        print(jsondata)
         if 'stream' in jsondata:
             if jsondata['stream'] is not None:  # stream is online
-                return {"islive":True, "title":jsondata["stream"]["channel"]["status"], "thumbnail":jsondata["stream"]["preview"]["large"]}
+                return {"islive": True, "title": jsondata["stream"]["channel"]["status"],
+                        "thumbnail": jsondata["stream"]["preview"]["large"]}
             else:
                 return {"islive": False}
     except Exception as e:
         return {"islive": False}
 
 
-def checkuserYt(channelId):
+def check_user_yt(channel_id):
     apikey = os.getenv("YT_APIKEY")
     url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={0}&type=video&eventType=live&key={1}"
-    req = requests.get(url=url.format(channelId, apikey))
+    req = requests.get(url=url.format(channel_id, apikey))
     jsondata = req.json()
     try:
-        live = jsondata["items"][0]["snippet"]["liveBroadcastContent"]
+        is_live = jsondata["items"][0]["snippet"]["liveBroadcastContent"] == "live"
         thumbnail = jsondata["items"][0]["snippet"]["thumbnails"]["high"]["url"]
         title = jsondata["items"][0]["snippet"]["title"]
-        is_live = True
 
         return {"islive": is_live, "thumbnail": thumbnail, "title": title}
     except Exception as e:
@@ -52,25 +53,32 @@ def checkuserYt(channelId):
 async def check_streams(ctx):
     while True:
         print("checking stream")
-        streams = {
-            "tibi": checkuserYt("UCxA1n--ZPGIWzFEZ98aLzTQ"),
-            "nagylaci": checkuserYt("UCxFpm3Qlpbe2Nunm02rtXXw"),
-            "martin": checkuserYt("UCVXMCQyIAhvbrH0lyRb9MMQ"),
-            "sodi": checkUser("235138165"),
-            "bturbo": checkUser("37738094")
-        }
+        streams = {}
+        for usr, channel in config.trash_list["yt"].items():
+            print("checking: {} : {} -> ".format(usr, channel), end="")
+            streams[usr] = check_user_yt(channel)
+            print(streams[usr]['islive'])
+        for usr, channel in config.trash_list["twitch"].items():
+            print("checking: {} : {} -> ".format(usr, channel), end="")
+            streams[usr] = check_user_twitch(channel)
+            print(streams[usr]['islive'])
+
         print(streams)
-        await ctx.send(streams)
+        shared.state["attachedChannels"][ctx.channel.id]["streamstate"]=streams
+        #await ctx.send(streams)
         await asyncio.sleep(30)
 
 
-def get_captcha(captchaId):
-    response = requests.get('https://hardverapro.hu/captcha/{0}.png'.format(captchaId), params={'t': time.time()})
+async def get_captcha(captcha_id):
+    response = requests.get('https://hardverapro.hu/captcha/{0}.png'.format(captcha_id), params={'t': time.time()})
     img = io.BytesIO(response.content)
 
-    image = Image.open(img).convert("RGBA")
-    bg = Image.open('bg.png', 'r')
-    text_img = Image.new('RGBA', (600, 320), (0, 0, 0, 0))
+    rgb_image = Image.open(img).convert("RGBA")
+    double_size = (rgb_image.size[0] * 2, rgb_image.size[1] * 2)
+    image = rgb_image.resize(double_size)
+
+    bg = Image.open('resources/bg.png', 'r')
+    text_img = Image.new('RGBA', (bg.width, bg.height), (0, 0, 0, 0))
     text_img.paste(bg, ((text_img.width - bg.width) // 2, (text_img.height - bg.height) // 2))
     text_img.paste(image, ((text_img.width - image.width) // 2, (text_img.height - image.height) // 2), image)
     img_byte_arr = io.BytesIO()
