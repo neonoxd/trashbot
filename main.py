@@ -47,7 +47,6 @@ async def say(ctx, *args):
 
 @bot.command(name='trashpolice')
 async def trashwatch(ctx, *args):
-    return
     if ctx.channel.id in shared.state["attachedChannels"]:
         curstatus = shared.state["attachedChannels"][ctx.channel.id]["attached"]
         shared.state["attachedChannels"][ctx.channel.id]["attached"] = not curstatus

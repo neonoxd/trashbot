@@ -1,5 +1,7 @@
 import asyncio
 import random
+
+import discord
 import requests
 import io
 from PIL import Image
@@ -13,14 +15,14 @@ import shared
 load_dotenv()
 
 
-def check_user_twitch(user):
+def check_user_twitch(user_id):
     endpoint = "https://api.twitch.tv/kraken/streams/{}"
 
     API_HEADERS = {
         'Client-ID': os.getenv("TWITCH_CLIENTID"),
         'Accept': 'application/vnd.twitchtv.v5+json',
     }
-    url = endpoint.format(user)
+    url = endpoint.format(user_id)
 
     try:
         req = requests.get(url, headers=API_HEADERS)
@@ -50,6 +52,29 @@ def check_user_yt(channel_id):
         return {"islive": False}
 
 
+async def check_and_notify(ctx, oldstate, newstate):
+    if oldstate is None:
+        print("no old state, current state: {}".format(newstate))
+        lives = {k: v for k, v in newstate.items() if v['islive']}
+        for live in lives.items():
+            mapped = config.trash_map[live[0]]
+            embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["name"])
+                                  , color=0xfc0303)
+            embed.set_image(url=live[1]["thumbnail"])
+            await ctx.send(embed=embed)
+    elif oldstate != newstate:
+        print("states dont match")
+        lives = {k: v for k, v in newstate.items() if v['islive']}
+        for live in lives.items():
+            if not oldstate[live[0]]["islive"]:
+                print("{} went live since last check".format(live[0]))
+                mapped = config.trash_map[live[0]]
+                embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["name"])
+                                      , color=0xfc0303)
+                embed.set_image(url=live[1]["thumbnail"])
+                await ctx.send(embed=embed)
+
+
 async def check_streams(ctx):
     while True:
         print("checking stream")
@@ -64,9 +89,14 @@ async def check_streams(ctx):
             print(streams[usr]['islive'])
 
         print(streams)
-        shared.state["attachedChannels"][ctx.channel.id]["streamstate"]=streams
-        #await ctx.send(streams)
-        await asyncio.sleep(30)
+        if "streamstate" not in shared.state["attachedChannels"][ctx.channel.id]:
+            print("no stream state yet, adding last")
+            shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
+            await check_and_notify(ctx, None, streams)
+        elif shared.state["attachedChannels"][ctx.channel.id]["streamstate"] != streams:
+            await check_and_notify(ctx, shared.state["attachedChannels"][ctx.channel.id]["streamstate"], streams)
+            shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
+        await asyncio.sleep(config.cfg["trashwatch_interval"])
 
 
 async def get_captcha(captcha_id):

@@ -18,6 +18,9 @@ async def handle_on_message(bot, message):
     global last_gecizes
     now = datetime.datetime.now()
 
+    if "-skip" in message.content:
+        await message.channel.send("az jo köcsög volt")
+
     if (now - last_gecizes).total_seconds() > 120 \
             and cfg["prefix"] not in message.content \
             and random.randrange(0,100) < 11:
