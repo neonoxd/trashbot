@@ -50,11 +50,8 @@ async def slap(ctx, *, reason: Slapper):
 async def on_message(message):
     if message.author == bot.user:
         return
-    print("{}".format(message))
-    print("{}".format(message.content))
-    print(message.author.id)
-    if message.author.id == 232184416259014657 and cfg["prefix"] not in message.content:
-        await message.channel.send("kit érdekel <@{}>".format(message.author.id))
+    #if message.author.id == 232184416259014657 and cfg["prefix"] not in message.content:
+    #    await message.channel.send("kit érdekel <@{}>".format(message.author.id))
     await bot.process_commands(message)
 
 

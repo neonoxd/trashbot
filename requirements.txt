@@ -8,7 +8,6 @@ cryptography==3.0
 defusedxml==0.7.0rc1
 discord==1.0.1
 discord.py==1.4.1
--e git+https://github.com/mobolic/facebook-sdk.git@1b92aafa010b88ef511f2f04fc53715f0c3a596b#egg=facebook_sdk
 idna==2.10
 multidict==4.7.6
 oauthlib==3.1.0
