@@ -18,15 +18,18 @@ load_dotenv()
 def check_user_twitch(user_id):
     endpoint = "https://api.twitch.tv/kraken/streams/{}"
 
-    API_HEADERS = {
+    headers = {
         'Client-ID': os.getenv("TWITCH_CLIENTID"),
         'Accept': 'application/vnd.twitchtv.v5+json',
     }
     url = endpoint.format(user_id)
 
     try:
-        req = requests.get(url, headers=API_HEADERS)
+        req = requests.get(url, headers=headers)
         jsondata = req.json()
+        if req.status_code != 200:
+            print("request returned with code: {}, \n response json: {}",req.status_code, jsondata)
+            return {"islive": False}
         if 'stream' in jsondata:
             if jsondata['stream'] is not None:  # stream is online
                 return {"islive": True, "title": jsondata["stream"]["channel"]["status"],
@@ -42,6 +45,9 @@ def check_user_yt(channel_id):
     url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={0}&type=video&eventType=live&key={1}"
     req = requests.get(url=url.format(channel_id, apikey))
     jsondata = req.json()
+    if req.status_code != 200:
+        print("request returned with code: {}, \n response json: {}", req.status_code, jsondata)
+        return {"islive": False}
     try:
         is_live = jsondata["items"][0]["snippet"]["liveBroadcastContent"] == "live"
         thumbnail = jsondata["items"][0]["snippet"]["thumbnails"]["high"]["url"]
@@ -53,12 +59,15 @@ def check_user_yt(channel_id):
 
 
 async def check_and_notify(ctx, oldstate, newstate):
+    trashmap = {_k[1]: {"type": _k[0], "id": _k[2], "link": _k[3], "nick": _k[4]} for _k in shared.trashes for _v in
+                tuple(_k)}
+
     if oldstate is None:
         print("no old state, current state: {}".format(newstate))
         lives = {k: v for k, v in newstate.items() if v['islive']}
         for live in lives.items():
-            mapped = config.trash_map[live[0]]
-            embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["name"])
+            mapped = trashmap[live[0]]
+            embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["nick"])
                                   , color=0xfc0303)
             embed.set_image(url=live[1]["thumbnail"])
             await ctx.send(embed=embed)
@@ -68,8 +77,8 @@ async def check_and_notify(ctx, oldstate, newstate):
         for live in lives.items():
             if not oldstate[live[0]]["islive"]:
                 print("{} went live since last check".format(live[0]))
-                mapped = config.trash_map[live[0]]
-                embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["name"])
+                mapped = trashmap[live[0]]
+                embed = discord.Embed(description=mapped["link"], title="{} fellötte a lájvszot:".format(mapped["nick"])
                                       , color=0xfc0303)
                 embed.set_image(url=live[1]["thumbnail"])
                 await ctx.send(embed=embed)
@@ -78,20 +87,21 @@ async def check_and_notify(ctx, oldstate, newstate):
 async def check_streams(ctx):
     while True:
         print("check_streams triggered")
-
+        # is there a channel with trashwatch on
         if bool({k: v for k, v in shared.state["attachedChannels"].items() if v['attached']}):
             print("checking channels")
             streams = {}
-            for usr, channel in config.trash_list["yt"].items():
-                print("checking: {} : {} -> ".format(usr, channel), end="")
-                streams[usr] = check_user_yt(channel)
-                print(streams[usr]['islive'])
-            for usr, channel in config.trash_list["twitch"].items():
-                print("checking: {} : {} -> ".format(usr, channel), end="")
-                streams[usr] = check_user_twitch(channel)
-                print(streams[usr]['islive'])
-
+            # get current status of channels
+            for type, name, id, link, nick in shared.trashes:
+                print("checking: {} : {} -> islive: ".format(name, id), end="")
+                if type == "yt":
+                    streams[name] = check_user_yt(id)
+                else:
+                    streams[name] = check_user_twitch(id)
+                print(streams[name]['islive'])
             print(streams)
+
+            # set initial state of channels or refresh, and notify
             if "streamstate" not in shared.state["attachedChannels"][ctx.channel.id]:
                 print("no stream state yet, adding last")
                 shared.state["attachedChannels"][ctx.channel.id]["streamstate"] = streams
