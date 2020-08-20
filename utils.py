@@ -11,6 +11,8 @@ from dotenv import load_dotenv
 from discord.ext import commands
 import config
 import shared
+import datetime
+import logging
 
 load_dotenv()
 
@@ -130,6 +132,55 @@ async def get_captcha(captcha_id):
     text_img.save(img_byte_arr, format='PNG')
     img_byte_arr.seek(0)
     return img_byte_arr
+
+
+async def think(bot,message):
+    channel = message.channel
+
+    while True:
+        logging.info("thought")
+        roll = random.randrange(0, 1000)
+        if roll < 5:
+            logging.info("rolled %s" % roll)
+            await doraffle(bot,channel)
+        elif roll < 10:
+            logging.info("rolled %s" % roll)
+            channel.send("most majdnem ki nyirtam vkit")
+
+        await asyncio.sleep(600)
+
+async def doraffle(bot,channel,timeout = 30):
+    logging.info("raffle created with timeout %s" % timeout)
+    raffle = {
+        "msgid": None,
+        "date": None,
+        "users": []
+    }
+
+    def check(reaction, user):
+        return reaction.message.id == raffle["msgid"]
+
+    msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal")
+    raffle["msgid"] = msg.id
+    raffle["date"] = datetime.datetime.now()
+    raffle["users"] = []
+
+
+    while (datetime.datetime.now() - raffle["date"]).total_seconds() < timeout:
+        logging.info("raffle time: {}".format((datetime.datetime.now() - raffle["date"]).total_seconds()))
+        try:
+            reaction, user = await bot.wait_for('reaction_add', timeout=10.0, check=check)
+            raffle["users"].append(user.mention)
+            logging.info("got reacc {} {}".format(reaction, user))
+            reaction, user = None, None
+        except Exception as e:
+            pass
+    logging.info("raffle ended")
+    raffle["active"] = False
+    if (len(raffle["users"]) > 0):
+        await channel.send("az egyetlen tul élö {}".format(random.choice(raffle["users"])))
+    else:
+        await channel.send("sajnos senki nem élte tul")
 
 
 class Slapper(commands.Converter):

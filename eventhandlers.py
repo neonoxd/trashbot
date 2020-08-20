@@ -4,6 +4,7 @@ import random
 import discord
 from config import cfg
 import shared
+import logging
 
 last_gecizes = datetime.datetime.now()
 
@@ -20,14 +21,14 @@ async def handle_on_message(bot, message):
     roll = random.randrange(0, 100)
 
     if "-skip" in message.content and roll < 70:
-        print("got lucky with roll chance: %s" % roll)
+        logging.info("got lucky with roll chance: %s" % roll)
         await message.channel.send("az jo köcsög volt")
 
     if (now - last_gecizes).total_seconds() > 600 \
             and cfg["prefix"] not in message.content \
             and roll < 11:
         last_gecizes = datetime.datetime.now()
-        print("got lucky with roll chance: %s" % roll)
+        logging.info("got lucky with roll chance: %s" % roll)
         await message.channel.send(random.choice(shared.beszolasok).format(message.author.id))
 
     if message.tts:
