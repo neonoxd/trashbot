@@ -17,14 +17,17 @@ async def handle_on_typing(bot, channel, user, when):
 async def handle_on_message(bot, message):
     global last_gecizes
     now = datetime.datetime.now()
+    roll = random.randrange(0, 100)
 
-    if "-skip" in message.content and random.randrange(0, 100) < 70:
+    if "-skip" in message.content and roll < 70:
+        print("got lucky with roll chance: %s" % roll)
         await message.channel.send("az jo köcsög volt")
 
     if (now - last_gecizes).total_seconds() > 600 \
             and cfg["prefix"] not in message.content \
-            and random.randrange(0,100) < 11:
+            and roll < 11:
         last_gecizes = datetime.datetime.now()
+        print("got lucky with roll chance: %s" % roll)
         await message.channel.send(random.choice(shared.beszolasok).format(message.author.id))
 
     if message.tts:
@@ -33,10 +36,5 @@ async def handle_on_message(bot, message):
         await message.add_reaction("🇨")
         await message.add_reaction("🇮")
         await message.add_reaction("♿")
-
-    #guild = message.channel.guild
-    #emoji = discord.utils.get(guild.emojis, name='alien1')
-    #if emoji:
-    #    await message.add_reaction(emoji)
 
     await bot.process_commands(message)

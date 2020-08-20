@@ -40,7 +40,7 @@ def check_user_twitch(user_id):
         return {"islive": False}
 
 
-def check_user_yt(channel_id):
+async def check_user_yt(channel_id):
     apikey = os.getenv("YT_APIKEY")
     url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={0}&type=video&eventType=live&key={1}"
     req = requests.get(url=url.format(channel_id, apikey))
@@ -95,7 +95,7 @@ async def check_streams(ctx):
             for type, name, id, link, nick in shared.trashes:
                 print("checking: {} : {} -> islive: ".format(name, id), end="")
                 if type == "yt":
-                    streams[name] = check_user_yt(id)
+                    streams[name] = await check_user_yt(id)
                 else:
                     streams[name] = check_user_twitch(id)
                 print(streams[name]['islive'])

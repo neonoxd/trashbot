@@ -2,7 +2,8 @@ import csv
 def init():
     global state,statuses,legjob_zene_list,beszolasok,trashes
     state = {
-        "attachedChannels": {}
+        "attachedChannels": {},
+        "thinkLoop": [False, None]
     }
     with open('resources/lists/beszolas.txt', 'r', encoding="utf8") as file:
         beszolasok = file.read().split("\n")
