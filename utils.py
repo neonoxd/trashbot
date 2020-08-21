@@ -149,6 +149,7 @@ async def think(bot,message):
 
         await asyncio.sleep(600)
 
+
 async def doraffle(bot,channel,timeout = 30):
     logging.info("raffle created with timeout %s" % timeout)
     raffle = {
@@ -181,6 +182,16 @@ async def doraffle(bot,channel,timeout = 30):
         await channel.send("az egyetlen tul élö {}".format(random.choice(raffle["users"])))
     else:
         await channel.send("sajnos senki nem élte tul")
+
+
+def roll(*args):
+    if len(args) == 1:
+        return random.randrange(0, args[0])
+    elif len(args) == 2:
+        return random.randrange(args[0], args[1])
+    else:
+        return -1
+
 
 
 class Slapper(commands.Converter):
