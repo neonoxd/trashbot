@@ -160,7 +160,7 @@ async def doraffle(bot, channel, timeout=30):
     def check(reaction_obj, user):
         return reaction_obj.message.id == raffle["msgid"]
 
-    msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal")
+    msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal !! @here")
     raffle["msgid"] = msg.id
     raffle["date"] = datetime.datetime.now()
     raffle["users"] = []
