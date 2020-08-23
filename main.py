@@ -1,14 +1,12 @@
-import asyncio
-import datetime
 import os
-import random
-import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 from config import cfg
-from utils import Slapper, check_streams,doraffle,think
 import shared
 import logging
+import discord
+from utils import Slapper, doraffle, think, roll
+import random
 
 logging.basicConfig(
     level=logging.INFO,
@@ -18,12 +16,11 @@ logging.basicConfig(
     ]
 )
 
-
-shared.init()
-bot = commands.Bot(command_prefix=cfg["prefix"])
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 PHToken = "92a95ab0a3f4d2de"
+shared.init()
+bot = commands.Bot(command_prefix=cfg["prefix"])
 
 
 @bot.command(name='hal')
@@ -32,10 +29,18 @@ async def slap(ctx, *, reason: Slapper):
     await ctx.send(reason)
 
 
+@bot.command(name='roll', description="guritok")
+async def rollcmd(ctx,*args):
+    await ctx.send(roll(args))
+
+
 @bot.command(name='vandam', description="kinyirok mid ekit")
 async def vandam(ctx, *args):
     logging.info("command called: {}".format(ctx.command))
-    await doraffle(bot,ctx.channel, 60)
+    if len(args) > 0:
+        await doraffle(bot, ctx.channel, int(args[0]))
+    else:
+        await doraffle(bot, ctx.channel)
 
 
 @bot.command(name='captcha', description="random PH captcha")
@@ -106,8 +111,8 @@ async def on_message(message):
         return
     if not shared.state["thinkLoop"][0]:
         logging.info("thinking activated")
-        shared.state["thinkLoop"]= [True, message.channel.id]
-        bot.loop.create_task(think(bot,message))
+        shared.state["thinkLoop"] = [True, message.channel.id]
+        bot.loop.create_task(think(bot, message))
 
     await handle_on_message(bot, message)
 

@@ -30,7 +30,7 @@ def check_user_twitch(user_id):
         req = requests.get(url, headers=headers)
         jsondata = req.json()
         if req.status_code != 200:
-            print("request returned with code: {}, \n response json: {}",req.status_code, jsondata)
+            print("request returned with code: {}, \n response json: {}", req.status_code, jsondata)
             return {"islive": False}
         if 'stream' in jsondata:
             if jsondata['stream'] is not None:  # stream is online
@@ -134,7 +134,7 @@ async def get_captcha(captcha_id):
     return img_byte_arr
 
 
-async def think(bot,message):
+async def think(bot, message):
     channel = message.channel
 
     while True:
@@ -142,15 +142,14 @@ async def think(bot,message):
         roll = random.randrange(0, 1000)
         if roll < 5:
             logging.info("rolled %s" % roll)
-            await doraffle(bot,channel)
+            await doraffle(bot, channel)
         elif roll < 10:
             logging.info("rolled %s" % roll)
-            channel.send("most majdnem ki nyirtam vkit")
-
+            await channel.send("most majdnem ki nyirtam vkit")
         await asyncio.sleep(600)
 
 
-async def doraffle(bot,channel,timeout = 30):
+async def doraffle(bot, channel, timeout=30):
     logging.info("raffle created with timeout %s" % timeout)
     raffle = {
         "msgid": None,
@@ -158,19 +157,22 @@ async def doraffle(bot,channel,timeout = 30):
         "users": []
     }
 
-    def check(reaction, user):
-        return reaction.message.id == raffle["msgid"]
+    def check(reaction_obj, user):
+        return reaction_obj.message.id == raffle["msgid"]
 
     msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal")
     raffle["msgid"] = msg.id
     raffle["date"] = datetime.datetime.now()
     raffle["users"] = []
 
+    while (datetime.datetime.now() - raffle["date"]).total_seconds() < timeout \
+            and int(timeout - (datetime.datetime.now() - raffle["date"]).total_seconds()) != 0:
+        diff = (datetime.datetime.now() - raffle["date"]).total_seconds()
+        logging.info("raffle time: {}".format(diff))
 
-    while (datetime.datetime.now() - raffle["date"]).total_seconds() < timeout:
-        logging.info("raffle time: {}".format((datetime.datetime.now() - raffle["date"]).total_seconds()))
+        timeout_reacc = int(timeout-diff)
         try:
-            reaction, user = await bot.wait_for('reaction_add', timeout=10.0, check=check)
+            reaction, user = await bot.wait_for('reaction_add', timeout=timeout_reacc, check=check)
             raffle["users"].append(user.mention)
             logging.info("got reacc {} {}".format(reaction, user))
             reaction, user = None, None
@@ -178,20 +180,20 @@ async def doraffle(bot,channel,timeout = 30):
             pass
     logging.info("raffle ended")
     raffle["active"] = False
-    if (len(raffle["users"]) > 0):
+    if len(raffle["users"]) > 0:
         await channel.send("az egyetlen tul élö {}".format(random.choice(raffle["users"])))
     else:
         await channel.send("sajnos senki nem élte tul")
 
 
-def roll(*args):
+def roll(args):
+    print(args)
     if len(args) == 1:
-        return random.randrange(0, args[0])
+        return random.randrange(0, int(args[0]))
     elif len(args) == 2:
-        return random.randrange(args[0], args[1])
+        return random.randrange(int(args[0]), int(args[1]))
     else:
-        return -1
-
+        return random.randrange(0, 100)
 
 
 class Slapper(commands.Converter):
