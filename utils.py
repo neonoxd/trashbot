@@ -20,10 +20,11 @@ load_dotenv()
 async def beemovie_task(ctx):
     while True:
         print(shared.state["beechannels"])
-        if bool({k: v for k, v in shared.state["beechannels"].items() if v['attached']}):
+        if bool({k: v for k, v in shared.state["beechannels"].items() if v['attached']}) \
+                and shared.state["beechannels"][ctx.channel.id]["current_page"] < len(shared.beescript):
             await ctx.send(shared.beescript[shared.state["beechannels"][ctx.channel.id]["current_page"]])
             shared.state["beechannels"][ctx.channel.id]["current_page"] += 1
-        await asyncio.sleep(random.randrange(30, 300))
+        await asyncio.sleep(random.randrange(30, 120))
 
 async def check_user_twitch(user_id):
     endpoint = "https://api.twitch.tv/kraken/streams/{}"

@@ -1,7 +1,6 @@
 import datetime
 import os
 
-import psycopg2
 from discord.ext import commands
 from dotenv import load_dotenv
 from config import cfg
@@ -25,32 +24,6 @@ DATABASE_URL = os.environ['DATABASE_URL']
 PHToken = "92a95ab0a3f4d2de"
 shared.init()
 bot = commands.Bot(command_prefix=cfg["prefix"])
-
-def dbtest():
-    try:
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-
-        cursor = conn.cursor()
-        postgreSQL_select_Query = "select * from idle_pool"
-
-        cursor.execute(postgreSQL_select_Query)
-        print("Selecting rows from mobile table using cursor.fetchall")
-        mobile_records = cursor.fetchall()
-
-        print("Print each row and it's columns values")
-        for row in mobile_records:
-            print("text = ", row[1], )
-            print("chance = ", row[2])
-
-    except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
-
-    finally:
-        # closing database connection.
-        if (conn):
-            cursor.close()
-            conn.close()
-            print("PostgreSQL connection is closed")
 
 
 @bot.command(name='hal')
@@ -109,7 +82,8 @@ async def bee(ctx, *args):
         shared.state["beechannels"][ctx.channel.id]["when"] = datetime.datetime.now()
         shared.state["beechannels"][ctx.channel.id]["current_page"] = 0
     else:
-        shared.state["beechannels"][ctx.channel.id] = {"attached": True, "when": datetime.datetime.now(), "current_page":0}
+        shared.state["beechannels"][ctx.channel.id] = {"attached": True, "when": datetime.datetime.now(),
+                                                       "current_page": 0}
         bot.loop.create_task(beemovie_task(ctx))
 
     if shared.state["beechannels"][ctx.channel.id]["attached"]:
