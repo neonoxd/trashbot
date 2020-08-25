@@ -17,7 +17,15 @@ import logging
 load_dotenv()
 
 
-def check_user_twitch(user_id):
+async def beemovie_task(ctx):
+    while True:
+        print(shared.state["beechannels"])
+        if bool({k: v for k, v in shared.state["beechannels"].items() if v['attached']}):
+            await ctx.send(shared.beescript[shared.state["beechannels"][ctx.channel.id]["current_page"]])
+            shared.state["beechannels"][ctx.channel.id]["current_page"] += 1
+        await asyncio.sleep(random.randrange(30, 300))
+
+async def check_user_twitch(user_id):
     endpoint = "https://api.twitch.tv/kraken/streams/{}"
 
     headers = {
@@ -38,24 +46,6 @@ def check_user_twitch(user_id):
                         "thumbnail": jsondata["stream"]["preview"]["large"]}
             else:
                 return {"islive": False}
-    except Exception as e:
-        return {"islive": False}
-
-
-async def check_user_yt(channel_id):
-    apikey = os.getenv("YT_APIKEY")
-    url = "https://www.googleapis.com/youtube/v3/search?part=snippet&channelId={0}&type=video&eventType=live&key={1}"
-    req = requests.get(url=url.format(channel_id, apikey))
-    jsondata = req.json()
-    if req.status_code != 200:
-        print("request returned with code: {}, \n response json: {}", req.status_code, jsondata)
-        return {"islive": False}
-    try:
-        is_live = jsondata["items"][0]["snippet"]["liveBroadcastContent"] == "live"
-        thumbnail = jsondata["items"][0]["snippet"]["thumbnails"]["high"]["url"]
-        title = jsondata["items"][0]["snippet"]["title"]
-
-        return {"islive": is_live, "thumbnail": thumbnail, "title": title}
     except Exception as e:
         return {"islive": False}
 
@@ -86,6 +76,18 @@ async def check_and_notify(ctx, oldstate, newstate):
                 await ctx.send(embed=embed)
 
 
+async def get_trashwatch_youtube_list():
+    TW_URL = os.getenv("TW_URL")
+    url = "{}/list".format(TW_URL)
+    try:
+        req = requests.get(url, headers={})
+        jsondata = req.json()
+        print(type(jsondata))
+        return jsondata
+    except Exception as e:
+        return {}
+
+
 async def check_streams(ctx):
     while True:
         print("check_streams triggered")
@@ -96,11 +98,10 @@ async def check_streams(ctx):
             # get current status of channels
             for type, name, id, link, nick in shared.trashes:
                 print("checking: {} : {} -> islive: ".format(name, id), end="")
-                if type == "yt":
-                    streams[name] = await check_user_yt(id)
-                else:
-                    streams[name] = check_user_twitch(id)
+                if type == "twitch":
+                    streams[name] = await check_user_twitch(id)
                 print(streams[name]['islive'])
+            yt_streams = await get_trashwatch_youtube_list()
             print(streams)
 
             # set initial state of channels or refresh, and notify
