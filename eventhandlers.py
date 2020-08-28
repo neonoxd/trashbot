@@ -10,7 +10,8 @@ import logging
 async def handle_on_typing(bot, channel, user, when):
     await bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
     await asyncio.sleep(5)
-    await bot.change_presence(activity=discord.Game(random.choice(shared.statuses)))
+    await bot.change_presence(activity=discord.Game(random.choices(population=shared.statuses["statuses"],
+                                                                   weights=shared.statuses["chances"])[0]))
 
 
 async def handle_on_message(bot, message):
@@ -57,7 +58,8 @@ async def handle_on_message(bot, message):
             and roll < 2:
         guild_state["last_slur"] = datetime.datetime.now()
         logging.info("got lucky with roll chance: %s" % roll)
-        await message.channel.send(random.choice(shared.slurps).format(message.author.id))
+        await message.channel.send(random.choices(population=shared.slurps["slurs"],
+                                                  weights=shared.slurps["chances"])[0].format(message.author.id))
 
     if message.tts:
         for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):

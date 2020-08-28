@@ -3,6 +3,7 @@ import os
 import random
 
 import discord
+import psycopg2
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -21,13 +22,14 @@ logging.basicConfig(
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
 DATABASE_URL = os.environ['DATABASE_URL']
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')
 PHToken = "92a95ab0a3f4d2de"
 shared.init()
 bot = commands.Bot(command_prefix=cfg["prefix"])
 
 
 @bot.command(name='roll', description="guritok")
-async def rollcmd(ctx,*args):
+async def rollcmd(ctx, *args):
     await ctx.send(roll(args))
 
 
@@ -82,7 +84,9 @@ async def trashwatch(ctx, *args):
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(random.choice(shared.statuses)))
+    await bot.change_presence(activity=discord.Game(
+        random.choices(population=shared.statuses["statuses"], weights=shared.statuses["chances"])[0]
+    ))
     logging.info("ready")
 
 
@@ -98,5 +102,6 @@ async def on_message(message):
     if message.author == bot.user:
         return
     await handle_on_message(bot, message)
+
 
 bot.run(TOKEN)
