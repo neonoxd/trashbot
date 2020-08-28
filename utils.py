@@ -8,7 +8,6 @@ from PIL import Image
 import time
 import os
 from dotenv import load_dotenv
-from discord.ext import commands
 import config
 import shared
 import datetime
@@ -17,14 +16,43 @@ import logging
 load_dotenv()
 
 
+async def handle_beemovie_command(ctx, args):
+    ctx_guild = ctx.guild.id
+    guild_state = shared.state["guild"][ctx_guild]
+
+    if "bee_state" not in guild_state:
+        guild_state["bee_state"] = {"active": True, "current_part": 0}
+        ctx.bot.loop.create_task(beemovie_task(ctx))
+    else:
+        if len(args) > 0:
+            guild_state["bee_state"]["current_part"] = 0
+            await ctx.send("mar nemtom hol tartottam")
+        else:
+            guild_state["bee_state"]["active"] = not guild_state["bee_state"]["active"]
+
+    print(shared.state)
+    if guild_state["bee_state"]["active"]:
+        await ctx.send(random.choice(["szal akkor", "na mondom akkor"]))
+    else:
+        await ctx.send("akk m1...")
+
+
 async def beemovie_task(ctx):
+    ctx_guild = ctx.guild.id
+    guild_state = shared.state["guild"][ctx_guild]
+    bee_state = guild_state["bee_state"]
+
     while True:
-        print(shared.state["beechannels"])
-        if bool({k: v for k, v in shared.state["beechannels"].items() if v['attached']}) \
-                and shared.state["beechannels"][ctx.channel.id]["current_page"] < len(shared.beescript):
-            await ctx.send(shared.beescript[shared.state["beechannels"][ctx.channel.id]["current_page"]])
-            shared.state["beechannels"][ctx.channel.id]["current_page"] += 1
-        await asyncio.sleep(random.randrange(30, 120))
+        if bee_state["active"] and bee_state["current_part"] < len(shared.beescript):
+            await ctx.send(shared.beescript[bee_state["current_part"]])
+            bee_state["current_part"] += 1
+            if bee_state["current_part"] == len(shared.beescript):
+                bee_state["active"] = False
+                bee_state["current_part"] = 0
+                await asyncio.sleep(5)
+                await ctx.send("na csak ennyit akartam")
+        await asyncio.sleep(random.randrange(5, 10))
+
 
 async def check_user_twitch(user_id):
     endpoint = "https://api.twitch.tv/kraken/streams/{}"
@@ -138,20 +166,18 @@ async def get_captcha(captcha_id):
 
 async def think(bot, message):
     channel = message.channel
-
     while True:
-        logging.info("thought")
-        roll = random.randrange(0, 1000)
-        if roll < 5:
-            logging.info("rolled %s" % roll)
-            await doraffle(bot, channel)
-        elif roll < 10:
-            logging.info("rolled %s" % roll)
+        roll_small = random.randrange(0, 1000)
+        if roll_small < 1:
+            logging.info("rolled %s" % roll_small)
+            await mercy_maybe(bot, channel)
+        elif roll_small < 5:
+            logging.info("rolled %s" % roll_small)
             await channel.send("most majdnem ki nyirtam vkit")
         await asyncio.sleep(600)
 
 
-async def doraffle(bot, channel, timeout=30):
+async def mercy_maybe(bot, channel, timeout=30):
     logging.info("raffle created with timeout %s" % timeout)
     raffle = {
         "msgid": None,
@@ -159,7 +185,7 @@ async def doraffle(bot, channel, timeout=30):
         "users": []
     }
 
-    def check(reaction_obj, user):
+    def check(reaction_obj, usr):
         return reaction_obj.message.id == raffle["msgid"]
 
     msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal !! @here")
@@ -170,18 +196,16 @@ async def doraffle(bot, channel, timeout=30):
     while (datetime.datetime.now() - raffle["date"]).total_seconds() < timeout \
             and int(timeout - (datetime.datetime.now() - raffle["date"]).total_seconds()) != 0:
         diff = (datetime.datetime.now() - raffle["date"]).total_seconds()
-        logging.info("raffle time: {}".format(diff))
 
-        timeout_reacc = int(timeout-diff)
+        timeout_reacc = int(timeout - diff)
+        logging.info("time's tickin': {} seconds left".format(timeout_reacc))
         try:
             reaction, user = await bot.wait_for('reaction_add', timeout=timeout_reacc, check=check)
             raffle["users"].append(user.mention)
             logging.info("got reacc {} {}".format(reaction, user))
-            reaction, user = None, None
         except Exception as e:
             pass
     logging.info("raffle ended")
-    raffle["active"] = False
     if len(raffle["users"]) > 0:
         await channel.send("az egyetlen tul élö {}".format(random.choice(raffle["users"])))
     else:
@@ -196,10 +220,3 @@ def roll(args):
         return random.randrange(int(args[0]), int(args[1]))
     else:
         return random.randrange(0, 100)
-
-
-class Slapper(commands.Converter):
-    async def convert(self, ctx, argument):
-        to_slap = random.choice(ctx.guild.members)
-        return '{0.author.mention} pofán csapta {1.mention}-t egy jó büdös hallal mert *{2}*'.format(ctx, to_slap,
-                                                                                                     argument)

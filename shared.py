@@ -2,21 +2,19 @@ import csv
 
 
 def init():
-    global state,statuses,legjob_zene_list,beszolasok,trashes,beescript
+    global state, statuses, trek_list, slurps, trashes, beescript
     state = {
-        "attachedChannels": {},
-        "beechannels": {},
-        "thinkLoop": [False, None]
+        "guild": {},
+        "global": {}
     }
+    # load static resources TODO: make some of them not static
     with open('resources/beemovie.txt', 'r', encoding="utf8") as file:
         beescript = file.read().split("\n\n  \n")
     with open('resources/lists/beszolas.txt', 'r', encoding="utf8") as file:
-        beszolasok = file.read().split("\n")
+        slurps = file.read().split("\n")
     with open('resources/lists/zene.txt', 'r', encoding="utf8") as file:
-        legjob_zene_list = file.read().split("\n\n")
+        trek_list = file.read().split("\n\n")
     with open('resources/lists/idle_statuses.txt', 'r', encoding="utf8") as file:
         statuses = file.read().split("\n")
-    with open('resources/lists/trash.csv', newline='', encoding="utf8") as csvfile:
-        trashread = csv.reader(csvfile, delimiter=',')
-        trashes = list(trashread)
-
+    with open('resources/lists/trash.csv', newline='', encoding="utf8") as trash_csv:
+        trashes = list(csv.reader(trash_csv, delimiter=','))
