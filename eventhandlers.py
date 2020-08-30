@@ -65,4 +65,7 @@ async def handle_on_message(bot, message):
         for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):
             await message.add_reaction(react)
 
+    if message.content == "(╯°□°）╯︵ ┻━┻":
+        await message.channel.send("┬─┬ ノ( ゜-゜ノ)")
+
     await bot.process_commands(message)
