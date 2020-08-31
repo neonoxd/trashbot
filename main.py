@@ -49,6 +49,10 @@ async def captcha(ctx):
     cimg = await get_captcha(PHToken)
     await ctx.send(file=discord.File(cimg, 'geci.png'))
 
+@bot.command(name='tenemos')
+async def tenemos(ctx):
+    logging.info("command called: {}".format(ctx.command))
+    await ctx.send(file=discord.File('resources/tenemos.jpg'))
 
 @bot.command(name='zene', description="random leg job zene idézet")
 async def zene(ctx):
