@@ -14,6 +14,14 @@ async def handle_on_typing(bot, channel, user, when):
                                                                    weights=shared.statuses["chances"])[0]))
 
 
+def has_link(string):
+    import re
+    # findall() has been used
+    # with valid conditions for urls in string
+    regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
+    url = re.findall(regex, string)
+    return [x[0] for x in url]
+
 async def handle_on_message(bot, message):
     # initialize state
     msg_guild = message.guild.id
@@ -61,7 +69,7 @@ async def handle_on_message(bot, message):
     }
     words = {**fwd, **dict([(value, key) for key, value in fwd.items()])}
     themsg = ""
-    if len(message.content.split(" ")) == 1:
+    if len(message.content.split(" ")) == 1 and len(has_link(message.content)) == 0:
         for word in words.keys():
             if word in message.content:
                 themsg = message.content.replace(word, words[word])
