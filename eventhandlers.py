@@ -49,6 +49,25 @@ async def handle_on_message(bot, message):
     now = datetime.datetime.now()
     roll = random.randrange(0, 100)
 
+    fwd = {
+        "ki": "be",
+        "fel": "le",
+        "össze": "szét",
+        "oda": "vissza",
+        "fönn": "lenn",
+        "fent": "lent",
+        "felül": "alul",
+        "áll": "ül"
+    }
+    words = {**fwd, **dict([(value, key) for key, value in fwd.items()])}
+    themsg = ""
+    if len(message.content.split(" ")) == 1:
+        for word in words.keys():
+            if word in message.content:
+                themsg = message.content.replace(word, words[word])
+    if len(themsg) > 0 and roll > 50:
+        await message.channel.send("🆗 gya gec ⚰️\nfeltaláltam\n🧔🏿🤙🏻🧪{0}".format(themsg))
+
     if "-skip" in message.content and roll < 40:
         logging.info("got lucky with roll chance: %s" % roll)
         await message.channel.send("az jo köcsög volt")
