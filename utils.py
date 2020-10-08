@@ -9,7 +9,9 @@ from PIL import Image
 import time
 import os
 from dotenv import load_dotenv
-from psycopg2._psycopg import InterfaceError
+#from psycopg2._psycopg import InterfaceError
+
+from tinydb import TinyDB, Query
 
 import config
 import shared
@@ -18,64 +20,64 @@ import logging
 
 load_dotenv()
 
-
-def is_conn_alive(conn):
-    from main import DATABASE_URL
-    print("checking connection is alive")
-    try:
-        c = conn.cursor()
-        c.execute("SELECT 1")
-        print("conn alive")
-        return conn
-    except InterfaceError as oe:
-        print("connection is closed, reopening")
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = True
-        return conn
-
-
-def read_slurs(conn):
-    conn = is_conn_alive(conn)
-    try:
-        cursor = conn.cursor()
-        select_slurs_query = "select * from slur_pool"
-        cursor.execute(select_slurs_query)
-        rows = cursor.fetchall()
-
-        return {
-            "slurs": [row[1] for row in rows],
-            "chances": [row[2] for row in rows]
-        }
-    except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
-
-    finally:
-        # closing database connection.
-        if conn:
-            cursor.close()
-            print("cursor closed")
+#
+# def is_conn_alive(conn):
+#     from main import DATABASE_URL
+#     print("checking connection is alive")
+#     try:
+#         c = conn.cursor()
+#         c.execute("SELECT 1")
+#         print("conn alive")
+#         return conn
+#     except InterfaceError as oe:
+#         print("connection is closed, reopening")
+#         conn = psycopg2.connect(DATABASE_URL)
+#         conn.autocommit = True
+#         return conn
 
 
-def read_statuses(conn):
-    conn = is_conn_alive(conn)
-    try:
-        cursor = conn.cursor()
-        select_slurs_query = "select * from idle_pool"
-        cursor.execute(select_slurs_query)
-        rows = cursor.fetchall()
-
-        return {
-            "statuses": [row[1] for row in rows],
-            "chances": [row[2] for row in rows]
-        }
-    except (Exception, psycopg2.Error) as error:
-        print("Error while fetching data from PostgreSQL", error)
-
-    finally:
-        # closing database connection.
-        if conn:
-            cursor.close()
-            print("cursor closed")
+# def read_slurs(conn):
+#     conn = is_conn_alive(conn)
+#     try:
+#         cursor = conn.cursor()
+#         select_slurs_query = "select * from slur_pool"
+#         cursor.execute(select_slurs_query)
+#         rows = cursor.fetchall()
+#
+#         return {
+#             "slurs": [row[1] for row in rows],
+#             "chances": [row[2] for row in rows]
+#         }
+#     except (Exception, psycopg2.Error) as error:
+#         print("Error while fetching data from PostgreSQL", error)
+#
+#     finally:
+#         # closing database connection.
+#         if conn:
+#             cursor.close()
+#             print("cursor closed")
+#
+#
+# def read_statuses(conn):
+#     conn = is_conn_alive(conn)
+#     try:
+#         cursor = conn.cursor()
+#         select_slurs_query = "select * from idle_pool"
+#         cursor.execute(select_slurs_query)
+#         rows = cursor.fetchall()
+#
+#         return {
+#             "statuses": [row[1] for row in rows],
+#             "chances": [row[2] for row in rows]
+#         }
+#     except (Exception, psycopg2.Error) as error:
+#         print("Error while fetching data from PostgreSQL", error)
+#
+#     finally:
+#         # closing database connection.
+#         if conn:
+#             cursor.close()
+#             print("cursor closed")
 
 
 async def handle_beemovie_command(ctx, args):

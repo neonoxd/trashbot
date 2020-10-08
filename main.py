@@ -3,7 +3,6 @@ import os
 import random
 
 import discord
-import psycopg2
 from discord.ext import commands
 from dotenv import load_dotenv
 
@@ -21,9 +20,8 @@ logging.basicConfig(
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-DATABASE_URL = os.environ['DATABASE_URL']
-conn = psycopg2.connect(DATABASE_URL, sslmode='require')
-PHToken = "18b3800c0155419c"
+
+PHToken = "3412d84ec3507dbc"
 shared.init()
 bot = commands.Bot(command_prefix=cfg["prefix"])
 

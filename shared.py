@@ -1,18 +1,24 @@
 import csv
 
-from utils import read_slurs, read_statuses
-
+import json
 
 def init():
     global state, statuses, trek_list, slurps, trashes, beescript
-    from main import conn
     state = {
         "guild": {},
         "global": {}
     }
+
+    with open('resources/db.json', 'r', encoding="utf8") as file:
+        dbs = file.read()
+        dbj = json.loads(dbs)
+
+
     # load resources from db
-    slurps = read_slurs(conn)
-    statuses = read_statuses(conn)
+    slurps = {"slurs": [dbj["slurs"][k]["slur"] for k in dbj["slurs"]],
+              "chances": [dbj["slurs"][k]["chance"] for k in dbj["slurs"]]} #read_slurs(conn)
+    statuses = {"statuses": [dbj["statuses"][k]["status"] for k in dbj["statuses"]],
+                "chances": [dbj["statuses"][k]["chance"] for k in dbj["statuses"]]} #read_statuses(conn)
 
     # load static resources
     with open('resources/beemovie.txt', 'r', encoding="utf8") as file:
