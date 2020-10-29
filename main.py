@@ -1,109 +1,88 @@
-import logging
+import json
 import os
+import logging
 import random
 
 import discord
 from discord.ext import commands
+
+from os import listdir
+from os.path import isfile, join
+
+import sys, traceback
 from dotenv import load_dotenv
-
-import shared
-from config import cfg
-from utils import mercy_maybe, roll, handle_beemovie_command
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-    handlers=[
-        logging.StreamHandler()
-    ]
-)
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
+PHTOKEN = os.getenv("PHTOKEN")
 
-PHToken = "3412d84ec3507dbc"
-shared.init()
-bot = commands.Bot(command_prefix=cfg["prefix"])
+logger = logging.getLogger('trashbot')
+logger.setLevel(logging.DEBUG)
 
+fh = logging.FileHandler('bot.log', 'w', 'utf-8')
+ch = logging.StreamHandler()
 
-@bot.command(name='roll', description="guritok")
-async def rollcmd(ctx, *args):
-    await ctx.send(roll(args))
+ch.setLevel(logging.DEBUG)
+fh.setLevel(logging.DEBUG)
 
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+ch.setFormatter(formatter)
 
-@bot.command(name='vandam', description="kinyirok mid ekit")
-async def vandam(ctx, *args):
-    logging.info("command called: {}".format(ctx.command))
-    if len(args) > 0:
-        await mercy_maybe(bot, ctx.channel, int(args[0]))
-    else:
-        await mercy_maybe(bot, ctx.channel)
-
-
-@bot.command(name='captcha', description="random PH captcha")
-async def captcha(ctx):
-    logging.info("command called: {}".format(ctx.command))
-    from utils import get_captcha
-    cimg = await get_captcha(PHToken)
-    await ctx.send(file=discord.File(cimg, 'geci.png'))
-
-@bot.command(name='tenemos')
-async def tenemos(ctx):
-    logging.info("command called: {}".format(ctx.command))
-    await ctx.send(file=discord.File('resources/tenemos.jpg'))
-
-@bot.command(name='zene', description="random leg job zene idézet")
-async def zene(ctx):
-    logging.info("command called: {}".format(ctx.command))
-    embed = discord.Embed(description="-Leg job zenék", title=random.choice(shared.trek_list), color=0xfc0303)
-    await ctx.send(embed=embed)
+logger.addHandler(fh)
+logger.addHandler(ch)
 
 
-@bot.command(name='arena', description="ketrecharc bunyo, hasznalat: {0}arena @user1 @user2 ...".format(cfg["prefix"]))
-async def fight(ctx, *args):
-    logging.info("command called: {}".format(ctx.command))
-    if len(args) == 0:
-        return
-    await ctx.send("a ketrec harc gyöz tese: {}".format(random.choice(args)))
+def get_prefix(bot, message):
+	"""A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
+	# Notice how you can use spaces in prefixes. Try to keep them simple though.
+	prefixes = ['k!']
 
-@bot.command(name='say', description="bemondom ha irsz utana valamit")
-async def say(ctx, *args):
-    logging.info("command called: {}".format(ctx.command))
-    await ctx.send(' '.join(args))
+	# Check to see if we are outside of a guild. e.g DM's etc.
+	if not message.guild:
+		# Only allow ? to be used in DMs
+		return '?'
 
+	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
+	return commands.when_mentioned_or(*prefixes)(bot, message)
 
-@bot.command(name='meh', description="elmondom afilmet röviden")
-async def bee(ctx, *args):
-    logging.info("command called: {}".format(ctx.command))
-    await handle_beemovie_command(ctx, args)
+cogs_dir = "cogs"
 
+intents = discord.Intents.default()
+intents.members = True
 
-@bot.command(name='trashwatch')
-async def trashwatch(ctx, *args):
-    logging.info("command called: {}".format(ctx.command))
+bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
+if __name__ == '__main__':
+	bot.cvars = {}
+	bot.cvars["PHTOKEN"] = PHTOKEN
+	bot.cvars["state"] = {"guild": {}, "global": {}}
+
+	with open('resources/db.json', 'r', encoding="utf8") as file:
+		dbjson = json.loads(file.read())
+
+	bot.cvars["slurps"] = {"slurs": [dbjson["slurs"][k]["slur"] for k in dbjson["slurs"]],
+						   "chances": [dbjson["slurs"][k]["chance"] for k in dbjson["slurs"]]}
+	bot.cvars["statuses"] = {"statuses": [dbjson["statuses"][k]["status"] for k in dbjson["statuses"]],
+							 "chances": [dbjson["statuses"][k]["chance"] for k in dbjson["statuses"]]}
+
+	for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
+		try:
+			bot.load_extension(cogs_dir + "." + extension)
+		except (discord.ClientException, ModuleNotFoundError):
+			logger.error(f'Failed to load extension {extension}.')
+			traceback.print_exc()
 
 @bot.event
 async def on_ready():
-    await bot.change_presence(activity=discord.Game(
-        random.choices(population=shared.statuses["statuses"], weights=shared.statuses["chances"])[0]
-    ))
-    logging.info("ready")
+	logger.debug(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
+	await bot.change_presence(activity=discord.Game(
+		random.choices(population=bot.cvars["statuses"]["statuses"], weights=bot.cvars["statuses"]["chances"])[0]
+	))
 
-@bot.event
-async def on_typing(channel, user, when):
-    from eventhandlers import handle_on_typing
-    await handle_on_typing(bot, channel, user, when)
-
-
-@bot.event
-async def on_message(message):
-    from eventhandlers import handle_on_message
-    if message.author == bot.user:
-        return
-    await handle_on_message(bot, message)
+	logger.debug(f'Successfully logged in and booted...!')
 
 
 bot.run(TOKEN)
