@@ -57,6 +57,8 @@ bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 if __name__ == '__main__':
 	bot.cvars = {}
 	bot.cvars["PHTOKEN"] = PHTOKEN
+	bot.cvars["FFMPEG_PATH"] = os.getenv("FFMPEG_PATH")
+	bot.cvars["SNDS_PATH"] = os.getenv("SNDS_PATH")
 	bot.cvars["state"] = {"guild": {}, "global": {}}
 
 	with open('resources/db.json', 'r', encoding="utf8") as file:
