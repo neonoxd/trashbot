@@ -21,13 +21,12 @@ class SoundBoardCog(commands.Cog):
         path = self.bot.cvars["SNDS_PATH"]
         root_dirname = os.path.basename(path)
 
-        print(f'sounds path: {path} \n rootdirname: {root_dirname}')
+        #print(f'sounds path: {path} \n rootdirname: {root_dirname}')
 
         for root, subdirs, files in os.walk(self.bot.cvars["SNDS_PATH"]):
             for file in files:
                 sounds.append(os.path.join(root, file))
         all = {os.path.basename(k): k for k in sounds}
-        print(all)
         return all
 
     async def dl_sounds(self):
