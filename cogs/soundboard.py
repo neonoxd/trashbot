@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import random
 
 import discord
@@ -16,7 +17,6 @@ class SoundBoardCog(commands.Cog):
         self.current_vc = None
 
     def read_sounds_list(self):
-        import os
         sounds = []
         path = self.bot.cvars["SNDS_PATH"]
         root_dirname = os.path.basename(path)
@@ -68,25 +68,33 @@ class SoundBoardCog(commands.Cog):
     async def summon(self, ctx):
         voice_channel = ctx.author.voice.channel
         if voice_channel is not None:
-            channel = voice_channel.name
-
-            if self.current_vc is None or self.current_vc.is_connected() is False:
+            if self.in_vc():
+                await self.current_vc.disconnect()
                 vc = await voice_channel.connect()
                 self.current_vc = vc
-            elif self.current_vc.is_connected() is True:
-                await self.current_vc.disconnect()
+            else:
                 vc = await voice_channel.connect()
                 self.current_vc = vc
         else:
             await ctx.send(str(ctx.author.name) + "is not in a channel.")
         await ctx.message.delete()
 
-    @commands.command(name='p')
-    async def x(self, ctx):
+    @commands.command(name='play')
+    async def x(self, ctx, *args):
         vc = await self.get_or_connect_vc(ctx)
         await asyncio.sleep(.5)
-        await self.play_file(vc, self.get_random_sound())
+        if len(args) == 0:
+            file = self.get_random_sound()
+        else:
+            filekey = " ".join(args)
+            file = self.sounds[filekey]
+        self.logger.debug(f'playing {os.path.basename(file)}')
+        await self.play_file(vc, file)
         await ctx.message.delete()
+
+    @commands.command(name='listsounds')
+    async def listsnds(self, ctx):
+        await ctx.send(f'```{list(self.sounds.keys())}```')
 
 
 def setup(bot):
