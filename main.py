@@ -68,7 +68,6 @@ if __name__ == '__main__':
 						   "chances": [dbjson["slurs"][k]["chance"] for k in dbjson["slurs"]]}
 	bot.cvars["statuses"] = {"statuses": [dbjson["statuses"][k]["status"] for k in dbjson["statuses"]],
 							 "chances": [dbjson["statuses"][k]["chance"] for k in dbjson["statuses"]]}
-
 	for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
 		try:
 			bot.load_extension(cogs_dir + "." + extension)

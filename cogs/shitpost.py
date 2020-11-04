@@ -218,7 +218,8 @@ class ShitpostCog(commands.Cog):
         ]
         words = {**fwd, **dict([(value, key) for key, value in fwd.items()])}
         themsg = ""
-        if len(message.content.split(" ")) == 1 and len(has_link(message.content)) == 0:
+        if len(message.content.split(" ")) == 1 and len(has_link(message.content)) == 0 and \
+                'k!' not in message.content:
             for word in words.keys():
                 if word in message.content:
                     themsg = message.content.replace(word, words[word])
