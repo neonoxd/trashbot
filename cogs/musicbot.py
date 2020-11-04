@@ -8,26 +8,6 @@ import os
 
 from discord import opus
 
-from pydub import AudioSegment
-from os import listdir
-import numpy as np
-import math
-
-
-def bass_line_freq(track):
-	sample_track = list(track)
-
-	# c-value
-	est_mean = np.mean(sample_track)
-
-	# a-value
-	est_std = 3 * np.std(sample_track) / (math.sqrt(2))
-
-	bass_factor = int(round((est_std - est_mean) * 0.005))
-
-	return bass_factor
-
-
 def load_opus_lib():
 	if opus.is_loaded():
 		return
@@ -96,7 +76,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
 			module_logger.debug(f'playin : {data}')
 
 		filename = data['url'] if stream else ytdl.prepare_filename(data)
-		print(f'streaming fnam: {filename}')
 
 		return cls(discord.FFmpegPCMAudio(filename, executable=ffmpg, options=["-vn"]), data=data)
 
