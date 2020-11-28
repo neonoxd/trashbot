@@ -15,7 +15,20 @@ class MiscCog(commands.Cog):
 	@commands.command(name='say')
 	async def say(self, ctx, *args):
 		self.logger.info("command called: {}".format(ctx.command))
+		await ctx.message.delete()
 		await ctx.send(' '.join(args))
+
+	@commands.command(name='impostor', hidden=True)
+	async def impost(self, ctx, *args):
+		await ctx.message.delete()
+		if len(args) > 0:
+			tmpl = f""".      　。　　　　•　    　ﾟ　　。
+	　　.　　　.　　　  　　.　　　　　。　　   。　.
+	 　.　　      。　        ඞ   。　    .    •
+	   •        {args[0]} was the impostor.　 。　.
+	　 　　。　　 　　　　ﾟ　　　.　    　　　.
+	,　　　　.　 .　　       ."""
+			await ctx.send(tmpl)
 
 	@commands.command(name="kot")
 	async def say(self, ctx):
