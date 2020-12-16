@@ -2,7 +2,7 @@ import json
 import os
 import logging
 import random
-
+import aiocron
 import discord
 from discord.ext import commands
 
@@ -47,6 +47,7 @@ def get_prefix(bot, message):
 	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
 	return commands.when_mentioned_or(*prefixes)(bot, message)
 
+
 cogs_dir = "cogs"
 
 intents = discord.Intents.default()
@@ -74,6 +75,13 @@ if __name__ == '__main__':
 		except (discord.ClientException, ModuleNotFoundError):
 			logger.error(f'Failed to load extension {extension}.')
 			traceback.print_exc()
+
+
+@aiocron.crontab('0 14 * * *')
+async def trigger_cron():
+	from cogs.shitpost import set_daily_tension
+	await set_daily_tension(bot)
+
 
 @bot.event
 async def on_ready():
