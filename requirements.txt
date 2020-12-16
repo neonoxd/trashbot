@@ -15,3 +15,4 @@ urllib3==1.25.11
 yarl==1.5.1
 PyNaCl==1.4.0
 youtube-dl
+aiocron~=1.3

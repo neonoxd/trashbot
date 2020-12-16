@@ -1,10 +1,14 @@
 import asyncio
 import logging
 import random
+import datetime
 
+import aiocron
 import discord
 import requests
 from discord.ext import commands
+
+from cogs.rng import roll
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -145,6 +149,58 @@ async def beemovie_task(self, ctx):
 		await asyncio.sleep(random.randrange(5, 10))
 
 
+async def set_daily_tension(bot):
+	guilds = bot.cvars["state"]["guild"]
+	for guild_id in list(guilds.keys()):
+		module_logger.debug(f'guild found : {guild_id}')
+
+		guild = guilds[guild_id]
+
+		guild['tension'] = roll("100")
+
+		ch_id = list(guild["channels"].keys())[0]
+		channel = bot.get_channel(ch_id)
+
+		plus90 = [
+			"https://www.youtube.com/watch?v=CDJhBTUg9Zw",  # rero zone
+			"Grandmasta Pete - Mérés",
+			"x̰̫̘̮́͠ḑ̨̟̝͎͓̮̬͎̜͍̬̬͍͉͕̹̘͞",
+			"nem bántás nap"
+		]
+
+		plus50 = [
+			"régi kazetá pejáco javitás",
+			"xanox44 homemade vape video"
+		]
+
+		sub50 = [
+			"https://www.youtube.com/watch?v=A_6wm8HVaVY",
+			"Aleksandr Pistoletov - Gladiator",
+			"Kibaszott Stryker",
+			"lecsalos live"
+		]
+
+		t_str = f'{guild["tension"]}%'
+		if guild['tension'] > 90:
+			tension = random.choice([t_str] + plus90)
+		elif guild['tension'] > 50:
+			tension = random.choice([t_str] + plus50)
+		else:
+			tension = random.choice([t_str] + sub50)
+
+		t_msg = f'mai vilag tenszion: **{tension}**'
+
+		skulls = []
+
+		if guild['tension'] < 50:
+			skulls.append("cement: off")
+
+		if len(skulls) > 0:
+			t_msg += f'\n **skulls:** {", ".join(skulls)}'
+
+		await channel.send(t_msg)
+
+
 class ShitpostCog(commands.Cog):
 	def __init__(self, bot):
 		module_logger.info("initializing Shitpost")
@@ -208,26 +264,62 @@ class ShitpostCog(commands.Cog):
 		if message.author == self.bot.user:
 			return
 
-		import datetime
 		now = datetime.datetime.now()
+		chance = random.randrange(0, 100)
 
+		self.setup_state(message, now)
+		current_tension = self.bot.cvars["state"]["guild"][message.guild.id]["tension"]
+
+
+		#await set_daily_tension(self.bot)
+
+		await self.sentience_spam(message)
+
+		await self.sentience_flipper(message, chance)
+
+		if current_tension is not None and current_tension > 50:
+			await self.sentience_reply(message, now, chance)
+
+		# async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
+		#	module_logger.warning(f'auditlog {entry.id} - {entry.action}, user: {entry.user}, tgt: {entry.target}')
+
+		if message.tts:
+			for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):
+				await message.add_reaction(react)
+
+		if message.content == "(╯°□°）╯︵ ┻━┻":
+			await message.channel.send("┬─┬ ノ( ゜-゜ノ)")
+
+	@commands.Cog.listener()
+	@commands.guild_only()
+	async def on_typing(self, channel, user, when):
+		await self.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
+		await asyncio.sleep(5)
+		await self.bot.change_presence(activity=discord.Game(
+			random.choices(population=self.bot.cvars["statuses"]["statuses"],
+						   weights=self.bot.cvars["statuses"]["chances"])[0]
+		))
+
+	def setup_state(self, message, now):
 		# setup state
 		state = self.bot.cvars["state"]
 		msg_guild = message.guild.id
 		if msg_guild not in state["guild"]:
-			state["guild"][msg_guild] = {"last_slur": now}
-			self.logger.info("thinking activated for guild {}, channel: {}"
-							 .format(message.guild.name, message.channel.name))
+			state["guild"][msg_guild] = {"channels": {}, "last_slur": now, "tension": None}
+			self.logger.info(
+				f"state initialized, thinking activated for guild {message.guild.name}, channel: {message.channel.name}")
 			self.bot.loop.create_task(think(self.bot, message))
 
+		# setup channel state
 		guild_state = state["guild"][msg_guild]
 		msg_channel = message.channel.id
-		if msg_channel not in guild_state:
-			guild_state[msg_channel] = {}
-			guild_state[msg_channel]["last_msgs"] = []
+		if msg_channel not in guild_state["channels"]:
+			guild_state["channels"][msg_channel] = {}
+			guild_state["channels"][msg_channel]["last_msgs"] = []
 
+	async def sentience_spam(self, message):
 		# surprise spammers
-		channel_state = guild_state[msg_channel]
+		channel_state = self.bot.cvars["state"]["guild"][message.guild.id]["channels"][message.channel.id]
 		if len(message.content) > 0 and 'k!' not in message.content:  # TODO extract prefix
 			if len(channel_state["last_msgs"]) == 3:
 				del channel_state["last_msgs"][0]
@@ -239,9 +331,25 @@ class ShitpostCog(commands.Cog):
 				await asyncio.sleep(1)
 				await message.channel.send(message.content)
 
-		# roll for sentience
-		roll = random.randrange(0, 100)
+	async def sentience_reply(self, message, now, roll):
+		guild_state = self.bot.cvars["state"]["guild"][message.guild.id]
+		# skippers smh
+		if any(w in message.content for w in ["-skip", "!skip"]) and roll < 40:
+			self.logger.info("got lucky with roll chance: %s" % roll)
+			await message.channel.send("az jo köcsög volt")
 
+		# random trash replies
+		elif (now - guild_state["last_slur"]).total_seconds() > 600 \
+				and "k!" not in message.content \
+				and roll < 2:
+			guild_state["last_slur"] = datetime.datetime.now()
+			self.logger.info("got lucky with roll chance: %s" % roll)
+			await message.channel.send(random.choices(population=self.bot.cvars["slurps"]["slurs"],
+													  weights=self.bot.cvars["slurps"]["chances"])[0].format(
+				message.author.id))
+
+	@staticmethod
+	async def sentience_flipper(message, roll):
 		# flip words meme
 		posts = [
 			"🆗 gya gec ⚰️\nfeltaláltam\n🧔🏿🤙🏻🧪{0}",
@@ -261,39 +369,6 @@ class ShitpostCog(commands.Cog):
 				await message.channel.send(file=discord.File(beflimg, 'befli.jpg'))
 			else:
 				await message.channel.send(random.choice(posts).format(themsg))
-
-		# skippers smh
-		if any(w in message.content for w in ["-skip", "!skip"]) and roll < 40:
-			self.logger.info("got lucky with roll chance: %s" % roll)
-			await message.channel.send("az jo köcsög volt")
-
-		# random trash replies
-		elif (now - guild_state["last_slur"]).total_seconds() > 600 \
-				and "k!" not in message.content \
-				and roll < 2:
-			guild_state["last_slur"] = datetime.datetime.now()
-			self.logger.info("got lucky with roll chance: %s" % roll)
-			await message.channel.send(random.choices(population=self.bot.cvars["slurps"]["slurs"],
-													  weights=self.bot.cvars["slurps"]["chances"])[0].format(
-				message.author.id))
-		# tts react
-		if message.tts:
-			for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):
-				await message.add_reaction(react)
-
-		# unflip
-		if message.content == "(╯°□°）╯︵ ┻━┻":
-			await message.channel.send("┬─┬ ノ( ゜-゜ノ)")
-
-	@commands.Cog.listener()
-	@commands.guild_only()
-	async def on_typing(self, channel, user, when):
-		await self.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
-		await asyncio.sleep(5)
-		await self.bot.change_presence(activity=discord.Game(
-			random.choices(population=self.bot.cvars["statuses"]["statuses"],
-						   weights=self.bot.cvars["statuses"]["chances"])[0]
-		))
 
 
 def setup(bot):
