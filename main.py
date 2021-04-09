@@ -62,13 +62,16 @@ if __name__ == '__main__':
 	bot.cvars["SNDS_PATH"] = os.getenv("SNDS_PATH")
 	bot.cvars["state"] = {"guild": {}, "global": {}}
 
-	with open('resources/db.json', 'r', encoding="utf8") as file:
-		dbjson = json.loads(file.read())
+	with open('resources/lists/slur.list', 'r', encoding="utf8") as file:
+		slurlist = file.readlines()
 
-	bot.cvars["slurps"] = {"slurs": [dbjson["slurs"][k]["slur"] for k in dbjson["slurs"]],
-						   "chances": [dbjson["slurs"][k]["chance"] for k in dbjson["slurs"]]}
-	bot.cvars["statuses"] = {"statuses": [dbjson["statuses"][k]["status"] for k in dbjson["statuses"]],
-							 "chances": [dbjson["statuses"][k]["chance"] for k in dbjson["statuses"]]}
+	with open('resources/lists/status.list', 'r', encoding="utf8") as file:
+		statuslist = file.readlines()
+
+	bot.cvars["slurps"] = slurlist
+	bot.cvars["statuses"] = statuslist
+
+	# load cogs
 	for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
 		try:
 			bot.load_extension(cogs_dir + "." + extension)
@@ -88,7 +91,7 @@ async def on_ready():
 	logger.debug(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
 	await bot.change_presence(activity=discord.Game(
-		random.choices(population=bot.cvars["statuses"]["statuses"], weights=bot.cvars["statuses"]["chances"])[0]
+		random.choice(bot.cvars["statuses"])
 	))
 
 	logger.debug(f'Successfully logged in and booted...!')

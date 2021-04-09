@@ -206,7 +206,7 @@ class ShitpostCog(commands.Cog):
 		module_logger.info("initializing Shitpost")
 		self.bot = bot
 		self.logger = module_logger
-		with open('resources/lists/zene.txt', 'r', encoding="utf8") as file:
+		with open('resources/lists/best.list', 'r', encoding="utf8") as file:
 			self.trek_list = file.read().split("\n\n")
 		with open('resources/beemovie.txt', 'r', encoding="utf8") as file:
 			self.beescript = file.read().split("\n\n  \n")
@@ -261,7 +261,7 @@ class ShitpostCog(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
-		if message.author == self.bot.user:
+		if message.author == self.bot.user or not message.guild:
 			return
 
 		now = datetime.datetime.now()
@@ -269,9 +269,6 @@ class ShitpostCog(commands.Cog):
 
 		self.setup_state(message, now)
 		current_tension = self.bot.cvars["state"]["guild"][message.guild.id]["tension"]
-
-
-		#await set_daily_tension(self.bot)
 
 		await self.sentience_spam(message)
 
@@ -296,8 +293,7 @@ class ShitpostCog(commands.Cog):
 		await self.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
 		await asyncio.sleep(5)
 		await self.bot.change_presence(activity=discord.Game(
-			random.choices(population=self.bot.cvars["statuses"]["statuses"],
-						   weights=self.bot.cvars["statuses"]["chances"])[0]
+			random.choice(self.bot.cvars["statuses"])
 		))
 
 	def setup_state(self, message, now):
@@ -344,9 +340,7 @@ class ShitpostCog(commands.Cog):
 				and roll < 2:
 			guild_state["last_slur"] = datetime.datetime.now()
 			self.logger.info("got lucky with roll chance: %s" % roll)
-			await message.channel.send(random.choices(population=self.bot.cvars["slurps"]["slurs"],
-													  weights=self.bot.cvars["slurps"]["chances"])[0].format(
-				message.author.id))
+			await message.channel.send(random.choice(self.bot.cvars["slurps"]).format(message.author.id))
 
 	@staticmethod
 	async def sentience_flipper(message, roll):

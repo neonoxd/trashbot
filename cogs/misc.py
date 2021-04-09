@@ -31,7 +31,7 @@ class MiscCog(commands.Cog):
 			await ctx.send(tmpl)
 
 	@commands.command(name="kot")
-	async def say(self, ctx):
+	async def kot(self, ctx):
 		async with aiohttp.ClientSession() as session:
 			async with session.get('http://aws.random.cat/meow') as r:
 				if r.status == 200:
