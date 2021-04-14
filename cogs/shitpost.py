@@ -69,8 +69,8 @@ async def mercy_maybe(bot, channel, timeout=30):
 		await channel.send("sajnos senki nem élte tul")
 
 
-async def think(bot, message):
-	channel = message.channel
+async def think(bot, channel):
+	module_logger.debug(f"thinking activated for channel {channel} - {channel.id} on {channel.guild.name}")
 	while True:
 		roll_small = random.randrange(0, 1000)
 		if roll_small < 1:
@@ -95,7 +95,7 @@ async def get_captcha(captcha_id):
 	double_size = (rgb_image.size[0] * 2, rgb_image.size[1] * 2)
 	image = rgb_image.resize(double_size)
 
-	bg = Image.open('resources/bg.png', 'r')
+	bg = Image.open('resources/img/bg.png', 'r')
 	text_img = Image.new('RGBA', (bg.width, bg.height), (0, 0, 0, 0))
 	text_img.paste(bg, ((text_img.width - bg.width) // 2, (text_img.height - bg.height) // 2))
 	text_img.paste(image, ((text_img.width - image.width) // 2, (text_img.height - image.height) // 2), image)
@@ -111,7 +111,7 @@ def get_befli(bottom_text):
 	from PIL import ImageDraw
 	import io
 
-	output = Image.open('resources/finally.jpg', 'r')
+	output = Image.open('resources/img/finally.jpg', 'r')
 
 	bg_w, bg_h = output.size
 	draw = ImageDraw.Draw(output)
@@ -132,40 +132,42 @@ def get_befli(bottom_text):
 
 
 async def beemovie_task(self, ctx):
-	ctx_guild = ctx.guild.id
-	state = self.bot.cvars["state"]
-	guild_state = state["guild"][ctx_guild]
-	bee_state = guild_state["bee_state"]
+	guild_id = ctx.guild.id
+	state = self.bot.state.get_guild_state_by_id(guild_id)
 
 	while True:
-		if bee_state["active"] and bee_state["current_part"] < len(self.beescript):
-			await ctx.send(self.beescript[bee_state["current_part"]])
-			bee_state["current_part"] += 1
-			if bee_state["current_part"] == len(self.beescript):
-				bee_state["active"] = False
-				bee_state["current_part"] = 0
+		if state.bee_active and state.bee_page < len(self.beescript):
+			await ctx.send(self.beescript[state.bee_page])
+			state.bee_page += 1
+			if state.bee_page == len(self.beescript):
+				state.bee_active = False
+				state.bee_page = 0
 				await asyncio.sleep(5)
 				await ctx.send("na csak ennyit akartam")
 		await asyncio.sleep(random.randrange(5, 10))
 
 
+async def reset_alert_states(bot):
+	module_logger.info("resetting peter_alert state for all guilds")
+	for guild_state in bot.state.guilds:
+		guild_state.peter_alert = False
+
+
 async def set_daily_tension(bot):
-	guilds = bot.cvars["state"]["guild"]
-	for guild_id in list(guilds.keys()):
-		module_logger.debug(f'guild found : {guild_id}')
 
-		guild = guilds[guild_id]
+	for guild_state in bot.state.guilds:
+		module_logger.debug(f'setting tension for guild : {guild_state.id}')
 
-		guild['tension'] = roll("100")
-
-		ch_id = list(guild["channels"].keys())[0]
-		channel = bot.get_channel(ch_id)
+		guild_state.tension = roll("100")
+		guild = discord.utils.get(bot.guilds, id=guild_state.id)
+		channel = guild.system_channel
 
 		plus90 = [
 			"https://www.youtube.com/watch?v=CDJhBTUg9Zw",  # rero zone
 			"Grandmasta Pete - Mérés",
 			"x̰̫̘̮́͠ḑ̨̟̝͎͓̮̬͎̜͍̬̬͍͉͕̹̘͞",
-			"nem bántás nap"
+			"nem bántás nap",
+			"https://www.youtube.com/watch?v=Xf6Geh82vXg"
 		]
 
 		plus50 = [
@@ -180,20 +182,27 @@ async def set_daily_tension(bot):
 			"lecsalos live"
 		]
 
-		t_str = f'{guild["tension"]}%'
-		if guild['tension'] > 90:
+		t_str = f'{guild_state.tension}%'
+		if guild_state.tension > 90:
 			tension = random.choice([t_str] + plus90)
-		elif guild['tension'] > 50:
+		elif guild.state.tension in [69, 420]:
+			tension = t_str
+		elif guild_state.tension > 50:
 			tension = random.choice([t_str] + plus50)
 		else:
 			tension = random.choice([t_str] + sub50)
 
 		t_msg = f'mai vilag tenszion: **{tension}**'
 
+		#  IDEA: roll for random skulls, tbd what they do
+
 		skulls = []
 
-		if guild['tension'] < 50:
+		if guild_state.tension < 50:
 			skulls.append("cement: off")
+
+		if guild_state.tension == 69:
+			skulls.append("NICE 😏")
 
 		if len(skulls) > 0:
 			t_msg += f'\n **skulls:** {", ".join(skulls)}'
@@ -221,13 +230,13 @@ class ShitpostCog(commands.Cog):
 	async def captcha(self, ctx):
 		self.logger.info("command called: {}".format(ctx.command))
 
-		cimg = await get_captcha(self.bot.cvars["PHTOKEN"])
+		cimg = await get_captcha(self.bot.globals.ph_token)
 		await ctx.send(file=discord.File(cimg, 'getsee.png'))
 
 	@commands.command(name='tenemos')
 	async def tenemos(self, ctx):
 		self.logger.info("command called: {}".format(ctx.command))
-		await ctx.send(file=discord.File('resources/tenemos.jpg'))
+		await ctx.send(file=discord.File('resources/img/tenemos.jpg'))
 
 	@commands.command(name='zene')
 	async def zene(self, ctx):
@@ -239,25 +248,46 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='beemovie')
 	async def bmc(self, ctx, *args):
 		self.logger.info("command called: {}".format(ctx.command))
-		ctx_guild = ctx.guild.id
-		state = self.bot.cvars["state"]
-		guild_state = state["guild"][ctx_guild]
 
-		if "bee_state" not in guild_state:
-			guild_state["bee_state"] = {"active": True, "current_part": 0}
+		guild_id = ctx.guild.id
+		guild_state = self.bot.state.get_guild_state_by_id(guild_id)
+
+		if not guild_state.bee_initialized:
+			guild_state.bee_initialized = True
+			guild_state.bee_active = True
 			ctx.bot.loop.create_task(beemovie_task(self, ctx))
 		else:
 			if len(args) > 0:
-				guild_state["bee_state"]["current_part"] = 0
+				guild_state.bee_page = 0
 				await ctx.send("mar nemtom hol tartottam")
 			else:
-				guild_state["bee_state"]["active"] = not guild_state["bee_state"]["active"]
+				guild_state.bee_active = not guild_state.bee_active
 
-		print(state)
-		if guild_state["bee_state"]["active"]:
+		if guild_state.bee_active:
 			await ctx.send(random.choice(["szal akkor", "na mondom akkor"]))
 		else:
 			await ctx.send("akk m1...")
+
+	@commands.command(name='tension')
+	async def show_tension(self, ctx):
+		tension = self.bot.state.get_guild_state_by_id(ctx.guild.id).tension
+		module_logger.warning(tension)
+		await ctx.channel.send(f'mai vilag tenszio: **{tension}%**')
+
+	@commands.Cog.listener()
+	async def on_voice_state_update(self, member, before, after):
+		if self.bot.globals.p_id == str(member.id):
+			if before.channel is None and after.channel is not None:
+				event_guild = None
+				for guild in self.bot.guilds:
+					voice_channel = discord.utils.get(guild.channels, id=after.channel.id)
+					event_guild = voice_channel.guild
+				if event_guild is not None:
+					guild_state = self.bot.state.get_guild_state_by_id(event_guild.id)
+					if not guild_state.peter_alert and guild_state.tension > 90:
+						await event_guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
+						guild_state.peter_alert = True
+						module_logger.debug("PETER ALERT!!!!!!!")
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
@@ -267,8 +297,11 @@ class ShitpostCog(commands.Cog):
 		now = datetime.datetime.now()
 		chance = random.randrange(0, 100)
 
-		self.setup_state(message, now)
-		current_tension = self.bot.cvars["state"]["guild"][message.guild.id]["tension"]
+		guild_state = self.bot.state.get_guild_state_by_id(message.guild.id)
+		current_tension = guild_state.tension
+
+		if guild_state.get_channel_state_by_id(message.channel.id) is None:
+			guild_state.track_channel(message.channel.id)
 
 		await self.sentience_spam(message)
 
@@ -277,7 +310,10 @@ class ShitpostCog(commands.Cog):
 		if current_tension is not None and current_tension > 50:
 			await self.sentience_reply(message, now, chance)
 
-		# async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
+		if message.author.id in [self.bot.globals.p_id, self.bot.globals.sz_id] and chance == 17:
+			await message.channel.send(file=discord.File("resources/img/forklift.png", 'forklift.png'), content=message.author.mention)
+
+		#async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
 		#	module_logger.warning(f'auditlog {entry.id} - {entry.action}, user: {entry.user}, tgt: {entry.target}')
 
 		if message.tts:
@@ -293,54 +329,33 @@ class ShitpostCog(commands.Cog):
 		await self.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
 		await asyncio.sleep(5)
 		await self.bot.change_presence(activity=discord.Game(
-			random.choice(self.bot.cvars["statuses"])
+			random.choice(self.bot.globals.statuses)
 		))
-
-	def setup_state(self, message, now):
-		# setup state
-		state = self.bot.cvars["state"]
-		msg_guild = message.guild.id
-		if msg_guild not in state["guild"]:
-			state["guild"][msg_guild] = {"channels": {}, "last_slur": now, "tension": None}
-			self.logger.info(
-				f"state initialized, thinking activated for guild {message.guild.name}, channel: {message.channel.name}")
-			self.bot.loop.create_task(think(self.bot, message))
-
-		# setup channel state
-		guild_state = state["guild"][msg_guild]
-		msg_channel = message.channel.id
-		if msg_channel not in guild_state["channels"]:
-			guild_state["channels"][msg_channel] = {}
-			guild_state["channels"][msg_channel]["last_msgs"] = []
 
 	async def sentience_spam(self, message):
 		# surprise spammers
-		channel_state = self.bot.cvars["state"]["guild"][message.guild.id]["channels"][message.channel.id]
+		guild_state = self.bot.state.get_guild_state_by_id(message.guild.id)
+		channel_state = guild_state.get_channel_state_by_id(message.channel.id)
 		if len(message.content) > 0 and 'k!' not in message.content:  # TODO extract prefix
-			if len(channel_state["last_msgs"]) == 3:
-				del channel_state["last_msgs"][0]
-				channel_state["last_msgs"].append(hash(message.content))
-			else:
-				channel_state["last_msgs"].append(hash(message.content))
-			msgs = channel_state["last_msgs"]
-			if msgs[1:] == msgs[:-1] and len(msgs) == 3:
+			channel_state.add_msg(message)
+			if channel_state.shall_i():
 				await asyncio.sleep(1)
 				await message.channel.send(message.content)
 
 	async def sentience_reply(self, message, now, roll):
-		guild_state = self.bot.cvars["state"]["guild"][message.guild.id]
+		guild_state = self.bot.state.get_guild_state_by_id(message.guild.id)
 		# skippers smh
-		if any(w in message.content for w in ["-skip", "!skip"]) and roll < 40:
+		if any(skip_word in message.content for skip_word in ["-skip", "!skip"]) and roll < 40:
 			self.logger.info("got lucky with roll chance: %s" % roll)
 			await message.channel.send("az jo köcsög volt")
 
 		# random trash replies
-		elif (now - guild_state["last_slur"]).total_seconds() > 600 \
+		elif (now - guild_state.last_slur_dt).total_seconds() > 600 \
 				and "k!" not in message.content \
 				and roll < 2:
-			guild_state["last_slur"] = datetime.datetime.now()
+			guild_state.last_slur_dt = datetime.datetime.now()
 			self.logger.info("got lucky with roll chance: %s" % roll)
-			await message.channel.send(random.choice(self.bot.cvars["slurps"]).format(message.author.id))
+			await message.channel.send(random.choice(self.bot.globals.slurs).format(message.author.id))
 
 	@staticmethod
 	async def sentience_flipper(message, roll):
@@ -348,7 +363,9 @@ class ShitpostCog(commands.Cog):
 		posts = [
 			"🆗 gya gec ⚰️\nfeltaláltam\n🧔🏿🤙🏻🧪{0}",
 			"🆗 halod\n🧔🏿🤙🏻🧪{0}",
-			"mondjuk inkab\n🧔🏿🤙🏻🧪{0}"
+			"mondjuk inkab\n🧔🏿🤙🏻🧪{0}",
+			"{0}?👀",
+			"mmmmmmmmmmmmmmmm...{0}?"
 		]
 		words = {**fwd, **dict([(value, key) for key, value in fwd.items()])}
 		themsg = ""

@@ -5,12 +5,11 @@ import random
 import aiocron
 import discord
 from discord.ext import commands
-
 from os import listdir
 from os.path import isfile, join
-
-import sys, traceback
+import traceback
 from dotenv import load_dotenv
+from utils.state import BotState, BotConfig
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -56,20 +55,24 @@ intents.members = True
 bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
 if __name__ == '__main__':
-	bot.cvars = {}
-	bot.cvars["PHTOKEN"] = PHTOKEN
-	bot.cvars["FFMPEG_PATH"] = os.getenv("FFMPEG_PATH")
-	bot.cvars["SNDS_PATH"] = os.getenv("SNDS_PATH")
-	bot.cvars["state"] = {"guild": {}, "global": {}}
+
+	bot.state = BotState()
+	bot.globals = BotConfig(
+		ph_token=PHTOKEN,
+		ffmpeg_path=os.getenv("FFMPEG_PATH"),
+		sounds_path=os.getenv("SNDS_PATH"),
+		sz_id=int(os.getenv("SZ_ID")),
+		p_id=int(os.getenv("P_ID"))
+	)
 
 	with open('resources/lists/slur.list', 'r', encoding="utf8") as file:
-		slurlist = file.readlines()
+		slur_list = file.readlines()
 
 	with open('resources/lists/status.list', 'r', encoding="utf8") as file:
-		statuslist = file.readlines()
+		status_list = file.readlines()
 
-	bot.cvars["slurps"] = slurlist
-	bot.cvars["statuses"] = statuslist
+	bot.globals.slurs = slur_list
+	bot.globals.statuses = status_list
 
 	# load cogs
 	for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
@@ -80,21 +83,34 @@ if __name__ == '__main__':
 			traceback.print_exc()
 
 
-@aiocron.crontab('0 14 * * *')
-async def trigger_cron():
-	from cogs.shitpost import set_daily_tension
-	await set_daily_tension(bot)
-
-
 @bot.event
 async def on_ready():
 	logger.debug(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
 
 	await bot.change_presence(activity=discord.Game(
-		random.choice(bot.cvars["statuses"])
+		random.choice(bot.globals.statuses)
 	))
 
+	logger.debug(f'Setting up state for {len(bot.guilds)} guilds')
+
+	for guild in bot.guilds:
+		from cogs.shitpost import think
+		bot.state.track_guild(guild.id)
+		bot.loop.create_task(think(bot, guild.system_channel))
+
 	logger.debug(f'Successfully logged in and booted...!')
+
+
+@aiocron.crontab('0 14 * * *')  # 14:00
+async def trigger_cron():
+	from cogs.shitpost import set_daily_tension
+	await set_daily_tension(bot)
+
+
+@aiocron.crontab('0 1 * * *')  # 01:00
+async def reset_alert_states():
+	from cogs.shitpost import reset_alert_states
+	await reset_alert_states(bot)
 
 
 bot.run(TOKEN)
