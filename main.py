@@ -75,7 +75,14 @@ if __name__ == '__main__':
 	bot.globals.statuses = status_list
 
 	# load cogs
-	for extension in [f.replace('.py', '') for f in listdir(cogs_dir) if isfile(join(cogs_dir, f))]:
+
+	debug_load_cogs = os.getenv("DEBUG_LOAD_COGS").split(",") if os.getenv("DEBUG_LOAD_COGS") is not None else []
+
+	for extension in [
+		f.replace('.py', '') for f in listdir(cogs_dir)
+		if isfile(join(cogs_dir, f))
+		and (len(debug_load_cogs) == 0 or f.replace('.py', '') in debug_load_cogs)
+	]:
 		try:
 			bot.load_extension(cogs_dir + "." + extension)
 		except (discord.ClientException, ModuleNotFoundError):
