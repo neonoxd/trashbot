@@ -142,6 +142,7 @@ async def reset_alert_states(bot):
 	module_logger.info("resetting peter_alert state for all guilds")
 	for guild_state in bot.state.guilds:
 		guild_state.peter_alert = False
+		guild_state.ghost_alerted_today = False
 
 
 async def set_daily_tension(bot, tension=None):
