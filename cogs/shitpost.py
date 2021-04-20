@@ -3,12 +3,12 @@ import logging
 import random
 import datetime
 
-import aiocron
 import discord
 import requests
 from discord.ext import commands
 
 from cogs.rng import roll
+from utils.helpers import has_link
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -22,15 +22,6 @@ fwd = {
 	"felül": "alul",
 	"áll": "ül"
 }
-
-
-def has_link(string):
-	import re
-	# findall() has been used
-	# with valid conditions for urls in string
-	regex = r"(?i)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'\".,<>?«»“”‘’]))"
-	url = re.findall(regex, string)
-	return [x[0] for x in url]
 
 
 async def mercy_maybe(bot, channel, timeout=30):
@@ -153,12 +144,12 @@ async def reset_alert_states(bot):
 		guild_state.peter_alert = False
 
 
-async def set_daily_tension(bot):
-
+async def set_daily_tension(bot, tension=None):
+	# TODO: option to only set it for 1 guild
 	for guild_state in bot.state.guilds:
 		module_logger.debug(f'setting tension for guild : {guild_state.id}')
 
-		guild_state.tension = roll("100")
+		guild_state.tension = tension if tension is not None else roll("100")
 		guild = discord.utils.get(bot.guilds, id=guild_state.id)
 		channel = guild.system_channel
 
@@ -185,7 +176,7 @@ async def set_daily_tension(bot):
 		t_str = f'{guild_state.tension}%'
 		if guild_state.tension > 90:
 			tension = random.choice([t_str] + plus90)
-		elif guild.state.tension in [69, 420]:
+		elif guild_state.tension in [69, 420]:
 			tension = t_str
 		elif guild_state.tension > 50:
 			tension = random.choice([t_str] + plus50)
@@ -276,18 +267,31 @@ class ShitpostCog(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after):
-		if self.bot.globals.p_id == str(member.id):
-			if before.channel is None and after.channel is not None:
-				event_guild = None
-				for guild in self.bot.guilds:
-					voice_channel = discord.utils.get(guild.channels, id=after.channel.id)
-					event_guild = voice_channel.guild
-				if event_guild is not None:
-					guild_state = self.bot.state.get_guild_state_by_id(event_guild.id)
-					if not guild_state.peter_alert and guild_state.tension > 90:
-						await event_guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
-						guild_state.peter_alert = True
-						module_logger.debug("PETER ALERT!!!!!!!")
+
+		if before.channel is None and after.channel is not None:  # user connected
+			guild = after.channel.guild
+			guild_state = self.bot.state.get_guild_state_by_id(guild.id)
+			#  p alert
+			if self.bot.globals.p_id == member.id:
+				if not guild_state.peter_alert and guild_state.tension > 90:
+					await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
+					guild_state.peter_alert = True
+					module_logger.debug("PETER ALERT!!!!!!!")
+
+			#  ghosts alert
+			elif member.id in self.bot.globals.ghost_ids:
+				if not guild_state.ghost_alerted_today:
+					msg_text = f"*{self.bot.globals.t_states[guild_state.ghost_state]}*"
+					guild_state.increment_ghost()
+					await after.channel.guild.system_channel.send(msg_text)
+					guild_state.ghost_alerted_today = True
+		elif before.channel is not None and after.channel is None:  # user disconnected
+			#  sz shleep event
+			if self.bot.globals.sz_id == member.id:
+				now = datetime.datetime.now()
+				if now.hour >= 21 or now.hour <= 3:
+					guild = before.channel.guild
+					await guild.system_channel.send(file=discord.File('resources/img/szabosleep.png'))
 
 	@commands.Cog.listener()
 	async def on_message(self, message):
@@ -311,9 +315,10 @@ class ShitpostCog(commands.Cog):
 			await self.sentience_reply(message, now, chance)
 
 		if message.author.id in [self.bot.globals.p_id, self.bot.globals.sz_id] and chance == 17:
-			await message.channel.send(file=discord.File("resources/img/forklift.png", 'forklift.png'), content=message.author.mention)
+			await message.channel.send(file=discord.File("resources/img/forklift.png", 'forklift.png'),
+									   content=message.author.mention)
 
-		#async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
+		# async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
 		#	module_logger.warning(f'auditlog {entry.id} - {entry.action}, user: {entry.user}, tgt: {entry.target}')
 
 		if message.tts:

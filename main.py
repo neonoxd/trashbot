@@ -13,7 +13,6 @@ from utils.state import BotState, BotConfig
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
-PHTOKEN = os.getenv("PHTOKEN")
 
 logger = logging.getLogger('trashbot')
 logger.setLevel(logging.DEBUG)
@@ -32,19 +31,15 @@ logger.addHandler(fh)
 logger.addHandler(ch)
 
 
-def get_prefix(bot, message):
+def get_prefix(command_bot, message):
 	"""A callable Prefix for our bot. This could be edited to allow per server prefixes."""
 
-	# Notice how you can use spaces in prefixes. Try to keep them simple though.
 	prefixes = ['k!']
 
-	# Check to see if we are outside of a guild. e.g DM's etc.
 	if not message.guild:
-		# Only allow ? to be used in DMs
 		return '?'
 
-	# If we are in a guild, we allow for the user to mention us or use any of the prefixes in our list.
-	return commands.when_mentioned_or(*prefixes)(bot, message)
+	return commands.when_mentioned_or(*prefixes)(command_bot, message)
 
 
 cogs_dir = "cogs"
@@ -58,7 +53,7 @@ if __name__ == '__main__':
 
 	bot.state = BotState()
 	bot.globals = BotConfig(
-		ph_token=PHTOKEN,
+		ph_token=os.getenv("PHTOKEN"),
 		ffmpeg_path=os.getenv("FFMPEG_PATH"),
 		sounds_path=os.getenv("SNDS_PATH"),
 		sz_id=int(os.getenv("SZ_ID")),
@@ -74,14 +69,22 @@ if __name__ == '__main__':
 	bot.globals.slurs = slur_list
 	bot.globals.statuses = status_list
 
+	bot.globals.t_states = [
+		"A horrible chill goes down your spine...", "Screams echo around you...", "Eater of Worlds has awoken!"
+	]
+
+	ghost_ids = [int(ghost_id) for ghost_id in os.getenv("GHOST_IDS").split(",")] if os.getenv("GHOST_IDS") is not None \
+		else []
+
+	bot.globals.ghost_ids = ghost_ids
+
 	# load cogs
 
 	debug_load_cogs = os.getenv("DEBUG_LOAD_COGS").split(",") if os.getenv("DEBUG_LOAD_COGS") is not None else []
 
 	for extension in [
 		f.replace('.py', '') for f in listdir(cogs_dir)
-		if isfile(join(cogs_dir, f))
-		and (len(debug_load_cogs) == 0 or f.replace('.py', '') in debug_load_cogs)
+		if isfile(join(cogs_dir, f)) and (len(debug_load_cogs) == 0 or f.replace('.py', '') in debug_load_cogs)
 	]:
 		try:
 			bot.load_extension(cogs_dir + "." + extension)

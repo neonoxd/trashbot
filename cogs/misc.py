@@ -1,4 +1,5 @@
 import logging
+import random
 
 import aiohttp
 from discord.ext import commands
@@ -12,7 +13,7 @@ class MiscCog(commands.Cog):
 		self.bot = bot
 		self.logger = module_logger
 
-	@commands.command(name='say')
+	@commands.command(name='say', aliases=['mondd'])
 	async def say(self, ctx, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
@@ -22,13 +23,16 @@ class MiscCog(commands.Cog):
 	async def impost(self, ctx, *args):
 		await ctx.message.delete()
 		if len(args) > 0:
-			tmpl = f""".      　。　　　　•　    　ﾟ　　。
-	　　.　　　.　　　  　　.　　　　　。　　   。　.
-	 　.　　      。　        ඞ   。　    .    •
-	   •        {args[0]} was the impostor.　 。　.
-	　 　　。　　 　　　　ﾟ　　　.　    　　　.
-	,　　　　.　 .　　       ."""
-			await ctx.send(tmpl)
+			impostor = args[0]
+		else:
+			impostor = random.choice(ctx.message.channel.members).mention
+		tmpl = f""".      　。　　　　•　    　ﾟ　　。
+　　.　　　.　　　  　　.　　　　　。　　   。　.
+ 　.　　      。　        ඞ   。　    .    •
+   •        {impostor} was the impostor.　 。　.
+　 　　。　　 　　　　ﾟ　　　.　    　　　.
+,　　　　.　 .　　       ."""
+		await ctx.send(tmpl)
 
 	@commands.command(name="kot")
 	async def kot(self, ctx):

@@ -70,10 +70,11 @@ class AdminCog(commands.Cog):
         module_logger.debug(f"cmd_set_tension called with args {args}")
         try:
             new_tension = int(args[0])
-            guild_state = self.bot.state.get_guild_state_by_id(ctx.guild.id)
-            guild_state.tension = new_tension
-        except:
+            from cogs.shitpost import set_daily_tension
+            await set_daily_tension(self.bot, new_tension)
+        except Exception as e:
             module_logger.error("something went wrong")
+            module_logger.error(e, exc_info=True)
 
 
 def setup(bot):
