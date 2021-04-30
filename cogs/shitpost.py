@@ -42,7 +42,7 @@ async def mercy_maybe(bot, channel, timeout=30):
 	cur_round["users"] = []
 
 	while (datetime.datetime.now() - cur_round["date"]).total_seconds() < timeout \
-			and int(timeout - (datetime.datetime.now() - cur_round["date"]).total_seconds()) != 0:
+		and int(timeout - (datetime.datetime.now() - cur_round["date"]).total_seconds()) != 0:
 		diff = (datetime.datetime.now() - cur_round["date"]).total_seconds()
 
 		timeout_reacc = int(timeout - diff)
@@ -281,8 +281,8 @@ class ShitpostCog(commands.Cog):
 
 			#  ghosts alert
 			elif member.id in self.bot.globals.ghost_ids:
-				if not guild_state.ghost_alerted_today:
-					msg_text = f"*{self.bot.globals.t_states[guild_state.ghost_state]}*"
+				if not guild_state.ghost_alerted_today and guild_state.tension < 90:
+					msg_text = f"*{self.bot.globals.t_states[guild_state.ghost_state % 3]}*"
 					guild_state.increment_ghost()
 					await after.channel.guild.system_channel.send(msg_text)
 					guild_state.ghost_alerted_today = True
