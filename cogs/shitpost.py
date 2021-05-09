@@ -268,11 +268,12 @@ class ShitpostCog(commands.Cog):
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after):
-
+		from utils.state import VCEvent
+		now = datetime.datetime.now()
 		if before.channel is None and after.channel is not None:  # user connected
 			guild = after.channel.guild
 			guild_state = self.bot.state.get_guild_state_by_id(guild.id)
-			guild_state.last_vc_joined = member
+			guild_state.push_last_vc_event(VCEvent(1, member, after.channel, datetime.datetime.timestamp(now)))
 
 			#  p alert
 			if self.bot.globals.p_id == member.id:
@@ -292,6 +293,7 @@ class ShitpostCog(commands.Cog):
 			guild = before.channel.guild
 			guild_state = self.bot.state.get_guild_state_by_id(guild.id)
 			guild_state.last_vc_left = member
+			guild_state.push_last_vc_event(VCEvent(0, member, before.channel, datetime.datetime.timestamp(now)))
 
 			#  sz shleep event
 			if self.bot.globals.sz_id == member.id:
