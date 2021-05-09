@@ -3,6 +3,7 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List
+from discord import Member
 
 module_logger = logging.getLogger('trashbot.State')
 
@@ -35,6 +36,15 @@ class GuildState:
 	peter_alert: bool = False
 	ghost_state: int = 0
 	ghost_alerted_today = False
+	last_roll: int = -1
+	last_vc_joined: Member = None
+	last_vc_left: Member = None
+
+	def set_last_vc_joined(self, member):
+		self.last_vc_joined = member
+
+	def set_last_vc_left(self, member):
+		self.last_vc_left = member
 
 	def get_channel_state_by_id(self, channel_id):
 		return next((channel_state for channel_state in self.channels if channel_state.id == channel_id), None)

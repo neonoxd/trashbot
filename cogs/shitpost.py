@@ -272,6 +272,8 @@ class ShitpostCog(commands.Cog):
 		if before.channel is None and after.channel is not None:  # user connected
 			guild = after.channel.guild
 			guild_state = self.bot.state.get_guild_state_by_id(guild.id)
+			guild_state.last_vc_joined = member
+
 			#  p alert
 			if self.bot.globals.p_id == member.id:
 				if not guild_state.peter_alert and guild_state.tension > 90:
@@ -342,7 +344,7 @@ class ShitpostCog(commands.Cog):
 		# surprise spammers
 		guild_state = self.bot.state.get_guild_state_by_id(message.guild.id)
 		channel_state = guild_state.get_channel_state_by_id(message.channel.id)
-		if len(message.content) > 0 and 'k!' not in message.content:  # TODO extract prefix
+		if len(message.content) > 0 and 'k!' not in message.content and not self.bot.user.mentioned_in(message):  # TODO extract prefix
 			channel_state.add_msg(message)
 			if channel_state.shall_i():
 				await asyncio.sleep(1)

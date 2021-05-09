@@ -13,6 +13,24 @@ class MiscCog(commands.Cog):
 		self.bot = bot
 		self.logger = module_logger
 
+	@commands.command(name="ki", hidden=True)
+	async def who(self, ctx, *args):
+		guild_state = self.bot.state.get_guild_state_by_id(ctx.message.guild.id)
+		if self.bot.user.mentioned_in(ctx.message):
+			question = " ".join(args).replace("?","").strip()
+			if question in ["", "joinolt", "van itt", "jött fel"]:
+				last_joined = guild_state.last_vc_joined
+				if last_joined is not None:
+					await ctx.send(f"{random.choice(['talán én...de az is lehet hogy ő', 'ez a köcsög', 'ö', 'ha valaki akk ö'])}: {last_joined}")
+				else:
+					await ctx.send("senki...")
+			elif question in ["volt az", "lépett ki", "lépett le", "dczett", "disconnectelt"]:
+				last_left = guild_state.last_vc_left
+				if last_left is not None:
+					await ctx.send(f"{random.choice(['ez a köcsög', 'ö', 'ha valaki akk ö'])} lépett le: {last_left}")
+				else:
+					await ctx.send("senki...")
+
 	@commands.command(name='say', aliases=['mondd'])
 	async def say(self, ctx, *args):
 		self.logger.info("command called: {}".format(ctx.command))
