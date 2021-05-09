@@ -289,6 +289,10 @@ class ShitpostCog(commands.Cog):
 					await after.channel.guild.system_channel.send(msg_text)
 					guild_state.ghost_alerted_today = True
 		elif before.channel is not None and after.channel is None:  # user disconnected
+			guild = before.channel.guild
+			guild_state = self.bot.state.get_guild_state_by_id(guild.id)
+			guild_state.last_vc_left = member
+
 			#  sz shleep event
 			if self.bot.globals.sz_id == member.id:
 				now = datetime.datetime.now()
