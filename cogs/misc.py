@@ -1,10 +1,12 @@
 import asyncio
+import datetime
 import logging
 import random
 
 import aiohttp
 from discord import Embed
 from discord.ext import commands
+import timeago
 
 module_logger = logging.getLogger('trashbot.MiscCog')
 
@@ -16,18 +18,25 @@ class MiscCog(commands.Cog):
 		self.logger = module_logger
 
 	@commands.command(name="kik", hidden=True)
-	async def whomst(self, ctx, *args):
+	async def whomst(self, ctx):
+		now = datetime.datetime.now()
 		guild_state = self.bot.state.get_guild_state_by_id(ctx.message.guild.id)
-		if self.bot.user.mentioned_in(ctx.message):
+		t_locale = random.choice(['zh_CN', 'hu', 'en'])
+		if self.bot.user.mentioned_in(ctx.message) and len(guild_state.last_vc_events):
 			embed = Embed(title="kb ezek vagy nemtom", color=0xFF5733)
-			event_list_str = """"""
+			event_list_str = []
 			for r in list(reversed(guild_state.last_vc_events)):
+				event_str = """"""
+				user = r.user.nick if r.user.nick is not None else r.user.name
+				when = datetime.datetime.fromtimestamp(r.when)
+				event_str = event_str + f"`[{timeago.format(when,now, t_locale)}] "
 				if r.event:
-					event_list_str = event_list_str + f"""\n`jött - {r.user.name} -> {r.channel.name}`"""
+					event_str = event_str + f"""{user} jött ide: {r.channel.name}`"""
 				else:
-					event_list_str = event_list_str + f"""\n`ment - {r.user.name}`"""
+					event_str = event_str + f"""{user} ment a g*ecibe`"""
+				event_list_str.append(event_str)
 
-			embed.add_field(name="\u200b", value=event_list_str)
+			embed.add_field(name="\u200b", value="\n".join(event_list_str))
 
 			embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
 							 icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
