@@ -2,8 +2,6 @@ import asyncio
 import logging
 import os
 import random
-from dataclasses import dataclass, field
-from typing import List
 
 import discord
 from discord.ext import commands
@@ -97,6 +95,15 @@ class SoundBoardCog(commands.Cog):
 		else:
 			await ctx.send(str(ctx.author.name) + "is not in a channel.")
 		await ctx.message.delete()
+
+	@commands.Cog.listener()
+	async def on_voice_state_update(self, member, before, after):
+		if before.channel is None and after.channel is not None:  # user connected
+			if self.bot.globals.sz_id == member.id:
+				if self.in_vc():
+					vc = self.current_vc
+					await asyncio.sleep(.5)
+					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/door{random.randrange(1,4)}.ogg"))
 
 	@commands.command(name='sound')
 	async def play_sound(self, ctx, *args):
