@@ -14,7 +14,7 @@ class RandomsCog(commands.Cog):
 
 	@commands.command(name='vandam')
 	async def vandam(self,ctx, *args):
-		from cogs.shitpost import mercy_maybe
+		from cogs.impl.shitpost import mercy_maybe
 		self.logger.info("command called: {}".format(ctx.command))
 		if len(args) > 0:
 			await mercy_maybe(self.bot, ctx.channel, int(args[0]))

@@ -57,7 +57,8 @@ if __name__ == '__main__':
 		ffmpeg_path=os.getenv("FFMPEG_PATH"),
 		sounds_path=os.getenv("SNDS_PATH"),
 		sz_id=int(os.getenv("SZ_ID")),
-		p_id=int(os.getenv("P_ID"))
+		p_id=int(os.getenv("P_ID")),
+		g_id=int(os.getenv("G_ID"))
 	)
 
 	with open('resources/lists/slur.list', 'r', encoding="utf8") as file:
@@ -104,7 +105,7 @@ async def on_ready():
 	logger.debug(f'Setting up state for {len(bot.guilds)} guilds')
 
 	for guild in bot.guilds:
-		from cogs.shitpost import think
+		from cogs.impl.shitpost import think
 		bot.state.track_guild(guild.id)
 		bot.loop.create_task(think(bot, guild.system_channel))
 
@@ -113,13 +114,13 @@ async def on_ready():
 
 @aiocron.crontab('0 14 * * *')  # 14:00
 async def trigger_cron():
-	from cogs.shitpost import set_daily_tension
+	from cogs.impl.shitpost import set_daily_tension
 	await set_daily_tension(bot)
 
 
 @aiocron.crontab('0 1 * * *')  # 01:00
 async def reset_alert_states():
-	from cogs.shitpost import reset_alert_states
+	from cogs.impl.shitpost import reset_alert_states
 	await reset_alert_states(bot)
 
 

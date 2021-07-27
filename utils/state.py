@@ -1,11 +1,16 @@
 import logging
 import sys
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
 from discord import Member, VoiceChannel
 
 module_logger = logging.getLogger('trashbot.State')
+
+
+@dataclass
+class UserStats:
+    pass
 
 
 @dataclass
@@ -42,7 +47,6 @@ class GuildState:
     bee_initialized = False
     bee_active: bool = False
     bee_page: int = 0
-    peter_alert: bool = False
     ghost_state: int = 0
     ghost_alerted_today = False
     last_roll: int = -1
@@ -82,7 +86,28 @@ class BotConfig:
     ph_token: str
     sz_id: int
     p_id: int
+    g_id: int
+    global_expires: dict = field(default_factory=dict)
     slurs: List[str] = field(default_factory=list)
     statuses: List[str] = field(default_factory=list)
     t_states: List[str] = field(default_factory=list)
     ghost_ids: List[int] = field(default_factory=list)
+    startup_at: datetime = datetime.now()
+
+    def add_expire(self, name: str, expires_at: datetime = None, expiry_td: timedelta = None):
+        module_logger.debug(f"adding expire {name}")
+        if name not in self.global_expires:
+            if expires_at is not None:
+                self.global_expires[name] = expires_at
+                module_logger.debug(f"expire added with param expires_at={expires_at}")
+            elif expiry_td is not None:
+                self.global_expires[name] = datetime.now() + expiry_td
+                module_logger.debug(f"expire added with param expiry_td={expiry_td}")
+        else:
+            module_logger.warning(f"expire already exists with name: {name}")
+
+    def is_expired(self, name: str):
+        if (name in self.global_expires and datetime.now() >= self.global_expires[name]) or name not in self.global_expires:
+            return True
+        else:
+            return False
