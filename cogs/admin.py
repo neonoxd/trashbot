@@ -74,14 +74,15 @@ class AdminCog(commands.Cog):
         self.bot.globals.ph_token = args[0]
 
     @set_command(name='nick')
-    async def cmd_set_nick(self, ctx, member, nick):
+    async def cmd_set_nick(self, ctx, member, *nick):
         converter = commands.MemberConverter()
         _member = await converter.convert(ctx, member)
         module_logger.debug(f"cmd_set_nick called with args {member} {nick}")
         module_logger.debug(f"{_member.id}")
         state = ctx.bot.state.get_guild_state_by_id(ctx.guild.id)
-        await _member.edit(nick=nick)
-        state.force_nick(_member, nick, ctx.author)
+        _nick = " ".join(nick)
+        await _member.edit(nick=_nick)
+        state.force_nick(_member, _nick, ctx.author)
         ctx.bot.loop.create_task(self.autoclear_task(ctx, _member))
 
     @set_command(name='tension')
