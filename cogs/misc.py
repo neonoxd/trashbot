@@ -19,8 +19,12 @@ class MiscCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_update(self, before, after):
-        if after.id == self.bot.globals.g_id:
-            await after.edit(nick="gabeszgecym")
+        module_logger.debug(f"user updated {before}")
+        guild_state = self.bot.state.get_guild_state_by_id(before.guild.id)
+        if after.id in guild_state.forced_nicks:
+            forced_nick = guild_state.forced_nicks[after.id]["nick"]
+            if after.nick != forced_nick:
+                await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
 
     @commands.command(name="kik", hidden=True)
     async def whomst(self, ctx):

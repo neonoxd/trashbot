@@ -86,7 +86,7 @@ async def event_voice_state_update(cog, member, before, after):
 		#  p alert
 		if cog.bot.globals.p_id == member.id:
 			if cog.bot.globals.is_expired("p") and guild_state.tension % 2 == 0:
-				cog.bot.globals.add_expire("p", expiry_td=datetime.timedelta(minutes=60))
+				cog.bot.globals.add_timeout("p", expiry_td=datetime.timedelta(minutes=60))
 				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
 				module_logger.debug("PETER ALERT!!!!!!!")
 
@@ -110,10 +110,10 @@ async def event_voice_state_update(cog, member, before, after):
 				module_logger.debug("expired")
 				if now.hour >= 21 or now.hour <= 3:
 					guild = before.channel.guild
-					cog.bot.globals.add_expire("sz", expiry_td=datetime.timedelta(minutes=1))
+					cog.bot.globals.add_timeout("sz", expiry_td=datetime.timedelta(minutes=1))
 					await guild.system_channel.send(file=discord.File('resources/img/szabosleep.png'))
 			else:
-				await guild.system_channel.send(random.choice(["?", "ájjál le", f"{member.mention} 😡💢"]))
+				await guild.system_channel.send(random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
 
 
 async def event_message(cog, message):
