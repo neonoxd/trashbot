@@ -2,7 +2,8 @@ import asyncio
 import datetime
 import logging
 import random
-
+import glob
+import os
 import discord
 import requests
 
@@ -116,9 +117,34 @@ async def event_voice_state_update(cog, member, before, after):
 				await guild.system_channel.send(random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
 
 
+async def handle_maymay(message):
+	files = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("./usr/img/maymay/*")}
+	msg_part = message.content.split(">")[1]
+
+	if msg_part not in files:
+		return
+
+	match = files[msg_part]
+
+	module_logger.debug(f"sending maymay [{msg_part}]")
+
+	if os.path.isdir(match):
+		multi_files = glob.glob(f"{match}/*")
+		randomfile = random.choice(multi_files)
+		await message.channel.send(file=discord.File(randomfile), content=f"> {os.path.basename(randomfile)}")
+	elif os.path.isfile(match):
+		await message.channel.send(file=discord.File(match))
+
+	return True
+
+
 async def event_message(cog, message):
 	if message.author == cog.bot.user or not message.guild:
 		return
+
+	if str(message.content)[0] == ">":
+		if await handle_maymay(message):
+			return
 
 	now = datetime.datetime.now()
 	chance = random.randrange(0, 100)
