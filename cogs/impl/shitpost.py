@@ -121,6 +121,10 @@ async def handle_maymay(message):
 	files = {os.path.splitext(os.path.basename(f))[0]: f for f in glob.glob("./usr/img/maymay/*")}
 	msg_part = message.content.split(">")[1]
 
+	if msg_part == "?":
+		await message.reply(f"`{', '.join(list(files.keys()))}`")
+		return True
+
 	if msg_part not in files:
 		return
 
