@@ -131,9 +131,9 @@ async def handle_maymay(message):
 	if os.path.isdir(match):
 		multi_files = glob.glob(f"{match}/*")
 		randomfile = random.choice(multi_files)
-		await message.channel.send(file=discord.File(randomfile), content=f"> {os.path.basename(randomfile)}")
+		await message.reply(file=discord.File(randomfile), content=f"> {os.path.basename(randomfile)}", mention_author=False)
 	elif os.path.isfile(match):
-		await message.channel.send(file=discord.File(match))
+		await message.reply(file=discord.File(match), mention_author=False)
 
 	return True
 
