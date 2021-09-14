@@ -145,8 +145,8 @@ async def handle_maymay(message):
 async def event_message(cog, message):
 	if message.author == cog.bot.user or not message.guild:
 		return
-
-	if str(message.content)[0] == ">":
+	msg_content = str(message.content)
+	if len(msg_content) > 0 and msg_content[0] == ">":
 		if await handle_maymay(message):
 			return
 
