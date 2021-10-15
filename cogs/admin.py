@@ -71,7 +71,7 @@ class AdminCog(commands.Cog):
     @set_command(name='phtoken')
     async def cmd_set_ph_token(self, ctx, args):
         module_logger.debug(f"cmd_set_ph_token called with args {args}")
-        self.bot.globals.ph_token = args[0]
+        self.bot.globals.ph_token = args
 
     @set_command(name='nick')
     async def cmd_set_nick(self, ctx, member, *nick):
