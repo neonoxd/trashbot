@@ -49,10 +49,10 @@ class ShitpostCog(commands.Cog):
 	async def on_message(self, message):
 		await event_message(self, message)
 
-	@commands.Cog.listener()
-	@commands.guild_only()
-	async def on_typing(self, channel, user, when):
-		await event_typing(self, channel, user, when)
+	#@commands.Cog.listener()
+	#@commands.guild_only()
+	#async def on_typing(self, channel, user, when):
+	#	await event_typing(self, channel, user, when)
 
 
 def setup(bot):

@@ -1,7 +1,9 @@
 import asyncio
 import logging
 import time
-
+import random
+import os
+import discord
 from discord import Member
 from discord.ext import commands
 
@@ -51,6 +53,30 @@ class AdminCog(commands.Cog):
         state.clear_nick(user)
         await user.edit(nick=None)
 
+    @commands.command(name='rr', hidden=True)
+    async def reload_resources(self, ctx):
+        slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'
+        with open(slur_path, 'r', encoding="utf8") as file:
+            slur_list = file.readlines()
+
+        status_path = 'usr/lists/status.list' if os.path.isfile(
+            'usr/lists/status.list') else 'resources/lists/status.list'
+        with open(status_path, 'r', encoding="utf8") as file:
+            status_list = file.readlines()
+
+        ctx.bot.globals.slurs = slur_list
+        ctx.bot.globals.statuses = status_list
+
+        await ctx.bot.change_presence(activity=discord.Game(
+            random.choice(ctx.bot.globals.statuses)
+        ))
+
+    @commands.command(name='rs', hidden=True)
+    async def roll_status(self, ctx):
+        await ctx.bot.change_presence(activity=discord.Game(
+            random.choice(ctx.bot.globals.statuses)
+        ))
+
     @commands.command(name='set', hidden=True)
     @commands.is_owner()
     async def setter_command(self, ctx, *args):
@@ -86,7 +112,7 @@ class AdminCog(commands.Cog):
         ctx.bot.loop.create_task(self.autoclear_task(ctx, _member))
 
     @set_command(name='tension')
-    async def cmd_set_tension(self, ctx, args):
+    async def cmd_set_tension(self, ctx, *args):
         module_logger.debug(f"cmd_set_tension called with args {args}")
         try:
             new_tension = int(args[0])

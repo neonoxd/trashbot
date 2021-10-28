@@ -161,7 +161,7 @@ async def event_message(cog, message):
 
 	await sentience_spam(cog, message)
 
-	await sentience_flipper(message, chance)
+	await sentience_flipper(cog, message, chance)
 
 	if current_tension is not None and current_tension > 50:
 		await sentience_reply(cog, message, now, chance)
@@ -171,6 +171,7 @@ async def event_message(cog, message):
 			file=discord.File("resources/img/forklift.png", 'forklift.png'),
 			content=message.author.mention
 		)
+		await roll_status(cog.bot)
 
 	# async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
 	# module_logger.warning(f'auditlog {entry.id} - {entry.action}, user: {entry.user}, tgt: {entry.target}')
@@ -178,6 +179,7 @@ async def event_message(cog, message):
 	if message.tts:
 		for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):
 			await message.add_reaction(react)
+			await roll_status(cog.bot)
 
 	if message.content == "(╯°□°）╯︵ ┻━┻":
 		await message.channel.send("┬─┬ ノ( ゜-゜ノ)")
@@ -195,7 +197,7 @@ async def sentience_spam(cog, message):
 			await message.channel.send(message.content)
 
 
-async def sentience_flipper(message, roll):
+async def sentience_flipper(cog, message, roll):
 	# flip words meme
 	posts = [
 		"🆗 gya gec ⚰️\nfeltaláltam\n🧔🏿🤙🏻🧪{0}",
@@ -218,6 +220,10 @@ async def sentience_flipper(message, roll):
 		else:
 			await message.channel.send(random.choice(posts).format(themsg))
 
+		await cog.bot.change_presence(activity=discord.Game(
+			random.choice(cog.bot.globals.statuses)
+		))
+
 
 async def event_typing(cog, channel, user, when):
 	await cog.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
@@ -227,12 +233,20 @@ async def event_typing(cog, channel, user, when):
 	))
 
 
+async def roll_status(bot):
+	await bot.change_presence(activity=discord.Game(
+		random.choice(bot.globals.statuses)
+	))
+
+
 async def sentience_reply(cog, message, now, roll):
 	guild_state = cog.bot.state.get_guild_state_by_id(message.guild.id)
+	print("bb")
 	# skippers smh
 	if any(skip_word in message.content for skip_word in ["-skip", "!skip"]) and roll < 40:
 		cog.logger.info("got lucky with roll chance: %s" % roll)
 		await message.channel.send("az jo köcsög volt")
+		await roll_status(cog.bot)
 
 	# random trash replies
 	elif (now - guild_state.last_slur_dt).total_seconds() > 600 \
@@ -241,6 +255,7 @@ async def sentience_reply(cog, message, now, roll):
 		guild_state.last_slur_dt = datetime.datetime.now()
 		cog.logger.info("got lucky with roll chance: %s" % roll)
 		await message.channel.send(random.choice(cog.bot.globals.slurs).format(message.author.id))
+		await roll_status(cog.bot)
 
 
 async def mercy_maybe(bot, channel, timeout=30):
@@ -256,6 +271,7 @@ async def mercy_maybe(bot, channel, timeout=30):
 		return reaction_obj.message.id == cur_round["msgid"] and usr.mention not in cur_round["users"]
 
 	msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal !! @here")
+	await roll_status(bot)
 	cur_round["msgid"] = msg.id
 	cur_round["date"] = datetime.datetime.now()
 	cur_round["users"] = []
@@ -416,5 +432,5 @@ async def set_daily_tension(bot, tension=None):
 
 		if len(skulls) > 0:
 			t_msg += f'\n **skulls:** {", ".join(skulls)}'
-
+		await roll_status(bot)
 		await channel.send(t_msg)

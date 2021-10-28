@@ -61,10 +61,12 @@ if __name__ == '__main__':
 		g_id=int(os.getenv("G_ID"))
 	)
 
-	with open('resources/lists/slur.list', 'r', encoding="utf8") as file:
+	slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'
+	with open(slur_path, 'r', encoding="utf8") as file:
 		slur_list = file.readlines()
 
-	with open('resources/lists/status.list', 'r', encoding="utf8") as file:
+	status_path = 'usr/lists/status.list' if os.path.isfile('usr/lists/status.list') else 'resources/lists/status.list'
+	with open(status_path, 'r', encoding="utf8") as file:
 		status_list = file.readlines()
 
 	bot.globals.slurs = slur_list
