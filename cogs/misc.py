@@ -30,15 +30,15 @@ class MiscCog(commands.Cog):
 
     @commands.command(name="mik")
     async def mik(self, ctx):
+        now = datetime.datetime.now()
         embed = Embed(title="ezek fönek sogor 🤣", color=0xFF5733)
-
         event_list_str = []
-
         queue = ctx.bot.globals.queued_hotpots
 
         for r in list(queue.keys()):
+            time_ago = timeago.format(queue[r]["when"], now, "hu")
             event_str = """"""
-            event_str = event_str + f"""`{r} - {queue[r]}`"""
+            event_str = event_str + f"""`[{time_ago}] - {queue[r]['author']} - {r}`"""
             event_list_str.append(event_str)
 
         if len(event_list_str):
@@ -179,10 +179,13 @@ class MiscCog(commands.Cog):
 
             await ctx.message.delete()
             queue = ctx.bot.globals.queued_hotpots
-            queue[description] = ctx.message.author.name
+            queue[description] = {
+                "author": ctx.message.author.name,
+                "when": datetime.datetime.now()
+            }
             module_logger.info(f"{ctx.message.author.id} queued: {description}")
             url = "https://ml.hotpot.ai"
-            timeout = aiohttp.ClientTimeout(total=2700)
+            timeout = aiohttp.ClientTimeout(total=3600)
             try:
                 async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
                     async with session.post(url + '/text-art-api-bin', data=mpwriter) as r:
@@ -196,6 +199,9 @@ class MiscCog(commands.Cog):
                             module_logger.error(r.headers)
                             module_logger.error(await r.read())
                             del queue[description]
+            except asyncio.TimeoutError as e:
+                await ctx.send(f"ENNEK ANYI: {description}")
+                del queue[description]
             except Exception as e:
                 await ctx.send(f"AT VERTEK ENGEMET: {description}")
                 if description in queue:
