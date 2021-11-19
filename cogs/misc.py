@@ -41,13 +41,13 @@ class MiscCog(commands.Cog):
             event_str = event_str + f"""`{r} - {queue[r]}`"""
             event_list_str.append(event_str)
 
-        embed.add_field(name="\u200b", value="\n".join(event_list_str))
+        if len(event_list_str):
+            embed.add_field(name="\u200b", value="\n".join(event_list_str))
 
-        embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
-                         icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
+            embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
+                             icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
 
-        await ctx.send(embed=embed)
-
+            await ctx.send(embed=embed)
 
     @commands.command(name="kik", hidden=True)
     async def whomst(self, ctx):
@@ -172,33 +172,19 @@ class MiscCog(commands.Cog):
 
         with aiohttp.MultipartWriter('form-data', boundary="----WebKitFormBoundarytYUBd9J1IjwBZiTL") as mpwriter:
 
-            request_id_part = mpwriter.append("hIBtH")
-            request_id_part.set_content_disposition("form-data", name="requestId")
-            request_id_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
-            request_id_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
-
-            input_text_part = mpwriter.append(f"{description} in the style of an oil painting")
-            input_text_part.set_content_disposition("form-data", name="inputText")
-            input_text_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
-            input_text_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
-
-            dimensions_part = mpwriter.append("256")
-            dimensions_part.set_content_disposition("form-data", name="outputDim")
-            dimensions_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
-            dimensions_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
-
-            iterations_part = mpwriter.append("400")
-            iterations_part.set_content_disposition("form-data", name="numIterations")
-            iterations_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
-            iterations_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+            self.add_weird_form_field(mpwriter, "requestId", "hIBtH")
+            self.add_weird_form_field(mpwriter, "inputText", f"{description} in the style of an oil painting")
+            self.add_weird_form_field(mpwriter, "outputDim", "256")
+            self.add_weird_form_field(mpwriter, "numIterations", "400")
 
             await ctx.message.delete()
             queue = ctx.bot.globals.queued_hotpots
             queue[description] = ctx.message.author.name
+            module_logger.info(f"{ctx.message.author.id} queued: {description}")
             url = "https://ml.hotpot.ai"
             timeout = aiohttp.ClientTimeout(total=2700)
             try:
-                async with aiohttp.ClientSession(headers=headers) as session:
+                async with aiohttp.ClientSession(headers=headers, timeout=timeout) as session:
                     async with session.post(url + '/text-art-api-bin', data=mpwriter) as r:
                         if r.status == 200:
                             js = await r.read()
@@ -213,7 +199,16 @@ class MiscCog(commands.Cog):
             except Exception as e:
                 await ctx.send(f"AT VERTEK ENGEMET: {description}")
                 if description in queue:
+                    module_logger.error(e, exc_info=True)
                     del queue[description]
+
+    @staticmethod
+    def add_weird_form_field(mpwriter, fieldname, value):
+        part = mpwriter.append(value)
+        part.set_content_disposition("form-data", name=fieldname)
+        part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+        part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+        return part
 
 
 def setup(bot):
