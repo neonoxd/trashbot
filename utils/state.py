@@ -101,6 +101,7 @@ class BotConfig:
 	t_states: List[str] = field(default_factory=list)
 	ghost_ids: List[int] = field(default_factory=list)
 	startup_at: datetime = datetime.now()
+	queued_hotpots: dict = field(default_factory=dict)
 
 	def add_timeout(self, name: str, expires_at: datetime = None, expiry_td: timedelta = None):
 		module_logger.debug(f"adding expire {name}")

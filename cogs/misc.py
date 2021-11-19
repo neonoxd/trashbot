@@ -1,9 +1,11 @@
 import asyncio
 import datetime
+import io
 import logging
 import random
 
 import aiohttp
+import discord
 from discord import Embed
 from discord.ext import commands
 import timeago
@@ -25,6 +27,27 @@ class MiscCog(commands.Cog):
             forced_nick = guild_state.forced_nicks[after.id]["nick"]
             if after.nick != forced_nick:
                 await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
+
+    @commands.command(name="mik")
+    async def mik(self, ctx):
+        embed = Embed(title="ezek fönek sogor 🤣", color=0xFF5733)
+
+        event_list_str = []
+
+        queue = ctx.bot.globals.queued_hotpots
+
+        for r in list(queue.keys()):
+            event_str = """"""
+            event_str = event_str + f"""`{r} - {queue[r]}`"""
+            event_list_str.append(event_str)
+
+        embed.add_field(name="\u200b", value="\n".join(event_list_str))
+
+        embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
+                         icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
+
+        await ctx.send(embed=embed)
+
 
     @commands.command(name="kik", hidden=True)
     async def whomst(self, ctx):
@@ -128,6 +151,72 @@ class MiscCog(commands.Cog):
                 if r.status == 200:
                     js = await r.json()
                     await ctx.send(js['file'])
+
+    @commands.command(name="cook")
+    async def cook(self, ctx, *args):
+        if not len(args):
+            await ctx.message.delete()
+            return
+        description = ' '.join(args)[:350]
+        headers = {
+            "accept": "*/*",
+            "accept-language": "hu-HU,hu;q=0.9,en-US;q=0.8,en;q=0.7",
+            "content-type": "multipart/form-data; boundary=----WebKitFormBoundarytYUBd9J1IjwBZiTL",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "same-site",
+            "sec-gpc": "1",
+            "Referer": "https://hotpot.ai/",
+            "Referrer-Policy": "strict-origin-when-cross-origin"
+        }
+
+        await ctx.guild.system_channel.send(ctx.message.author.mention)
+
+        with aiohttp.MultipartWriter('form-data', boundary="----WebKitFormBoundarytYUBd9J1IjwBZiTL") as mpwriter:
+
+            request_id_part = mpwriter.append("hIBtH")
+            request_id_part.set_content_disposition("form-data", name="requestId")
+            request_id_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+            request_id_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+
+            input_text_part = mpwriter.append(f"{description} in the style of an oil painting")
+            input_text_part.set_content_disposition("form-data", name="inputText")
+            input_text_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+            input_text_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+
+            dimensions_part = mpwriter.append("256")
+            dimensions_part.set_content_disposition("form-data", name="outputDim")
+            dimensions_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+            dimensions_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+
+            iterations_part = mpwriter.append("400")
+            iterations_part.set_content_disposition("form-data", name="numIterations")
+            iterations_part.headers.pop(aiohttp.hdrs.CONTENT_LENGTH, None)
+            iterations_part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
+
+            await ctx.message.delete()
+            queue = ctx.bot.globals.queued_hotpots
+            queue[description] = ctx.message.author.name
+            url = "https://ml.hotpot.ai"
+            timeout = aiohttp.ClientTimeout(total=2700)
+            try:
+                async with aiohttp.ClientSession(headers=headers) as session:
+                    async with session.post(url + '/text-art-api-bin', data=mpwriter) as r:
+                        if r.status == 200:
+                            js = await r.read()
+                            img = io.BytesIO(js)
+                            await ctx.send(file=discord.File(img, "hotpot.png"), content=description)
+                            del queue[description]
+                            await ctx.guild.system_channel.send(f"{ctx.message.author.mention} megva")
+                        else:
+                            module_logger.error(r.status)
+                            module_logger.error(r.headers)
+                            module_logger.error(await r.read())
+                            del queue[description]
+            except Exception as e:
+                ctx.send(f"AT VERTEK ENGEMET: {description}")
+                if description in queue:
+                    del queue[description]
 
 
 def setup(bot):

@@ -33,11 +33,6 @@ class RandomsCog(commands.Cog):
 			return
 		await ctx.send("a ketrec harc gyöz tese: {}".format(random.choice(args)))
 
-	@commands.Cog.listener()
-	async def on_message(self, message):
-		if message.author == self.bot.user:
-			return
-
 
 def roll(args):
 	if len(args) == 1:
