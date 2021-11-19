@@ -211,7 +211,7 @@ class MiscCog(commands.Cog):
                             module_logger.error(await r.read())
                             del queue[description]
             except Exception as e:
-                ctx.send(f"AT VERTEK ENGEMET: {description}")
+                await ctx.send(f"AT VERTEK ENGEMET: {description}")
                 if description in queue:
                     del queue[description]
 
