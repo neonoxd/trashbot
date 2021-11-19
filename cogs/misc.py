@@ -203,9 +203,8 @@ class MiscCog(commands.Cog):
                         if r.status == 200:
                             js = await r.read()
                             img = io.BytesIO(js)
-                            await ctx.send(file=discord.File(img, "hotpot.png"), content=description)
+                            await ctx.send(file=discord.File(img, "hotpot.png"), content=f"{description}\ntölle: {ctx.message.author.mention}")
                             del queue[description]
-                            await ctx.guild.system_channel.send(f"{ctx.message.author.mention} megva")
                         else:
                             module_logger.error(r.status)
                             module_logger.error(r.headers)
