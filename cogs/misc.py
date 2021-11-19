@@ -170,8 +170,6 @@ class MiscCog(commands.Cog):
             "Referrer-Policy": "strict-origin-when-cross-origin"
         }
 
-        await ctx.guild.system_channel.send(ctx.message.author.mention)
-
         with aiohttp.MultipartWriter('form-data', boundary="----WebKitFormBoundarytYUBd9J1IjwBZiTL") as mpwriter:
 
             request_id_part = mpwriter.append("hIBtH")
