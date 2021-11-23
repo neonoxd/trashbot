@@ -3,7 +3,7 @@ import datetime
 import io
 import logging
 import random
-
+from utils.helpers import create_alphanumeric_string
 import aiohttp
 import discord
 from discord import Embed
@@ -158,10 +158,14 @@ class MiscCog(commands.Cog):
             await ctx.message.delete()
             return
         description = ' '.join(args)[:350]
+
+        boundary = f'----WebKitFormBoundary{create_alphanumeric_string(16)}'
+        request_id = create_alphanumeric_string(5)
+
         headers = {
             "accept": "*/*",
             "accept-language": "hu-HU,hu;q=0.9,en-US;q=0.8,en;q=0.7",
-            "content-type": "multipart/form-data; boundary=----WebKitFormBoundarytYUBd9J1IjwBZiTL",
+            "content-type": f"multipart/form-data; boundary={boundary}",
             "sec-fetch-dest": "empty",
             "sec-fetch-mode": "cors",
             "sec-fetch-site": "same-site",
@@ -170,9 +174,9 @@ class MiscCog(commands.Cog):
             "Referrer-Policy": "strict-origin-when-cross-origin"
         }
 
-        with aiohttp.MultipartWriter('form-data', boundary="----WebKitFormBoundarytYUBd9J1IjwBZiTL") as mpwriter:
+        with aiohttp.MultipartWriter('form-data', boundary=boundary) as mpwriter:
 
-            self.add_weird_form_field(mpwriter, "requestId", "hIBtH")
+            self.add_weird_form_field(mpwriter, "requestId", request_id)
             self.add_weird_form_field(mpwriter, "inputText", f"{description} in the style of an oil painting")
             self.add_weird_form_field(mpwriter, "outputDim", "256")
             self.add_weird_form_field(mpwriter, "numIterations", "400")
