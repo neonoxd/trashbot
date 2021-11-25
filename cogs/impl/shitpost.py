@@ -9,7 +9,7 @@ import requests
 from discord.utils import get
 
 from cogs.rng import roll
-from utils.helpers import has_link, replace_str_index
+from utils.helpers import has_link, replace_str_index, get_user_nick_or_name
 
 module_logger = logging.getLogger('trashbot.Shitpost.impl')
 
@@ -78,12 +78,15 @@ async def command_tension(cog, ctx):
 
 
 async def command_cz(cog, ctx):
+	module_logger.info(f"[CMD::CZ] called by [{ctx.message.author}]")
 	await ctx.message.delete()
 	if cog.bot.globals.is_expired("cz"):
+		newnick = get_breveg()
+		module_logger.info(f"[CMD::CZ] generated nick [{newnick}]")
 		cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
 		member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
-		await member.edit(nick=get_breveg())
-		await ctx.send(member.mention)
+		await member.edit(nick=newnick)
+		await ctx.send(f"{get_user_nick_or_name(ctx.message.author)} szerint: {member.mention}")
 	else:
 		await ctx.send("pill...")
 
