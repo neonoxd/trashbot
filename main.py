@@ -58,7 +58,8 @@ if __name__ == '__main__':
 		sounds_path=os.getenv("SNDS_PATH"),
 		sz_id=int(os.getenv("SZ_ID")),
 		p_id=int(os.getenv("P_ID")),
-		g_id=int(os.getenv("G_ID"))
+		g_id=int(os.getenv("G_ID")),
+		cz_id=int(os.getenv("CZ_ID"))
 	)
 
 	slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'

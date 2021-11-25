@@ -84,6 +84,14 @@ async def event_voice_state_update(cog, member, before, after):
 		guild_state = cog.bot.state.get_guild_state_by_id(guild.id)
 		guild_state.push_last_vc_event(VCEvent(1, member, after.channel, datetime.datetime.timestamp(now)))
 
+		#  cz alert
+		if cog.bot.globals.cz_id == member.id:
+			if cog.bot.globals.is_expired("cz") and guild_state.tension % 2 == 0:
+				cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=60))
+				await member.edit(nick=get_breveg())
+				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
+				module_logger.debug("PETER ALERT!!!!!!!")
+
 		#  p alert
 		if cog.bot.globals.p_id == member.id:
 			if cog.bot.globals.is_expired("p") and guild_state.tension % 2 == 0:
@@ -114,7 +122,8 @@ async def event_voice_state_update(cog, member, before, after):
 					cog.bot.globals.add_timeout("sz", expiry_td=datetime.timedelta(minutes=1))
 					await guild.system_channel.send(file=discord.File('resources/img/szabosleep.png'))
 			else:
-				await guild.system_channel.send(random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
+				await guild.system_channel.send(
+					random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
 
 
 async def handle_maymay(message):
@@ -135,11 +144,30 @@ async def handle_maymay(message):
 	if os.path.isdir(match):
 		multi_files = glob.glob(f"{match}/*")
 		randomfile = random.choice(multi_files)
-		await message.reply(file=discord.File(randomfile), content=f"> {os.path.basename(randomfile)}", mention_author=False)
+		await message.reply(file=discord.File(randomfile), content=f"> {os.path.basename(randomfile)}",
+							mention_author=False)
 	elif os.path.isfile(match):
 		await message.reply(file=discord.File(match), mention_author=False)
 
 	return True
+
+
+def get_breveg():
+	consonants = [char for char in "bcdfghjklmnpqrstvwxz"] + ["gy", "cz", "dzs", "ty", "br"]
+	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var"]
+	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi"]
+
+	out = ""
+	if random.choice([True, False]):
+		out += random.choice(prebuilts)
+		out += random.choice(enders)
+	else:
+		out += random.choice(consonants)
+		out += "é"
+		out += random.choice(consonants) if random.choice([True, False]) else ""
+		out += random.choice(enders)
+
+	return out
 
 
 async def event_message(cog, message):
@@ -166,7 +194,9 @@ async def event_message(cog, message):
 	if current_tension is not None and current_tension > 50:
 		await sentience_reply(cog, message, now, chance)
 
-	if message.author.id in [cog.bot.globals.p_id, cog.bot.globals.sz_id] and chance == 17:
+	if message.author.id in [cog.bot.globals.p_id, cog.bot.globals.sz_id, cog.bot.globals.cz_id] and chance == 17:
+		if message.author.id == cog.bot.globals.cz_id:
+			await message.author.edit(nick=get_breveg())
 		await message.channel.send(
 			file=discord.File("resources/img/forklift.png", 'forklift.png'),
 			content=message.author.mention

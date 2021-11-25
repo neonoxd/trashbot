@@ -95,6 +95,7 @@ class BotConfig:
 	sz_id: int
 	p_id: int
 	g_id: int
+	cz_id: int
 	global_timeouts: dict = field(default_factory=dict)
 	slurs: List[str] = field(default_factory=list)
 	statuses: List[str] = field(default_factory=list)
