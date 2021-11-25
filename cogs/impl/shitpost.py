@@ -6,9 +6,10 @@ import glob
 import os
 import discord
 import requests
+from discord.utils import get
 
 from cogs.rng import roll
-from utils.helpers import has_link
+from utils.helpers import has_link, replace_str_index
 
 module_logger = logging.getLogger('trashbot.Shitpost.impl')
 
@@ -74,6 +75,11 @@ async def command_tension(cog, ctx):
 	tension = cog.bot.state.get_guild_state_by_id(ctx.guild.id).tension
 	module_logger.warning(tension)
 	await ctx.channel.send(f'mai vilag tenszio: **{tension}%**')
+
+
+async def command_cz(cog, ctx):
+	member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
+	await member.edit(nick=get_breveg())
 
 
 async def event_voice_state_update(cog, member, before, after):
@@ -167,7 +173,7 @@ def get_breveg():
 		out += random.choice(consonants) if random.choice([True, False]) else ""
 		out += random.choice(enders)
 
-	return out
+	return replace_str_index(out, 0, out[0].capitalize())
 
 
 async def event_message(cog, message):

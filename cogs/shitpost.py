@@ -2,7 +2,7 @@ import logging
 from discord.ext import commands
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_zene, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	event_typing
+	event_typing, command_cz
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -40,6 +40,10 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='tension')
 	async def show_tension(self, ctx):
 		await command_tension(self, ctx)
+
+	@commands.command(name='cz')
+	async def show_tension(self, ctx):
+		await command_cz(self, ctx)
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after):

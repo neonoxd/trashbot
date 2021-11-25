@@ -17,3 +17,7 @@ def has_link(string):
 
 def create_alphanumeric_string(length):
 	return ''.join(random.sample(string.ascii_letters + string.digits, length))
+
+
+def replace_str_index(text, index=0, replacement=''):
+	return '%s%s%s' % (text[:index], replacement, text[index + 1:])
