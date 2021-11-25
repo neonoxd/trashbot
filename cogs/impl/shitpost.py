@@ -79,7 +79,9 @@ async def command_tension(cog, ctx):
 
 async def command_cz(cog, ctx):
 	member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
+	await ctx.message.delete()
 	await member.edit(nick=get_breveg())
+	await ctx.send(member.mention)
 
 
 async def event_voice_state_update(cog, member, before, after):
