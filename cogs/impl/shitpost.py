@@ -78,10 +78,14 @@ async def command_tension(cog, ctx):
 
 
 async def command_cz(cog, ctx):
-	member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
 	await ctx.message.delete()
-	await member.edit(nick=get_breveg())
-	await ctx.send(member.mention)
+	if cog.bot.globals.is_expired("cz"):
+		cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
+		member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
+		await member.edit(nick=get_breveg())
+		await ctx.send(member.mention)
+	else:
+		await ctx.send("pill...")
 
 
 async def event_voice_state_update(cog, member, before, after):
@@ -162,8 +166,8 @@ async def handle_maymay(message):
 
 def get_breveg():
 	consonants = [char for char in "bcdfghjklmnpqrstvwxz"] + ["gy", "cz", "dzs", "ty", "br"]
-	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var"]
-	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi"]
+	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var", "zágráb"]
+	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi", "melletti"]
 
 	out = ""
 	if random.choice([True, False]):
