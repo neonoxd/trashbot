@@ -45,7 +45,7 @@ class MiscCog(commands.Cog):
             embed.add_field(name="\u200b", value="\n".join(event_list_str))
 
             embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
-                             icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
+                             icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
 
             await ctx.send(embed=embed)
 
@@ -77,7 +77,7 @@ class MiscCog(commands.Cog):
             embed.add_field(name="\u200b", value="\n".join(event_list_str))
 
             embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
-                             icon_url="https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/122705023_1507933319399057_8489117913383885547_n.jpg?_nc_cat=104&ccb=1-3&_nc_sid=8bfeb9&_nc_ohc=qd6IIUpCXgkAX9YV1zV&_nc_ht=scontent-vie1-1.xx&oh=caabf0e1cd80b2ca930d7f143fe73a25&oe=60BE032E")
+                             icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
 
             await ctx.send(embed=embed)
 

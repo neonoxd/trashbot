@@ -2,7 +2,7 @@ import logging
 from discord.ext import commands
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_zene, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	event_typing, command_cz
+	event_typing, command_cz, announce_friday_mfs
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -20,6 +20,11 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx):
 		await command_befli(self, ctx)
+
+	@commands.command(name='friday', hidden=True)
+	async def friday(self, ctx):
+		await ctx.message.delete()
+		await announce_friday_mfs(self.bot)
 
 	@commands.command(name='captcha')
 	async def captcha(self, ctx):
@@ -53,10 +58,10 @@ class ShitpostCog(commands.Cog):
 	async def on_message(self, message):
 		await event_message(self, message)
 
-	#@commands.Cog.listener()
-	#@commands.guild_only()
-	#async def on_typing(self, channel, user, when):
-	#	await event_typing(self, channel, user, when)
+# @commands.Cog.listener()
+# @commands.guild_only()
+# async def on_typing(self, channel, user, when):
+#	await event_typing(self, channel, user, when)
 
 
 def setup(bot):

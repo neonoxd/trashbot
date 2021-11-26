@@ -9,6 +9,8 @@ from os import listdir
 from os.path import isfile, join
 import traceback
 from dotenv import load_dotenv
+
+from cogs.impl.shitpost import announce_friday_mfs
 from utils.state import BotState, BotConfig
 
 load_dotenv()
@@ -119,6 +121,11 @@ async def on_ready():
 async def trigger_cron():
 	from cogs.impl.shitpost import set_daily_tension
 	await set_daily_tension(bot)
+
+
+@aiocron.crontab("0 20 * * FRI")
+async def trigger_friday_mfs():
+	await announce_friday_mfs(bot)
 
 
 @aiocron.crontab('0 1 * * *')  # 01:00

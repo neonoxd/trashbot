@@ -424,6 +424,21 @@ async def reset_alert_states(bot):
 		guild_state.ghost_alerted_today = False
 
 
+async def announce_friday_mfs(bot):
+	for guild_state in bot.state.guilds:
+		guild = discord.utils.get(bot.guilds, id=guild_state.id)
+		channel = guild.system_channel
+		embed = discord.Embed(title="PPPPÉNTEK ESTE! SOGOR", description="because the uncle can do it edition")
+		embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
+						 icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
+		embed.set_thumbnail(
+			url="https://cdn.discordapp.com/attachments/745209915299069952/913788274575835136/friday.png")
+
+		embed.add_field(name="\u200b", value="\n".join(["MIT:", ">JÁCCASZ", ">NÉZEL", ">HALGATOL", ">KAJOLSZ", ">ISZOL", ">SZIVOL", ">REJSZOL"]))
+
+		await channel.send(embed=embed)
+
+
 async def set_daily_tension(bot, tension=None):
 	# TODO: option to only set it for 1 guild
 	for guild_state in bot.state.guilds:
