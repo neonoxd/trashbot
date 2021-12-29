@@ -169,18 +169,19 @@ async def handle_maymay(message):
 
 def get_breveg():
 	consonants = [char for char in "bcdfghjklmnpqrstvwxz"] + ["gy", "cz", "dzs", "ty", "br"]
-	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var", "zágráb"]
-	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi", "melletti"]
+	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var", "zágráb", "zárt", "kétabony"]
+	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi", "melletti", "közi", "kerti", "faszú"]
 
 	out = ""
 	if random.choice([True, False]):
 		out += random.choice(prebuilts)
 		out += random.choice(enders)
 	else:
-		out += random.choice(consonants)
-		out += "é"
-		out += random.choice(consonants) if random.choice([True, False]) else ""
-		out += random.choice(enders)
+		start = random.choice(consonants) + "é"
+		end = random.choice(enders)
+		mid = random.choice(consonants) if (start[-1:] not in consonants and end[:-1] not in consonants) \
+										   or random.choice([True, False]) else ""
+		out = f"{start}{mid}{end}"
 
 	return replace_str_index(out, 0, out[0].capitalize())
 
