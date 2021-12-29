@@ -80,13 +80,14 @@ async def command_tension(cog, ctx):
 async def command_cz(cog, ctx):
 	module_logger.info(f"[CMD::CZ] called by [{ctx.message.author}]")
 	await ctx.message.delete()
+	author = get_user_nick_or_name(ctx.message.author)
 	if cog.bot.globals.is_expired("cz"):
 		newnick = get_breveg()
 		module_logger.info(f"[CMD::CZ] generated nick [{newnick}]")
 		cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
 		member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
 		await member.edit(nick=newnick)
-		await ctx.send(f"{get_user_nick_or_name(ctx.message.author)} szerint: {member.mention}")
+		await ctx.send(f"{author} szerint: {member.mention}")
 	else:
 		await ctx.send("pill...")
 
@@ -102,7 +103,7 @@ async def event_voice_state_update(cog, member, before, after):
 		#  cz alert
 		if cog.bot.globals.cz_id == member.id:
 			if cog.bot.globals.is_expired("cz") and guild_state.tension % 2 == 0:
-				cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=60))
+				cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
 				await member.edit(nick=get_breveg())
 				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
 				module_logger.debug("PETER ALERT!!!!!!!")
