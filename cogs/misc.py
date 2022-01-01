@@ -220,7 +220,7 @@ class MiscCog(commands.Cog):
         part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
         return part
 
-	@command.command(name="status")
+	@commands.command(name="status")
 	def get_live_statuses(self,ctx):
 	    import requests
 
@@ -242,9 +242,9 @@ class MiscCog(commands.Cog):
 	        Channel("Janka","channel/UCBhxAavhPaGbQsEY5dqhaMw"),
 	        Channel("Híradó","channel/UCHJ8gW2vKH5R3VohymtBCrQ")
 	    }
-	    for a in channels_to_check:
-	        response = requests.get(f"https://www.youtube.com/{a.url}",headers=headers,cookies=cookies)
-	        statuses.append(f"{a.name} - {searching in response.content.decode('UTF-8')}")
+	    for channel in channels_to_check:
+	        response = requests.get(f"https://www.youtube.com/{channel.url}",headers=headers,cookies=cookies)
+	        statuses.append(f"{channel.name} - {searching in response.content.decode('UTF-8')}")
 		ctx.send("\r\n".join(statuses))
 
 def setup(bot):
