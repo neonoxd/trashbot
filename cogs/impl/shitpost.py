@@ -211,7 +211,8 @@ async def event_message(cog, message):
 	if current_tension is not None and current_tension > 50:
 		await sentience_reply(cog, message, now, chance)
 
-	if message.author.id in [cog.bot.globals.p_id, cog.bot.globals.sz_id, cog.bot.globals.cz_id] and chance == 17:
+	if message.author.id in [cog.bot.globals.p_id, cog.bot.globals.sz_id, cog.bot.globals.cz_id] \
+			and random.randrange(0, 1000) == 17:
 		if message.author.id == cog.bot.globals.cz_id:
 			await message.author.edit(nick=get_breveg())
 		await message.channel.send(
