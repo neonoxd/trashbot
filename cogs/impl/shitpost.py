@@ -170,8 +170,12 @@ async def handle_maymay(message):
 
 def get_breveg():
 	consonants = [char for char in "bcdfghjklmnpqrstvwxz"] + ["gy", "cz", "dzs", "ty", "br"]
-	prebuilts = ["hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "var", "zágráb", "zárt", "kétabony"]
-	enders = ["végi", "helyi", "ési", "réti", "gényi", "esi", "melletti", "közi", "kerti", "faszú"]
+	prebuilts = [
+		"hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "zágráb", "zárt", "kétabony", "hosszú", "bánat"
+	]
+	enders = [
+		"végi", "helyi", "ési", "réti", "gényi", "esi", "melletti", "közi", "kerti", "faszú", "téri", "falvi", "fejű"
+	]
 
 	out = ""
 	if random.choice([True, False]):
@@ -289,7 +293,6 @@ async def roll_status(bot):
 
 async def sentience_reply(cog, message, now, roll):
 	guild_state = cog.bot.state.get_guild_state_by_id(message.guild.id)
-	print("bb")
 	# skippers smh
 	if any(skip_word in message.content for skip_word in ["-skip", "!skip"]) and roll < 40:
 		cog.logger.info("got lucky with roll chance: %s" % roll)
