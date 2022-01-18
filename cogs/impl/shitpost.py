@@ -144,7 +144,7 @@ async def event_voice_state_update(cog, member, before, after):
 		if cog.bot.globals.dzs_id == member.id:
 			if cog.bot.globals.is_expired("dzs") and guild_state.tension % 2 == 0:
 				cog.bot.globals.add_timeout("dzs", expiry_td=datetime.timedelta(minutes=60))
-				await guild.system_channel.send("-Dzsoki"))
+				await guild.system_channel.send("-Dzsoki")
 				module_logger.debug("dzsoki leave!")
 
 
