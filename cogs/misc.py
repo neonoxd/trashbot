@@ -223,7 +223,7 @@ class MiscCog(commands.Cog):
 		part.headers.pop(aiohttp.hdrs.CONTENT_TYPE, None)
 		return part
 
-	@commands.command(name="status")
+	@commands.command(name="trash")
 	async def get_live_statuses(self, ctx):
 		import requests
 
