@@ -140,6 +140,12 @@ async def event_voice_state_update(cog, member, before, after):
 			else:
 				await guild.system_channel.send(
 					random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
+		
+		if cog.bot.globals.dzs_id == member.id:
+			if cog.bot.globals.is_expired("dzs") and guild_state.tension % 2 == 0:
+				cog.bot.globals.add_timeout("dzs", expiry_td=datetime.timedelta(minutes=60))
+				await guild.system_channel.send("-Dzsoki"))
+				module_logger.debug("dzsoki leave!")
 
 
 async def handle_maymay(message):
