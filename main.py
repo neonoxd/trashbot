@@ -56,6 +56,7 @@ if __name__ == '__main__':
 	bot.state = BotState()
 	bot.globals = BotConfig(
 		ph_token=os.getenv("PHTOKEN"),
+		yt_cookie=os.getenv("YTCOOKIE"),
 		ffmpeg_path=os.getenv("FFMPEG_PATH"),
 		sounds_path=os.getenv("SNDS_PATH"),
 		sz_id=int(os.getenv("SZ_ID")),

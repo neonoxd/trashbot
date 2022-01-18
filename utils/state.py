@@ -92,6 +92,7 @@ class BotConfig:
 	ffmpeg_path: str
 	sounds_path: str
 	ph_token: str
+	yt_cookie: str
 	sz_id: int
 	p_id: int
 	g_id: int
