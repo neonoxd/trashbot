@@ -1,5 +1,7 @@
 import logging
 import random, string
+import matplotlib.font_manager as fontman
+import os
 
 
 def todo(logger, msg):
@@ -25,3 +27,8 @@ def replace_str_index(text, index=0, replacement=''):
 
 def get_user_nick_or_name(member):
 	return member.nick if member.nick is not None else member.name
+
+
+def find_font_file(query):
+	matches = list(filter(lambda path: query in os.path.basename(path), fontman.findSystemFonts()))
+	return matches

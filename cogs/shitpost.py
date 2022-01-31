@@ -1,8 +1,10 @@
 import logging
+
 from discord.ext import commands
+
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_zene, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	event_typing, command_cz, announce_friday_mfs
+	command_cz, announce_friday_mfs, command_gabo
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -33,6 +35,10 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='tenemos')
 	async def tenemos(self, ctx):
 		await command_tenemos(self, ctx)
+
+	@commands.command(name="gabo")
+	async def gabo(self, ctx, *args):
+		await command_gabo(self, ctx, args)
 
 	@commands.command(name='zene')
 	async def zene(self, ctx):

@@ -1,15 +1,17 @@
 import asyncio
 import datetime
+import io
 import logging
 import random
 import glob
 import os
 import discord
 import requests
+from PIL import Image, ImageDraw, ImageFont
 from discord.utils import get
 
 from cogs.rng import roll
-from utils.helpers import has_link, replace_str_index, get_user_nick_or_name
+from utils.helpers import has_link, replace_str_index, get_user_nick_or_name, find_font_file
 
 module_logger = logging.getLogger('trashbot.Shitpost.impl')
 
@@ -35,6 +37,15 @@ async def command_captcha(cog, ctx):
 	cog.logger.info("command called: {}".format(ctx.command))
 	captcha_img = await get_captcha(cog.bot.globals.ph_token)
 	await ctx.send(file=discord.File(captcha_img, 'getsee.png'))
+
+
+async def command_gabo(cog, ctx, args):
+	cog.logger.info(f"command called: {ctx.command} with args {args}")
+	await ctx.message.delete()
+	if len(args) < 1:
+		return
+	img = await get_gabo(" ".join(args))
+	await ctx.send(file=discord.File(img, 'pg.png'))
 
 
 async def command_tenemos(cog, ctx):
@@ -140,7 +151,7 @@ async def event_voice_state_update(cog, member, before, after):
 			else:
 				await guild.system_channel.send(
 					random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
-		
+
 		if cog.bot.globals.dzs_id == member.id:
 			if cog.bot.globals.is_expired("dzs") and guild_state.tension % 2 == 0:
 				cog.bot.globals.add_timeout("dzs", expiry_td=datetime.timedelta(minutes=60))
@@ -388,6 +399,59 @@ async def get_captcha(captcha_id):
 	return img_byte_arr
 
 
+async def get_gabo(input_text):
+	fontpath = find_font_file('arial.ttf')[0]
+
+	def break_fix(text, width, font, draw):
+		if not text:
+			return
+		lo = 0
+		hi = len(text)
+		while lo < hi:
+			mid = (lo + hi + 1) // 2
+			t = text[:mid]
+			w, h = draw.textsize(t, font=font)
+			if w <= width:
+				lo = mid
+			else:
+				hi = mid - 1
+		t = text[:lo]
+		w, h = draw.textsize(t, font=font)
+		yield t, w, h
+		yield from break_fix(text[lo:], width, font, draw)
+
+	def fit_text(base_img, text, color, font):
+		width = base_img.size[0] - 2
+		draw = ImageDraw.Draw(base_img)
+		sized_font = ImageFont.FreeTypeFont(font.path, 1)
+		for size in range(1, 150):
+			pieces = list(break_fix(text, width, sized_font, draw))
+			height = sum(p[2] for p in pieces)
+			if height > base_img.size[1] - 100:
+				break
+			sized_font = ImageFont.FreeTypeFont(font.path, size)
+		module_logger.debug(f"calculated fontsize {sized_font.size}")
+		y = (base_img.size[1] - height) // 2
+		for t, w, h in pieces:
+			x = (base_img.size[0] - w) // 2
+			draw.text((x, y), t, font=sized_font, fill=color)
+			y += h
+
+	bg = Image.open('resources/img/pgbg.jpg', 'r')
+	arial = ImageFont.FreeTypeFont(fontpath, 1)
+
+	text_img = Image.new('RGBA', (bg.width, bg.height), (255, 255, 255, 255))
+	text_img.paste(bg, ((text_img.width - bg.width) // 2, (text_img.height - bg.height) // 2))
+
+	img = Image.new('RGBA', (507, 432), color="#685745")
+	fit_text(img, input_text, (255, 255, 255), arial)
+	text_img.paste(img, ((text_img.width - img.width) // 2 - 30, (text_img.height - img.height) // 2 - 20))
+	img_byte_arr = io.BytesIO()
+	text_img.save(img_byte_arr, format='PNG')
+	img_byte_arr.seek(0)
+	return img_byte_arr
+
+
 def generate_finally_image(bottom_text):
 	from PIL import Image
 	from PIL import ImageFont
@@ -446,7 +510,8 @@ async def announce_friday_mfs(bot):
 		embed.set_thumbnail(
 			url="https://cdn.discordapp.com/attachments/745209915299069952/913788274575835136/friday.png")
 
-		embed.add_field(name="\u200b", value="\n".join(["MIT:", ">JÁCCASZ", ">NÉZEL", ">HALGATOL", ">KAJOLSZ", ">ISZOL", ">SZIVOL", ">REJSZOL"]))
+		embed.add_field(name="\u200b", value="\n".join(
+			["MIT:", ">JÁCCASZ", ">NÉZEL", ">HALGATOL", ">KAJOLSZ", ">ISZOL", ">SZIVOL", ">REJSZOL"]))
 
 		await channel.send(embed=embed)
 
