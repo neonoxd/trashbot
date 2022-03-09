@@ -1,0 +1,2 @@
+#!/bin/bash
+docker build -t localhost/pyffmpeg -f Dockerfile.baseimage .

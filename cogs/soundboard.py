@@ -104,6 +104,17 @@ class SoundBoardCog(commands.Cog):
 					vc = self.current_vc
 					await asyncio.sleep(.5)
 					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/door{random.randrange(1,4)}.ogg"))
+			if self.bot.globals.d_id == member.id:
+				if self.in_vc():
+					vc = self.current_vc
+					await asyncio.sleep(.5)
+					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/join_hola.wav"))
+		if before.channel is not None and after.channel is None:  # user disconnected
+			if self.bot.globals.d_id == member.id:
+				if self.in_vc():
+					vc = self.current_vc
+					await asyncio.sleep(.5)
+					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/out_chau.wav"))
 
 	@commands.command(name='sound')
 	async def play_sound(self, ctx, *args):

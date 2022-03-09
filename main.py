@@ -63,7 +63,8 @@ if __name__ == '__main__':
 		p_id=int(os.getenv("P_ID")),
 		g_id=int(os.getenv("G_ID")),
 		cz_id=int(os.getenv("CZ_ID")),
-		dzs_id=int(os.getenv("DZS_ID"))
+		dzs_id=int(os.getenv("DZS_ID")),
+		d_id=int(os.getenv("D_ID"))
 	)
 
 	slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'
