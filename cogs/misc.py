@@ -247,7 +247,7 @@ class MiscCog(commands.Cog):
 		statuses = []
 		for channel in channels_to_check:
 			response = requests.get(f"https://www.youtube.com/{channel.url}", headers=headers, cookies=cookies)
-			statuses.append(f"{channel.name} - {'LIVE' if live_keyword in response.content.decode('UTF-8') else 'OFFLINE'} - https://www.youtube.com/{channel.url}")
+			statuses.append(f"{channel.name} - {'LIVE' if live_keyword in response.content.decode('UTF-8') else 'OFFLINE'} - https://www.youtube.com/{channel.url.strip()}")
 		await ctx.send("\r\n".join(statuses))
 
 
