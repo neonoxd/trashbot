@@ -59,6 +59,13 @@ async def command_zene(cog, ctx):
 	await ctx.send(embed=embed)
 
 
+async def command_dog(cog, ctx):
+	cog.logger.info("command called: {}".format(ctx.command))
+	embed = discord.Embed(description="-Kiskutya megnő, oszt megharapja a nagyot",
+						  title=random.choice(cog.dogeatdogworld), color=0x03fc03)
+	await ctx.send(embed=embed)
+
+
 async def command_beemovie(cog, ctx, args):
 	cog.logger.info("command called: {}".format(ctx.command))
 

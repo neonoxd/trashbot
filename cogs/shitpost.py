@@ -4,7 +4,7 @@ from discord.ext import commands
 
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_zene, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	command_cz, announce_friday_mfs, command_gabo
+	command_cz, announce_friday_mfs, command_gabo, command_dog
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -18,6 +18,8 @@ class ShitpostCog(commands.Cog):
 			self.trek_list = file.read().split("\n\n")
 		with open('resources/beemovie.txt', 'r', encoding="utf8") as file:
 			self.beescript = file.read().split("\n\n  \n")
+		with open('resources/lists/dog.list', 'r', encoding="utf8") as file:
+			self.dogeatdogworld = file.read().split("\n\n")
 
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx):
@@ -43,6 +45,10 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='zene')
 	async def zene(self, ctx):
 		await command_zene(self, ctx)
+
+	@commands.command(aliases=['kutya', 'dogeatdog', 'kiskutya'])
+	async def harap(self, ctx):
+		await command_dog(self, ctx)
 
 	@commands.command(name='beemovie')
 	async def bmc(self, ctx, *args):
