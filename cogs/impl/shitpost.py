@@ -239,7 +239,8 @@ async def event_message(cog, message):
 	if guild_state.get_channel_state_by_id(message.channel.id) is None:
 		guild_state.track_channel(message.channel.id)
 
-	await sentience_spam(cog, message)
+	if cog.bot.globals.is_expired("spam"):
+		await sentience_spam(cog, message)
 
 	await sentience_flipper(cog, message, chance)
 
@@ -278,6 +279,7 @@ async def sentience_spam(cog, message):
 		if channel_state.shall_i():
 			await asyncio.sleep(1)
 			await message.channel.send(message.content)
+			cog.bot.globals.add_timeout("spam", expiry_td=datetime.timedelta(minutes=5))
 
 
 async def sentience_flipper(cog, message, roll):
