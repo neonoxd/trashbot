@@ -133,6 +133,13 @@ async def event_voice_state_update(cog, member, before, after):
 				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
 				module_logger.debug("PETER ALERT!!!!!!!")
 
+		#  sz alert
+		if cog.bot.globals.sz_id == member.id:
+			if cog.bot.globals.is_expired("sz"):
+				cog.bot.globals.add_timeout("sz", expiry_td=datetime.timedelta(minutes=60))
+				await guild.system_channel.send(file=discord.File('resources/img/brunya_alezredes_alert.png'))
+				module_logger.debug("BABO ALERT :v")
+
 		#  ghosts alert
 		elif member.id in cog.bot.globals.ghost_ids:
 			if not guild_state.ghost_alerted_today and guild_state.tension < 90:
