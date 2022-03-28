@@ -59,7 +59,7 @@ class ShitpostCog(commands.Cog):
 		await command_tension(self, ctx)
 
 	@commands.command(name='cz')
-	async def show_tension(self, ctx):
+	async def cege(self, ctx):
 		await command_cz(self, ctx)
 
 	@commands.Cog.listener()
