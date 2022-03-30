@@ -314,7 +314,7 @@ async def sentience_flipper(cog, message, roll):
 
 async def sentience_mock_image(cog, message, roll):
 	# how/soyjak meme
-	chance = 84
+	chance = 92
 	image_types = [
 		".jpg",
 		".jpeg",
