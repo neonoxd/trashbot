@@ -64,7 +64,6 @@ async def command_dog(cog, ctx):
 	embed = discord.Embed(description="-Kiskutya megnő, oszt megharapja a nagyot",
 						  title=random.choice(cog.dogeatdogworld), color=0x03fc03)
 	await ctx.send(embed=embed)
- 
 
 
 async def command_beemovie(cog, ctx, args):
@@ -244,7 +243,7 @@ async def event_message(cog, message):
 		await sentience_spam(cog, message)
 
 	await sentience_flipper(cog, message, chance)
- 
+
 	await sentience_mock_image(cog, message, chance)
 
 	if current_tension is not None and current_tension > 50:
@@ -259,9 +258,6 @@ async def event_message(cog, message):
 			content=message.author.mention
 		)
 		await roll_status(cog.bot)
-
-	# async for entry in message.guild.audit_logs(limit=100, action=discord.AuditLogAction.member_disconnect):
-	# module_logger.warning(f'auditlog {entry.id} - {entry.action}, user: {entry.user}, tgt: {entry.target}')
 
 	if message.tts:
 		for react in random.choice([["🇬", "🇪", "🇨", "🇮", "♿"], ["🆗"], ["🤬"], ["👀"]]):
@@ -312,6 +308,7 @@ async def sentience_flipper(cog, message, roll):
 			random.choice(cog.bot.globals.statuses)
 		))
 
+
 async def sentience_mock_image(cog, message, roll):
 	# how/soyjak meme
 	chance = 92
@@ -320,18 +317,21 @@ async def sentience_mock_image(cog, message, roll):
 		".jpeg",
 		".png"
 	]
-	if  roll > chance and len(message.attachments) > 0 and any(attachment.filename.lower().endswith(imgtype) for imgtype in image_types for attachment in message.attachments):
+	if roll > chance and len(message.attachments) > 0 and any(
+			attachment.filename.lower().endswith(imgtype) for imgtype in image_types for attachment in
+			message.attachments):
 		for attachment in message.attachments:
 			if roll > chance:
 				chance += 4
 				await attachment.save(attachment.filename)
 				mockimg = get_mock_image(attachment.filename)
 				await message.channel.send(file=discord.File(mockimg, 'mock.png'))
-				os.remove(attachment.filename)												#might not work on the server os
+				os.remove(attachment.filename)  # might not work on the server os
 
 		await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
 		))
+
 
 async def event_typing(cog, channel, user, when):
 	await cog.bot.change_presence(activity=discord.Game("latom h irsz geco {}".format(user)))
@@ -516,36 +516,40 @@ def generate_finally_image(bottom_text):
 	img_byte_arr.seek(0)
 	return img_byte_arr
 
+
 def get_mock_image(msg_image):
 	import io
 	from PIL import Image
 
-	module_logger.debug('mock image') 
-	img = Image.open(f'{msg_image}','r').convert("RGBA")
-	frame_size = (447, 330) #XDDD🚨
+	module_logger.debug('mock image')
+	img = Image.open(f'{msg_image}', 'r').convert("RGBA")
+	frame_size = (447, 330)  # XDDD🚨
 	image = img.resize(frame_size)
- 
+
 	template_paths = [
 		'resources/img/memetemplates/hogy.png',
 		'resources/img/memetemplates/mi.png',
 		'resources/img/memetemplates/question_marks.png',
 		'resources/img/memetemplates/soyjaks_pointing.png',
 	]
- 
+
 	template_choice = random.choice(template_paths)
-	bg = Image.open(template_choice,'r').convert("RGBA")
+	bg = Image.open(template_choice, 'r').convert("RGBA")
 	text_img = Image.new('RGBA', (bg.width, bg.height), (0, 0, 0, 0))
-	if (template_choice == 'resources/img/memetemplates/soyjaks_pointing.png'):		
-		text_img.paste(image, (1 + (text_img.width - image.width) // 3, -1 + (text_img.height - image.height) // 7), image)
-		text_img = Image.alpha_composite(text_img, bg)		
+	if template_choice == 'resources/img/memetemplates/soyjaks_pointing.png':
+		text_img.paste(image, (1 + (text_img.width - image.width) // 3, -1 + (text_img.height - image.height) // 7),
+					   image)
+		text_img = Image.alpha_composite(text_img, bg)
 	else:
 		text_img.paste(bg, ((text_img.width - bg.width) // 2, (text_img.height - bg.height) // 2))
-		text_img.paste(image, (1 + (text_img.width - image.width) // 2, -1 + (text_img.height - image.height) // 7), image)
-  
+		text_img.paste(image, (1 + (text_img.width - image.width) // 2, -1 + (text_img.height - image.height) // 7),
+					   image)
+
 	img_byte_arr = io.BytesIO()
 	text_img.save(img_byte_arr, format='PNG')
 	img_byte_arr.seek(0)
 	return img_byte_arr
+
 
 async def beemovie_task(self, ctx):
 	guild_id = ctx.guild.id
@@ -640,6 +644,3 @@ async def set_daily_tension(bot, tension=None):
 			t_msg += f'\n **skulls:** {", ".join(skulls)}'
 		await roll_status(bot)
 		await channel.send(t_msg)
-  
-  
-  
