@@ -244,7 +244,7 @@ async def event_message(cog, message):
 
 	await sentience_flipper(cog, message, chance)
 
-	await sentience_mock_image(cog, message, chance)
+	await sentience_mock_image(cog, message)
 
 	if current_tension is not None and current_tension > 50:
 		await sentience_reply(cog, message, now, chance)
@@ -309,9 +309,10 @@ async def sentience_flipper(cog, message, roll):
 		))
 
 
-async def sentience_mock_image(cog, message, roll):
+async def sentience_mock_image(cog, message):
 	# how/soyjak meme
-	chance = 92
+	chance = 0.995
+	roll = random.random()
 	image_types = [
 		".jpg",
 		".jpeg",
@@ -321,12 +322,10 @@ async def sentience_mock_image(cog, message, roll):
 			attachment.filename.lower().endswith(imgtype) for imgtype in image_types for attachment in
 			message.attachments):
 		for attachment in message.attachments:
-			if roll > chance:
-				chance += 4
-				await attachment.save(attachment.filename)
-				mockimg = get_mock_image(attachment.filename)
-				await message.channel.send(file=discord.File(mockimg, 'mock.png'))
-				os.remove(attachment.filename)  # might not work on the server os
+			await attachment.save(attachment.filename)
+			mockimg = get_mock_image(attachment.filename)
+			await message.channel.send(file=discord.File(mockimg, 'mock.png'))
+			os.remove(attachment.filename)  # might not work on the server os
 
 		await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
