@@ -1,5 +1,6 @@
 import logging
 
+import discord
 from discord.ext import commands
 
 from cogs.impl.shitpost import command_befli, command_captcha, \
@@ -41,6 +42,19 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name="gabo")
 	async def gabo(self, ctx, *args):
 		await command_gabo(self, ctx, args)
+
+	@commands.command(name="sanity")
+	async def szabo(self, ctx):
+		guild = ctx.bot.guilds[0]
+		sz_vc = [
+			c for c in guild.channels if c.type == discord.ChannelType.voice
+			and len([member for member in c.members if member.id == ctx.bot.globals.sz_id]) > 0
+		]
+		await ctx.message.delete()
+		if len(sz_vc) > 0 and len(sz_vc[0].members) > 5:
+			await ctx.channel.send("**sanity:** :/")
+		else:
+			await ctx.channel.send("**sanity:** :)")
 
 	@commands.command(name='zene')
 	async def zene(self, ctx):
