@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 import discord
@@ -52,9 +53,15 @@ class ShitpostCog(commands.Cog):
 		]
 		await ctx.message.delete()
 		if len(sz_vc) > 0 and len(sz_vc[0].members) > 5:
-			await ctx.channel.send("**sanity:** :/")
+			msg = await ctx.channel.send("**sanity check...**")
+			await asyncio.sleep(2)
+			await msg.edit(content="**sanity check...** ❌")
+			await asyncio.sleep(3)
+			await ctx.message.channel.send(file=discord.File("resources/img/insanity.webp"), content="good luck :)")
 		else:
-			await ctx.channel.send("**sanity:** :)")
+			msg = await ctx.channel.send("**sanity check...**")
+			await asyncio.sleep(2)
+			await msg.edit(content="**sanity check...** ✅")
 
 	@commands.command(name='zene')
 	async def zene(self, ctx):
