@@ -246,6 +246,14 @@ async def event_message(cog, message):
 
 	await sentience_mock_image(cog, message)
 
+	if len(message.content) > 250 and chance > 69:
+		module_logger.debug(f"long msg procc /w chance {chance}")
+		gifs = [
+			"https://tenor.com/view/noted-note-the-office-writing-taking-notes-gif-15981193",
+			"https://tenor.com/view/write-that-down-taking-notes-school-universities-university-gif-17937210"
+		]
+		await message.reply(content=random.choice(gifs), mention_author=True)
+
 	if current_tension is not None and current_tension > 50:
 		await sentience_reply(cog, message, now, chance)
 
