@@ -246,6 +246,8 @@ async def event_message(cog, message):
 
 	await sentience_mock_image(cog, message)
 
+	await sentience_answer_question(cog, message, roll)
+ 
 	if len(message.content) > 250 and chance > 69:
 		module_logger.debug(f"long msg procc /w chance {chance}")
 		gifs = [
@@ -336,6 +338,20 @@ async def sentience_mock_image(cog, message):
 			os.remove(attachment.filename)  # might not work on the server os
 
 		await cog.bot.change_presence(activity=discord.Game(
+			random.choice(cog.bot.globals.statuses)
+		))
+  
+async def sentience_answer_question(cog, message, roll):
+	answers = [
+		"tollem kerdezed?",
+		"jo kerdes batya",
+		"ilyen hulye kerdest te😂"
+	]
+	if roll > 80 and  message.content.endswith("?"):
+		cog.logger.info("uncle answered a question")
+		await message.reply(random.choice(answers))
+
+	await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
 		))
 
