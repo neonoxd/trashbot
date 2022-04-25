@@ -350,10 +350,11 @@ async def sentience_answer_question(cog, message, roll):
 	if roll > 80 and  message.content.endswith("?"):
 		cog.logger.info("uncle answered a question")
 		await message.reply(random.choice(answers))
-
-	await cog.bot.change_presence(activity=discord.Game(
+		await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
 		))
+
+	
 
 
 async def event_typing(cog, channel, user, when):
