@@ -28,7 +28,7 @@ class PinnerCog(commands.Cog):
 
 	def persist_pins(self):
 		with open(self.pin_path, 'w') as outfile:
-			json.dump(self.pins, outfile)
+			json.dump(self.pins, outfile, indent=4, sort_keys=True)
 
 	async def add_pin(self, ctx, pin_obj):
 		self.pins = {**self.pins, **pin_obj}
@@ -58,8 +58,7 @@ class PinnerCog(commands.Cog):
 	@commands.command(name='pins')
 	async def list_pins(self, ctx, arg=None):
 		if arg is not None and arg == "dump":
-			with open(self.pin_path, 'r') as infile:
-				await ctx.send(file=discord.File(infile, 'pins.json'))
+			await ctx.send(file=discord.File(self.pin_path, 'pins.json'))
 		else:
 			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
 
