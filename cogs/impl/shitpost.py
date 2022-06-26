@@ -123,15 +123,13 @@ async def event_voice_state_update(cog, member, before, after):
 			if cog.bot.globals.is_expired("cz") and guild_state.tension % 2 == 0:
 				cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
 				await member.edit(nick=get_breveg())
-				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
-				module_logger.debug("PETER ALERT!!!!!!!")
+				await guild.system_channel.send(file=discord.File('resources/img/peter2_alert.jpg'))
 
 		#  p alert
 		if cog.bot.globals.p_id == member.id:
 			if cog.bot.globals.is_expired("p") and guild_state.tension % 2 == 0:
 				cog.bot.globals.add_timeout("p", expiry_td=datetime.timedelta(minutes=60))
 				await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
-				module_logger.debug("PETER ALERT!!!!!!!")
 
 		#  sz alert
 		if cog.bot.globals.sz_id == member.id:
