@@ -10,7 +10,6 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from discord.utils import get
 
-from cogs.rng import roll
 from utils.helpers import has_link, replace_str_index, get_user_nick_or_name, find_font_file
 
 module_logger = logging.getLogger('trashbot.Shitpost.impl')
@@ -245,7 +244,7 @@ async def event_message(cog, message):
 	await sentience_mock_image(cog, message)
 
 	await sentience_answer_question(cog, message, roll)
- 
+
 	if len(message.content) > 250 and chance > 69:
 		module_logger.debug(f"long msg procc /w chance {chance}")
 		gifs = [
@@ -338,21 +337,20 @@ async def sentience_mock_image(cog, message):
 		await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
 		))
-  
+
+
 async def sentience_answer_question(cog, message, roll):
 	answers = [
 		"tollem kerdezed?",
 		"jo kerdes batya",
 		"ilyen hulye kerdest te😂"
 	]
-	if roll > 80 and  message.content.endswith("?"):
+	if roll > 80 and message.content.endswith("?"):
 		cog.logger.info("uncle answered a question")
 		await message.reply(random.choice(answers))
 		await cog.bot.change_presence(activity=discord.Game(
 			random.choice(cog.bot.globals.statuses)
 		))
-
-	
 
 
 async def event_typing(cog, channel, user, when):
@@ -612,6 +610,7 @@ async def announce_friday_mfs(bot):
 
 
 async def set_daily_tension(bot, tension=None):
+	from cogs.rng import roll
 	# TODO: option to only set it for 1 guild
 	for guild_state in bot.state.guilds:
 		module_logger.debug(f'setting tension for guild : {guild_state.id}')
