@@ -291,7 +291,7 @@ async def event_message(cog, message):
 
     await sentience_mock_image(cog, message)
 
-    await sentience_answer_question(cog, message, roll)
+    await sentience_answer_question(cog, message, chance)
 
     if len(message.content) > 250 and chance > 69:
         module_logger.debug(f"long msg procc /w chance {chance}")
