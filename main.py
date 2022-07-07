@@ -62,6 +62,7 @@ if __name__ == '__main__':
 		sz_id=int(os.getenv("SZ_ID")),
 		p_id=int(os.getenv("P_ID")),
 		g_id=int(os.getenv("G_ID")),
+		gba_id=int(os.getenv("GBA_ID")),
 		cz_id=int(os.getenv("CZ_ID")),
 		dzs_id=int(os.getenv("DZS_ID")),
 		d_id=int(os.getenv("D_ID"))
