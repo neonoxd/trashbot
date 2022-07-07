@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_zene, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	command_cz, announce_friday_mfs, command_gabo, command_dog
+	command_cz, announce_friday_mfs, command_gabo, command_dog, command_gba
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -78,6 +78,10 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='tension')
 	async def show_tension(self, ctx):
 		await command_tension(self, ctx)
+
+	@commands.command(name='gba')
+	async def gabo(self, ctx):
+		await command_gba(self, ctx)
 
 	@commands.command(name='cz')
 	async def cege(self, ctx):
