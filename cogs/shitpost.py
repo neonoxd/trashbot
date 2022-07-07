@@ -80,7 +80,7 @@ class ShitpostCog(commands.Cog):
 		await command_tension(self, ctx)
 
 	@commands.command(name='gba')
-	async def gabo(self, ctx):
+	async def gba(self, ctx):
 		await command_gba(self, ctx)
 
 	@commands.command(name='cz')
