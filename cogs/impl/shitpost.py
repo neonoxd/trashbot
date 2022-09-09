@@ -159,6 +159,7 @@ async def event_voice_state_update(cog, member, before, after):
                 guild_state.increment_ghost()
                 await after.channel.guild.system_channel.send(msg_text)
                 guild_state.ghost_alerted_today = True
+
     elif before.channel is not None and after.channel is None:  # user disconnected
         guild = before.channel.guild
         guild_state = cog.bot.state.get_guild_state_by_id(guild.id)
@@ -177,6 +178,20 @@ async def event_voice_state_update(cog, member, before, after):
             else:
                 await guild.system_channel.send(
                     random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
+
+        #  l shleep event
+        if cog.bot.globals.l_id == member.id:
+            now = datetime.datetime.now()
+            if cog.bot.globals.is_expired("l"):
+                module_logger.debug("expired")
+                if now.hour >= 21 or now.hour <= 3:
+                    guild = before.channel.guild
+                    cog.bot.globals.add_timeout("l", expiry_td=datetime.timedelta(minutes=1))
+                    await guild.system_channel.send(file=discord.File('resources/img/lacsleep.jpg'))
+            else:
+                module_logger.debug("GABO LEPKED! :@")
+                await guild.system_channel.send(
+                    random.choice(["?", f"{member.mention} 😡💢"]))
 
         if cog.bot.globals.dzs_id == member.id:
             if cog.bot.globals.is_expired("dzs") and guild_state.tension % 2 == 0:
