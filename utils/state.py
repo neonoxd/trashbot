@@ -98,6 +98,7 @@ class BotConfig:
 	gba_id: int
 	g_id: int
 	cz_id: int
+	m_id: int
 	dzs_id: int
 	d_id: int
 	l_id: int

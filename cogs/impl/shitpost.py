@@ -132,6 +132,12 @@ async def event_voice_state_update(cog, member, before, after):
         guild_state = cog.bot.state.get_guild_state_by_id(guild.id)
         guild_state.push_last_vc_event(VCEvent(1, member, after.channel, datetime.datetime.timestamp(now)))
 
+        #  elmano alert
+        if cog.bot.globals.m_id == member.id:
+            if cog.bot.globals.is_expired("m") and guild_state.tension % 2 == 0:
+                cog.bot.globals.add_timeout("m", expiry_td=datetime.timedelta(minutes=60))
+                await guild.system_channel.send(file=discord.File('resources/img/elmano.gif'))
+
         #  cz alert
         if cog.bot.globals.cz_id == member.id:
             if cog.bot.globals.is_expired("cz") and guild_state.tension % 2 == 0:
