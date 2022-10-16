@@ -95,6 +95,7 @@ class BotConfig:
 	yt_cookie: str
 	sz_id: int
 	p_id: int
+	ps_id: int
 	gba_id: int
 	g_id: int
 	cz_id: int

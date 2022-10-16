@@ -61,6 +61,7 @@ if __name__ == '__main__':
 		sounds_path=os.getenv("SNDS_PATH"),
 		sz_id=int(os.getenv("SZ_ID")),
 		p_id=int(os.getenv("P_ID")),
+		ps_id=int(os.getenv("PS_ID")),
 		g_id=int(os.getenv("G_ID")),
 		gba_id=int(os.getenv("GBA_ID")),
 		cz_id=int(os.getenv("CZ_ID")),

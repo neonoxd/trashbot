@@ -96,25 +96,32 @@ class SoundBoardCog(commands.Cog):
 			await ctx.send(str(ctx.author.name) + "is not in a channel.")
 		await ctx.message.delete()
 
+	async def play_source_if_vc(self, source, delay):
+		if self.in_vc():
+			vc = self.current_vc
+			await asyncio.sleep(delay)
+			vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=source))
+
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member, before, after):
+
+		join_map = {
+			self.bot.globals.sz_id: f"resources/sounds/door{random.randrange(1,4)}.ogg",
+			self.bot.globals.d_id: f"resources/sounds/join_hola.wav",
+			self.bot.globals.ps_id: f"resources/sounds/pspsps.mp3"
+		}
+
+		exit_map = {
+			self.bot.globals.d_id: f"resources/sounds/out_chau.wav"
+		}
+
 		if before.channel is None and after.channel is not None:  # user connected
-			if self.bot.globals.sz_id == member.id:
-				if self.in_vc():
-					vc = self.current_vc
-					await asyncio.sleep(.5)
-					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/door{random.randrange(1,4)}.ogg"))
-			if self.bot.globals.d_id == member.id:
-				if self.in_vc():
-					vc = self.current_vc
-					await asyncio.sleep(.5)
-					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/join_hola.wav"))
+			if member.id in join_map:
+				await self.play_source_if_vc(join_map[member.id], .5)
+
 		if before.channel is not None and after.channel is None:  # user disconnected
-			if self.bot.globals.d_id == member.id:
-				if self.in_vc():
-					vc = self.current_vc
-					await asyncio.sleep(.5)
-					vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=f"resources/sounds/out_chau.wav"))
+			if member.id in exit_map:
+				await self.play_source_if_vc(exit_map[member.id], .5)
 
 	@commands.command(name='sound')
 	async def play_sound(self, ctx, *args):

@@ -268,7 +268,7 @@ def get_kutfuras():
 def get_breveg():
     consonants = [char for char in "bcdfghjklmnpqrstvwxz"] + ["gy", "cz", "dzs", "ty", "br"]
     prebuilts = [
-        "hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "zágráb", "zárt", "kétabony", "hosszú", "bánat"
+        "hét", "gét", "rét", "új", "már", "gép", "tér", "vér", "zágráb", "zárt", "kétabony", "hosszú", "bánat", "dér"
     ]
     enders = [
         "végi", "helyi", "ési", "réti", "gényi", "esi", "melletti", "közi", "kerti", "faszú", "téri", "falvi", "fejű"
@@ -276,8 +276,12 @@ def get_breveg():
 
     out = ""
     if random.choice([True, False]):
-        out += random.choice(prebuilts)
-        out += random.choice(enders)
+        pre = random.choice(prebuilts)
+        out += pre
+        if pre == "dér" and random.randrange(0, 100) > 40:
+            out += "heni"
+        else:
+            out += random.choice(enders)
     else:
         start = random.choice(consonants) + "é"
         end = random.choice(enders)
