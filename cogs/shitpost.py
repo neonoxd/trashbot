@@ -24,6 +24,8 @@ class ShitpostCog(commands.Cog):
 			self.dogeatdogworld = file.read().split("\n\n")
 		with open('resources/lists/kocsi.list', 'r', encoding="utf8") as file:
 			self.kocsiposta = file.read().split("\n\n")
+		with open('resources/lists/alek.list', 'r', encoding="utf8") as file:
+			self.alekposta = file.read().split("\n\n")
 
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx):
@@ -100,6 +102,10 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name='kocsi')
 	async def kocsi(self, ctx):
 		await command_kocsi(self, ctx)
+
+	@commands.command(name='alek')
+	async def alek(self, ctx):
+		await command_alek(self, ctx)
 
 # @commands.Cog.listener()
 # @commands.guild_only()
