@@ -97,7 +97,7 @@ class ShitpostCog(commands.Cog):
 	async def on_message(self, message):
 		await event_message(self, message)
 
-	@commands.Cog.listener(name='kocsi')
+	@commands.command(name='kocsi')
 	async def kocsi(self, ctx):
 		await command_kocsi(self, ctx)
 
