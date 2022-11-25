@@ -72,6 +72,12 @@ async def command_kocsi(cog, ctx):
     await ctx.send(embed=embed_for("kocsi", cog, ctx))
 
 
+async def command_alek(cog, ctx):
+    cog.logger.info("command called: {}".format(ctx.command))
+    await ctx.message.delete()
+    await ctx.send(embed=embed_for("alek", cog, ctx))
+
+
 def embed_for(page_name, cog, ctx):
     page_map = {
         "kocsi": {
@@ -94,13 +100,22 @@ def embed_for(page_name, cog, ctx):
             "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t39.30808-6/305612470_496312765832307_2357745445834312423_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bmL4QyzXU8YAX-q4UMR&_nc_ht=scontent-vie1-1.xx&oh=00_AfCsy21l279Yw_pjL1ey0XISxauZXbj5jI00uZsWPGveRw&oe=6386117D",
             "color": 0xfc0303,
             "src": "treck_list"
+        },
+        "alek": {
+            "name": "Nagy Alekosz",
+            "url": "https://www.facebook.com/nagyalekosz1978",
+            "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t1.18169-9/14956556_1194799913947886_2965278864388702238_n.jpg?_nc_cat=108&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=fRj-vU2ILygAX8tsImp&_nc_ht=scontent-vie1-1.xx&oh=00_AfDnCKkV9OywIqDDWXvRVcuy94wpczFZK5-bW4hz_IcATw&oe=63A8936F",
+            "color": 0x420202,
+            "src": "alek"
+
         }
     }
 
     src_map = {
         "treck_list": cog.trek_list,
         "dogeat": cog.dogeatdogworld,
-        "kocsi": cog.kocsiposta
+        "kocsi": cog.kocsiposta,
+        "alek": cog.alekposta
     }
 
     pm = page_map[page_name]
