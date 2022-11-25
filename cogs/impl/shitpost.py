@@ -5,6 +5,8 @@ import logging
 import random
 import glob
 import os
+import re
+
 import discord
 import requests
 from PIL import Image, ImageDraw, ImageFont
@@ -55,48 +57,65 @@ async def command_tenemos(cog, ctx):
 async def command_zene(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
     await ctx.message.delete()
-    await ctx.send(embed=embed_for("zene", random.choice(cog.trek_list), ctx.message.author))
+    await ctx.send(embed=embed_for("zene", cog, ctx))
 
 
 async def command_dog(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
     await ctx.message.delete()
-    await ctx.send(embed=embed_for("dog", random.choice(cog.dogeatdogworld), ctx.message.author))
+    await ctx.send(embed=embed_for("dog", cog, ctx))
 
 
 async def command_kocsi(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
     await ctx.message.delete()
-    await ctx.send(embed=embed_for("kocsi", random.choice(cog.kocsiposta), ctx.message.author))
+    await ctx.send(embed=embed_for("kocsi", cog, ctx))
 
 
-def embed_for(page_name, embed_content, who):
+def embed_for(page_name, cog, ctx):
     page_map = {
         "kocsi": {
             "name": "Halálos iramban 3, A KOCSI",
             "url": "https://www.facebook.com/kocsikocsikocsi",
             "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t1.6435-9/64678650_2494663417240150_2089116631585259520_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=FTPnmr24Sy4AX9-1guK&_nc_ht=scontent-vie1-1.xx&oh=00_AfCckmSGj0IXrqBMT5gBwH8EhGGL8Nl_dKbkl4iw6pNEwQ&oe=63A87CEE",
-            "color": 0x0000ff
+            "color": 0x0000ff,
+            "src": "kocsi"
         },
         "dog": {
             "name": "Kiskutya megnő, oszt megharapja a nagyot",
             "url": "https://www.facebook.com/kiskutyamegno",
             "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t39.30808-6/307536737_213833987634926_7133737757398353005_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=b9a7hQT9HScAX-LdfLJ&tn=js4JzOtCZte-4dPs&_nc_ht=scontent-vie1-1.xx&oh=00_AfBiT1z45PDS8FeUhRn7vQL5nMknNRh7M1rp6ka4QXtyMg&oe=6386917F",
-            "color": 0x03fc03
+            "color": 0x03fc03,
+            "src": "dogeat"
         },
         "zene": {
             "name": "Leg job zenék",
             "url": "https://www.facebook.com/legjobzenek",
             "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t39.30808-6/305612470_496312765832307_2357745445834312423_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=bmL4QyzXU8YAX-q4UMR&_nc_ht=scontent-vie1-1.xx&oh=00_AfCsy21l279Yw_pjL1ey0XISxauZXbj5jI00uZsWPGveRw&oe=6386117D",
-            "color": 0xfc0303
+            "color": 0xfc0303,
+            "src": "treck_list"
         }
     }
 
-    pm = page_map[page_name]
+    src_map = {
+        "treck_list": cog.trek_list,
+        "dogeat": cog.dogeatdogworld,
+        "kocsi": cog.kocsiposta
+    }
 
-    embed = discord.Embed(description=embed_content, title="", color=pm["color"])
+    pm = page_map[page_name]
+    src_text = random.choice(src_map[pm["src"]])
+
+    clean_text = re.sub("#url#.+", "", src_text)
+    src_url_match = re.search("#url#.+", src_text)
+
+    embed = discord.Embed(description=clean_text, title="", color=pm["color"])
+
+    if src_url_match is not None:
+        embed.set_image(url=src_url_match[0].split("#url#")[1])
+
     embed.set_author(name=pm["name"], url=pm["url"], icon_url=pm["pfp"])
-    embed.set_footer(text=f"Generázva neki: {who}")
+    embed.set_footer(text=f"Generázva neki: {ctx.message.author}")
     return embed
 
 
