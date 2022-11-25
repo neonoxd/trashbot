@@ -54,16 +54,19 @@ async def command_tenemos(cog, ctx):
 
 async def command_zene(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
+    await ctx.message.delete()
     await ctx.send(embed=embed_for("zene", random.choice(cog.trek_list), ctx.message.author))
 
 
 async def command_dog(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
+    await ctx.message.delete()
     await ctx.send(embed=embed_for("dog", random.choice(cog.dogeatdogworld), ctx.message.author))
 
 
 async def command_kocsi(cog, ctx):
     cog.logger.info("command called: {}".format(ctx.command))
+    await ctx.message.delete()
     await ctx.send(embed=embed_for("kocsi", random.choice(cog.kocsiposta), ctx.message.author))
 
 
