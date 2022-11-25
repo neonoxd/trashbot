@@ -22,6 +22,8 @@ class ShitpostCog(commands.Cog):
 			self.beescript = file.read().split("\n\n  \n")
 		with open('resources/lists/dog.list', 'r', encoding="utf8") as file:
 			self.dogeatdogworld = file.read().split("\n\n")
+		with open('resources/lists/kocsi.list', 'r', encoding="utf8") as file:
+			self.kocsiposta = file.read().split("\n\n")
 
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx):
@@ -94,6 +96,10 @@ class ShitpostCog(commands.Cog):
 	@commands.Cog.listener()
 	async def on_message(self, message):
 		await event_message(self, message)
+
+	@commands.command(name='kocsi')
+	async def kocsi(self, ctx):
+		await command_kocsi(self, ctx)
 
 # @commands.Cog.listener()
 # @commands.guild_only()

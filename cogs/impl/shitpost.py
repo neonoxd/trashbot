@@ -64,6 +64,12 @@ async def command_dog(cog, ctx):
                           title=random.choice(cog.dogeatdogworld), color=0x03fc03)
     await ctx.send(embed=embed)
 
+async def command_kocsi(cog, ctx):
+    cog.logger.info("command called: {}".format(ctx.command))
+    embed=discord.Embed(description="-Halálos iramban 3, A KOCSI",
+                        title=random.choice(cog.kocsiposta), color=0x0000ff)
+    await ctx.send(embed=embed) #halálos iramban 3 a kocsi fb page quotes -> src: kocsi.list | hunty 2022.11.25
+
 
 async def command_beemovie(cog, ctx, args):
     cog.logger.info("command called: {}".format(ctx.command))
