@@ -87,9 +87,9 @@ async def send_motd(bot):
 	module_logger.debug(f'Sending MOTD for: {guild_state.id}')
 	guild = discord.utils.get(bot.guilds, id=guild_state.id)
 	channel = guild.system_channel
+	motd_msg = ["mai üzi 🙂", "mára igy szol az ige..", "Akor együnk 😘 Berki Erzsébet 😘", "na akk a mai tőrvény:"]
 	await channel.send(embed=embed, content=random.choice(motd_msg))
 	bot.state.motd = embed
-	motd_msg = ["mai üzi 🙂", "mára igy szol az ige..", "Akor együnk 😘 Berki Erzsébet 😘", "na akk a mai tőrvény:"] 
 
 def setup(bot):
 	bot.add_cog(QuoterCog(bot))
