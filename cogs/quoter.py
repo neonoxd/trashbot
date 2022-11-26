@@ -36,7 +36,7 @@ class QuoterCog(commands.Cog):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		if ctx.bot.state.motd is not None:
-			await ctx.send(embed=ctx.bot.state.motd, content='MOTD - Message of the Day')
+			await ctx.send(embed=ctx.bot.state.motd, content='ez volt a mai de máskor figyeljel ide...')
 		else:
 			await send_motd(ctx.bot)
 
@@ -81,15 +81,15 @@ async def send_motd(bot):
 	quotekeys = list(bot.state.quotecfg.keys())
 	random_pagename = random.choice(quotekeys)
 	cog = bot.get_cog('QuoterCog')
-	embed = cog.embed_for(random_pagename, bot, 'KTJ')
+	embed = cog.embed_for(random_pagename, bot, 'mindenkinek aki szereti 🙂🙂')
 	
 	guild_state = bot.state.guilds[0]
 	module_logger.debug(f'Sending MOTD for: {guild_state.id}')
 	guild = discord.utils.get(bot.guilds, id=guild_state.id)
 	channel = guild.system_channel
-	await channel.send(embed=embed, content='MOTD - Message of the Day')
+	await channel.send(embed=embed, content=random.choice(motd_msg))
 	bot.state.motd = embed
-
+	motd_msg = ["mai üzi 🙂", "mára igy szol az ige..", "Akor együnk 😘 Berki Erzsébet 😘", "na akk a mai tőrvény:"] 
 
 def setup(bot):
 	bot.add_cog(QuoterCog(bot))
