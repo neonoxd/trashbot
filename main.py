@@ -141,4 +141,10 @@ async def reset_alert_states():
 	await reset_alert_states(bot)
 
 
+@aiocron.crontab('0 12 * * *') # 12:00
+async def motd():
+	from cogs.quoter import send_motd
+	await send_motd(bot)
+
+
 bot.run(TOKEN)
