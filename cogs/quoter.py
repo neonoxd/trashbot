@@ -14,6 +14,7 @@ class QuoterCog(commands.Cog):
 	def __init__(self, bot):
 		module_logger.info("initializing PinnerCog")
 		self.logger = module_logger
+		self.bot = bot
 		bot.state.quotecfg = json.loads(open("resources/config/quote_config.json", "r", encoding="utf8").read())
 		bot.state.quotecontent = self.read_quotes()
 
@@ -35,18 +36,18 @@ class QuoterCog(commands.Cog):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		if ctx.bot.state.motd is not None:
-			await ctx.send(embed=ctx.bot.state.motd)
+			await ctx.send(embed=ctx.bot.state.motd, content='MOTD - Message of the Day')
 		else:
 			await send_motd(ctx.bot)
 
 	def read_quotes(self):
 		self.logger.debug("reading quotes")
 		content = {}
-		for q_src_n in list(ctx.bot.state.quotecfg.keys()):
-			filepath = f'resources/lists/{ctx.bot.state.quotecfg[q_src_n]["src_file"]}'
+		for q_src_n in list(self.bot.state.quotecfg.keys()):
+			filepath = f'resources/lists/{self.bot.state.quotecfg[q_src_n]["src_file"]}'
 			if os.path.exists(filepath):
 				with open(filepath, 'r', encoding="utf8") as file:
-					content[ctx.bot.state.quotecfg[q_src_n]['src']] = file.read().split("\n\n")
+					content[self.bot.state.quotecfg[q_src_n]['src']] = file.read().split("\n\n")
 
 		return content
 

@@ -3,6 +3,8 @@ import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import List
+
+import discord
 from discord import Member, VoiceChannel
 
 module_logger = logging.getLogger('trashbot.State')
@@ -80,7 +82,7 @@ class BotState:
 	guilds: List[GuildState] = field(default_factory=list)
 	quotecfg: dict = field(default_factory=dict)
 	quotecontent: dict = field(default_factory=dict)
-	motd: discord.Embed
+	motd: discord.Embed = None
 
 	def get_guild_state_by_id(self, guild_id):
 		return next((guild_state for guild_state in self.guilds if guild_state.id == guild_id), None)
