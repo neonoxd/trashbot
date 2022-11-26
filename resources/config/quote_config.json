@@ -10,7 +10,7 @@
   },
   "dog": {
       "name": "Kiskutya megnő, oszt megharapja a nagyot",
-      "alias": "kutya,kiskutya",
+      "alias": "kutya,kiskutya,harap",
       "url": "https://www.facebook.com/kiskutyamegno",
       "pfp": "https://scontent-vie1-1.xx.fbcdn.net/v/t39.30808-6/307536737_213833987634926_7133737757398353005_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=09cbfe&_nc_ohc=b9a7hQT9HScAX-LdfLJ&tn=js4JzOtCZte-4dPs&_nc_ht=scontent-vie1-1.xx&oh=00_AfBiT1z45PDS8FeUhRn7vQL5nMknNRh7M1rp6ka4QXtyMg&oe=6386917F",
       "color": "0x03fc03",
