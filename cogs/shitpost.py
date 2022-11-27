@@ -6,7 +6,7 @@ from discord.ext import commands
 
 from cogs.impl.shitpost import command_befli, command_captcha, \
 	command_tenemos, command_beemovie, command_tension, event_voice_state_update, event_message, \
-	command_cz, announce_friday_mfs, command_gabo, command_gba
+	command_cz, announce_friday_mfs, command_gabo, command_gba, sodipedia
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
@@ -39,6 +39,11 @@ class ShitpostCog(commands.Cog):
 	@commands.command(name="gabo")
 	async def gabo(self, ctx, *args):
 		await command_gabo(self, ctx, args)
+		
+
+	@commands.command(name="sodipedia")
+	async def sodipedia(self, ctx, *args):
+		await sodipedia(self, ctx, args)
 
 	@commands.command(name="sanity")
 	async def szabo(self, ctx):
