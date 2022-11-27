@@ -42,8 +42,8 @@ class ShitpostCog(commands.Cog):
 		
 
 	@commands.command(name="sodipedia")
-	async def sodipedia(self, ctx, *args):
-		await sodipedia(self, ctx, args)
+	async def sodipedia(self, ctx):
+		await sodipedia(ctx)
 
 	@commands.command(name="sanity")
 	async def szabo(self, ctx):

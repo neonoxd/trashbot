@@ -27,15 +27,14 @@ flip_map = {
     "áll": "ül"
 }
 
-async def sodipedia(cog,ctx):
+async def sodipedia(ctx):
     from bs4 import BeautifulSoup
     import lxml.html
     result = requests.get("https://sodipedia.sodika.org/wiki/Sz%C3%B3cikkek")
     soup = BeautifulSoup(result.content,"html.parser")
     dom = lxml.html.fromstring(str(soup))
     el = dom.xpath("//th[contains(.,'Az elmúlt napok eseményei')]")[0].getparent().getparent().xpath("//li")[0]
-    await ctx.send(''.join(el.itertext()))
-
+    await ctx.send(''.join(el.itertext()))  
 
 async def command_befli(cog, ctx):
     cog.logger.info("command befli: {}".format(ctx.command))
