@@ -1,0 +1,11 @@
+{
+  "dummy": {
+      "name": "Dummy Source",
+      "alias": "dummy1",
+      "url": "https://cdn.discordapp.com/attachments/248727639127359490/630460482532409413/unknown.png ",
+      "pfp": "https://cdn.discordapp.com/attachments/248727639127359490/630460482532409413/unknown.png ",
+      "color": "0xff00ff",
+      "src": "dummysrc",
+      "src_file": "dummy.list"
+  }
+}

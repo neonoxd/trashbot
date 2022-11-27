@@ -7,6 +7,8 @@ import discord
 from discord import Member
 from discord.ext import commands
 
+from utils.helpers import get_resource_name_or_user_override
+
 module_logger = logging.getLogger('trashbot.AdminCog')
 
 
@@ -37,6 +39,19 @@ class AdminCog(commands.Cog):
         self.bot = bot
         self.logger = module_logger
 
+    @commands.command(name="info", hidden=True)
+    async def dump_info(self, ctx):
+        await ctx.message.delete()
+        embed = discord.Embed(title="Van itt minden", description="ez meg az")
+        embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
+                         icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
+
+        dump = self.bot.globals.verinfo
+        for key in list(dump.keys()):
+            embed.add_field(name=key, value=dump[key], inline=False)
+
+        await ctx.send(embed=embed)
+
     @commands.command(name="ping")
     async def ping(self, ctx: commands.Context):
         """Get the bot's current websocket and API latency."""
@@ -55,17 +70,11 @@ class AdminCog(commands.Cog):
 
     @commands.command(name='rr', hidden=True)
     async def reload_resources(self, ctx):
-        slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'
-        with open(slur_path, 'r', encoding="utf8") as file:
-            slur_list = file.readlines()
+        with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
+            ctx.bot.globals.slurs = file.readlines()
 
-        status_path = 'usr/lists/status.list' if os.path.isfile(
-            'usr/lists/status.list') else 'resources/lists/status.list'
-        with open(status_path, 'r', encoding="utf8") as file:
-            status_list = file.readlines()
-
-        ctx.bot.globals.slurs = slur_list
-        ctx.bot.globals.statuses = status_list
+        with open(get_resource_name_or_user_override("lists/status.list"), 'r', encoding="utf8") as file:
+            ctx.bot.globals.statuses = file.readlines()
 
         await ctx.bot.change_presence(activity=discord.Game(
             random.choice(ctx.bot.globals.statuses)

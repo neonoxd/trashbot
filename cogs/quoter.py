@@ -7,6 +7,8 @@ import re
 import discord
 from discord.ext import commands
 
+from utils.helpers import get_resource_name_or_user_override
+
 module_logger = logging.getLogger('trashbot.QuoterCog')
 
 
@@ -15,14 +17,15 @@ class QuoterCog(commands.Cog):
 		module_logger.info("initializing QuoterCog")
 		self.logger = module_logger
 		self.bot = bot
-		bot.state.quotecfg = json.loads(open("resources/config/quote_config.json", "r", encoding="utf8").read())
+		bot.state.quotecfg = json.loads(open(get_resource_name_or_user_override("config/quote_sources.json"), "r", encoding="utf8").read())
 		bot.state.quotecontent = self.read_quotes()
 
 	@commands.command(name='qr')
 	async def quote_reload(self, ctx):
+		"""reload quotes"""
 		await ctx.message.delete()
 		self.logger.info("command called: {}".format(ctx.command))
-		ctx.bot.state.quotecfg = json.loads(open("resources/config/quote_config.json", "r", encoding="utf8").read())
+		ctx.bot.state.quotecfg = json.loads(open(get_resource_name_or_user_override("config/quote_sources.json"), "r", encoding="utf8").read())
 		ctx.bot.state.quotecontent = self.read_quotes()
 
 	@commands.command(name='quote', aliases=['q'])
@@ -45,7 +48,7 @@ class QuoterCog(commands.Cog):
 		self.logger.debug("reading quotes")
 		content = {}
 		for q_src_n in list(self.bot.state.quotecfg.keys()):
-			filepath = f'resources/lists/{self.bot.state.quotecfg[q_src_n]["src_file"]}'
+			filepath = get_resource_name_or_user_override(f'lists/{self.bot.state.quotecfg[q_src_n]["src_file"]}')
 			if os.path.exists(filepath):
 				with open(filepath, 'r', encoding="utf8") as file:
 					content[self.bot.state.quotecfg[q_src_n]['src']] = file.read().split("\n\n")

@@ -12,6 +12,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from cogs.impl.shitpost import announce_friday_mfs
+from utils.helpers import get_resource_name_or_user_override
 from utils.state import BotState, BotConfig
 
 load_dotenv()
@@ -52,7 +53,7 @@ intents = discord.Intents.all()
 bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
 
-async def setup():
+async def setup_state():
 	bot.state = BotState()
 	bot.globals = BotConfig(
 		ph_token=os.getenv("PHTOKEN"),
@@ -71,28 +72,22 @@ async def setup():
 		l_id=int(os.getenv("L_ID"))
 	)
 
-	slur_path = 'usr/lists/slur.list' if os.path.isfile('usr/lists/slur.list') else 'resources/lists/slur.list'
-	with open(slur_path, 'r', encoding="utf8") as file:
-		slur_list = file.readlines()
+	with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
+		bot.globals.slurs = file.readlines()
 
-	status_path = 'usr/lists/status.list' if os.path.isfile(
-		'usr/lists/status.list') else 'resources/lists/status.list'
-	with open(status_path, 'r', encoding="utf8") as file:
-		status_list = file.readlines()
-
-	bot.globals.slurs = slur_list
-	bot.globals.statuses = status_list
+	with open(get_resource_name_or_user_override("lists/status.list"), 'r', encoding="utf8") as file:
+		bot.globals.statuses = file.readlines()
 
 	bot.globals.t_states = [
 		"A horrible chill goes down your spine...", "Screams echo around you...", "Eater of Worlds has awoken!"
 	]
 
-	ghost_ids = [int(ghost_id) for ghost_id in os.getenv("GHOST_IDS").split(",")] if os.getenv(
+	bot.globals.ghost_ids = [int(ghost_id) for ghost_id in os.getenv("GHOST_IDS").split(",")] if os.getenv(
 		"GHOST_IDS") is not None \
 		else []
 
-	bot.globals.ghost_ids = ghost_ids
 
+async def setup_cogs():
 	# load cogs
 
 	debug_load_cogs = os.getenv("DEBUG_LOAD_COGS").split(",") if os.getenv(
@@ -111,13 +106,23 @@ async def setup():
 
 async def main():
 	async with bot:
-		await setup()
+		await setup_state()
+		await setup_cogs()
 		await bot.start(TOKEN)
 
 
 @bot.event
 async def on_ready():
-	logger.debug(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
+	ver = os.popen("git rev-parse --short HEAD").read()
+	bot.globals.verinfo["Tibi"] = ver
+	bot.globals.verinfo["discord.py"] = discord.__version__
+	bot.globals.verinfo["Bot User"] = bot.user.name
+	bot.globals.verinfo["Bot ID"] = bot.user.id
+
+	logger.debug(f'\n\n'
+				 f'Logged in as: {bot.user.name} - {bot.user.id}\n'
+				 f'Version: {discord.__version__}\n'
+				 f'Running on commit: {ver}')
 
 	await bot.change_presence(activity=discord.Game(
 		random.choice(bot.globals.statuses)
@@ -129,6 +134,7 @@ async def on_ready():
 		from cogs.impl.shitpost import think
 		bot.state.track_guild(guild.id)
 		bot.loop.create_task(think(bot, guild.system_channel))
+		await guild.system_channel.send("na re")
 
 	logger.debug(f'Successfully logged in and booted...!')
 

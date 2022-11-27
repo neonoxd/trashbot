@@ -11,7 +11,8 @@ import requests
 from PIL import Image, ImageDraw, ImageFont
 from discord.utils import get
 
-from utils.helpers import has_link, replace_str_index, get_user_nick_or_name, find_font_file
+from utils.helpers import has_link, replace_str_index, get_user_nick_or_name, find_font_file, \
+    get_resource_name_or_user_override
 
 module_logger = logging.getLogger('trashbot.Shitpost.impl')
 
@@ -221,8 +222,7 @@ async def handle_maymay(message):
 
 
 def get_kutfuras():
-    kutfuras_path = 'usr/lists/gba.list' if os.path.isfile('usr/lists/gba.list') else 'resources/lists/gba.list'
-    with open(kutfuras_path, 'r', encoding="utf8") as file:
+    with open(get_resource_name_or_user_override("lists/gba.list"), 'r', encoding="utf8") as file:
         kutfuras = file.read().split(',')
 
     out = random.choice(kutfuras)

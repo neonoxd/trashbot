@@ -10,7 +10,7 @@ import timeago
 from discord import Embed
 from discord.ext import commands
 
-from utils.helpers import create_alphanumeric_string
+from utils.helpers import create_alphanumeric_string, get_resource_name_or_user_override
 
 module_logger = logging.getLogger('trashbot.MiscCog')
 
@@ -240,9 +240,7 @@ class MiscCog(commands.Cog):
 		cookies = dict(cookies_are=self.bot.globals.yt_cookie)
 		headers = {"Content-Type": "text/html"}
 
-		channel_list_path = 'usr/lists/trashyt.list' if os.path.isfile(
-			'usr/lists/trashyt.list') else 'resources/lists/trashyt.list'
-		with open(channel_list_path, 'r', encoding="utf8") as file:
+		with open(get_resource_name_or_user_override("lists/trashyt.list"), 'r', encoding="utf8") as file:
 			channel_list = file.readlines()
 
 		channels_to_check = [Channel(channel_entry.split(";")[0], channel_entry.split(";")[1]) for channel_entry in channel_list]
