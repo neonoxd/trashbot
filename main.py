@@ -1,13 +1,14 @@
-import json
-import os
+import asyncio
 import logging
+import os
 import random
+import traceback
+from os import listdir
+from os.path import isfile, join
+
 import aiocron
 import discord
 from discord.ext import commands
-from os import listdir
-from os.path import isfile, join
-import traceback
 from dotenv import load_dotenv
 
 from cogs.impl.shitpost import announce_friday_mfs
@@ -46,13 +47,12 @@ def get_prefix(command_bot, message):
 
 cogs_dir = "cogs"
 
-intents = discord.Intents.default()
-intents.members = True
+intents = discord.Intents.all()
 
 bot = commands.Bot(command_prefix=get_prefix, intents=intents)
 
-if __name__ == '__main__':
 
+async def setup():
 	bot.state = BotState()
 	bot.globals = BotConfig(
 		ph_token=os.getenv("PHTOKEN"),
@@ -75,7 +75,8 @@ if __name__ == '__main__':
 	with open(slur_path, 'r', encoding="utf8") as file:
 		slur_list = file.readlines()
 
-	status_path = 'usr/lists/status.list' if os.path.isfile('usr/lists/status.list') else 'resources/lists/status.list'
+	status_path = 'usr/lists/status.list' if os.path.isfile(
+		'usr/lists/status.list') else 'resources/lists/status.list'
 	with open(status_path, 'r', encoding="utf8") as file:
 		status_list = file.readlines()
 
@@ -86,24 +87,32 @@ if __name__ == '__main__':
 		"A horrible chill goes down your spine...", "Screams echo around you...", "Eater of Worlds has awoken!"
 	]
 
-	ghost_ids = [int(ghost_id) for ghost_id in os.getenv("GHOST_IDS").split(",")] if os.getenv("GHOST_IDS") is not None \
+	ghost_ids = [int(ghost_id) for ghost_id in os.getenv("GHOST_IDS").split(",")] if os.getenv(
+		"GHOST_IDS") is not None \
 		else []
 
 	bot.globals.ghost_ids = ghost_ids
 
 	# load cogs
 
-	debug_load_cogs = os.getenv("DEBUG_LOAD_COGS").split(",") if os.getenv("DEBUG_LOAD_COGS") is not None else []
+	debug_load_cogs = os.getenv("DEBUG_LOAD_COGS").split(",") if os.getenv(
+		"DEBUG_LOAD_COGS") is not None else []
 
 	for extension in [
 		f.replace('.py', '') for f in listdir(cogs_dir)
 		if isfile(join(cogs_dir, f)) and (len(debug_load_cogs) == 0 or f.replace('.py', '') in debug_load_cogs)
 	]:
 		try:
-			bot.load_extension(cogs_dir + "." + extension)
+			await bot.load_extension(cogs_dir + "." + extension)
 		except (discord.ClientException, ModuleNotFoundError):
 			logger.error(f'Failed to load extension {extension}.')
 			traceback.print_exc()
+
+
+async def main():
+	async with bot:
+		await setup()
+		await bot.start(TOKEN)
 
 
 @bot.event
@@ -147,4 +156,5 @@ async def motd():
 	await send_motd(bot)
 
 
-bot.run(TOKEN)
+if __name__ == '__main__':
+	asyncio.run(main())

@@ -222,5 +222,5 @@ class SoundBoardCog(commands.Cog):
 		await msg.delete()
 
 
-def setup(bot):
-	bot.add_cog(SoundBoardCog(bot))
+async def setup(bot):
+	await bot.add_cog(SoundBoardCog(bot))

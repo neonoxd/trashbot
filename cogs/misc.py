@@ -148,11 +148,14 @@ class MiscCog(commands.Cog):
 
 	@commands.command(name="kot")
 	async def kot(self, ctx):
+		await ctx.message.delete()
 		async with aiohttp.ClientSession() as session:
 			async with session.get('http://aws.random.cat/meow') as r:
 				if r.status == 200:
 					js = await r.json()
 					await ctx.send(js['file'])
+				else:
+					self.logger.warning(f"resp {r}")
 
 	@commands.command(name="cook")
 	async def cook(self, ctx, *args):
@@ -251,5 +254,5 @@ class MiscCog(commands.Cog):
 		await ctx.send("\n".join(statuses))
 
 
-def setup(bot):
-	bot.add_cog(MiscCog(bot))
+async def setup(bot):
+	await bot.add_cog(MiscCog(bot))

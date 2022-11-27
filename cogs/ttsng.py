@@ -48,5 +48,5 @@ class TtsEngine(commands.Cog):
 		ctx.voice_client.play(discord.FFmpegPCMAudio(executable=self.bot.cvars["FFMPEG_PATH"], source=filename), after=lambda e: os.remove(filename))
 
 
-def setup(bot):
-	bot.add_cog(TtsEngine(bot))
+async def setup(bot):
+	await bot.add_cog(TtsEngine(bot))

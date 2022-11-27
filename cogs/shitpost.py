@@ -89,5 +89,5 @@ class ShitpostCog(commands.Cog):
 #	await event_typing(self, channel, user, when)
 
 
-def setup(bot):
-	bot.add_cog(ShitpostCog(bot))
+async def setup(bot):
+	await bot.add_cog(ShitpostCog(bot))

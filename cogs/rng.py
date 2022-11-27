@@ -43,5 +43,5 @@ def roll(args):
 		return random.randrange(0, 100)
 
 
-def setup(bot):
-	bot.add_cog(RandomsCog(bot))
+async def setup(bot):
+	await bot.add_cog(RandomsCog(bot))

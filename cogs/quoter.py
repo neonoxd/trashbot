@@ -12,7 +12,7 @@ module_logger = logging.getLogger('trashbot.QuoterCog')
 
 class QuoterCog(commands.Cog):
 	def __init__(self, bot):
-		module_logger.info("initializing PinnerCog")
+		module_logger.info("initializing QuoterCog")
 		self.logger = module_logger
 		self.bot = bot
 		bot.state.quotecfg = json.loads(open("resources/config/quote_config.json", "r", encoding="utf8").read())
@@ -20,6 +20,7 @@ class QuoterCog(commands.Cog):
 
 	@commands.command(name='qr')
 	async def quote_reload(self, ctx):
+		await ctx.message.delete()
 		self.logger.info("command called: {}".format(ctx.command))
 		ctx.bot.state.quotecfg = json.loads(open("resources/config/quote_config.json", "r", encoding="utf8").read())
 		ctx.bot.state.quotecontent = self.read_quotes()
@@ -91,5 +92,6 @@ async def send_motd(bot):
 	await channel.send(embed=embed, content=random.choice(motd_msg))
 	bot.state.motd = embed
 
-def setup(bot):
-	bot.add_cog(QuoterCog(bot))
+
+async def setup(bot):
+	await bot.add_cog(QuoterCog(bot))

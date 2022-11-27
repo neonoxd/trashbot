@@ -155,5 +155,5 @@ class MusicBot(commands.Cog):
 			ctx.voice_client.stop()
 
 
-def setup(bot):
-	bot.add_cog(MusicBot(bot))
+async def setup(bot):
+	await bot.add_cog(MusicBot(bot))

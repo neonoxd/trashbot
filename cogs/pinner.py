@@ -63,5 +63,5 @@ class PinnerCog(commands.Cog):
 			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
 
 
-def setup(bot):
-	bot.add_cog(PinnerCog(bot))
+async def setup(bot):
+	await bot.add_cog(PinnerCog(bot))
