@@ -1,11 +1,10 @@
 import asyncio
 import datetime
+import glob
 import io
 import logging
-import random
-import glob
 import os
-import re
+import random
 
 import discord
 import requests

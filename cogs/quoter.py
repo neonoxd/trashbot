@@ -29,8 +29,8 @@ class QuoterCog(commands.Cog):
 	async def quote(self, ctx, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
-		if len(args) > 0:
-			await ctx.send(embed=self.embed_for(args[0], ctx.bot, ctx.message.author))
+		pn = args[0] if len(args) > 0 else random.choice(list(self.bot.state.quotecfg.keys()))
+		await ctx.send(embed=self.embed_for(pn, ctx.bot, ctx.message.author))
 
 	@commands.command(name='motd')
 	async def motd(self, ctx):
@@ -55,7 +55,7 @@ class QuoterCog(commands.Cog):
 	@staticmethod
 	def embed_for(page_name, bot, author):
 		pm = None
-		for q_src_n in list (bot.state.quotecfg.keys()):
+		for q_src_n in list(bot.state.quotecfg.keys()):
 			if "alias" in bot.state.quotecfg[q_src_n]:
 				if page_name in bot.state.quotecfg[q_src_n]["alias"].split(","):
 					pm = bot.state.quotecfg[q_src_n]
@@ -83,7 +83,7 @@ async def send_motd(bot):
 	random_pagename = random.choice(quotekeys)
 	cog = bot.get_cog('QuoterCog')
 	embed = cog.embed_for(random_pagename, bot, 'mindenkinek aki szereti 🙂🙂')
-	
+
 	guild_state = bot.state.guilds[0]
 	module_logger.debug(f'Sending MOTD for: {guild_state.id}')
 	guild = discord.utils.get(bot.guilds, id=guild_state.id)
