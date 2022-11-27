@@ -8,6 +8,7 @@ import os
 
 from discord import opus
 
+
 def load_opus_lib():
 	if opus.is_loaded():
 		return
@@ -43,7 +44,7 @@ ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 ffmpeg_options = {
 	'options': '-vn'
 }
-# dotenv.load_dotenv()
+
 ffmpg = os.getenv("FFMPEG_PATH")
 
 module_logger = logging.getLogger('trashbot.MusicBot')
@@ -88,9 +89,9 @@ class MusicBot(commands.Cog):
 		module_logger.info("initializing MusicBot")
 
 	@commands.command()
-	async def join(self, ctx, *, channel: discord.VoiceChannel):
+	async def join(self, ctx):
 		"""Joins a voice channel"""
-
+		channel = ctx.author.voice.channel
 		if ctx.voice_client is not None:
 			return await ctx.voice_client.move_to(channel)
 
@@ -106,7 +107,7 @@ class MusicBot(commands.Cog):
 	# 	await ctx.send('Now playing: {}'.format(query))
 
 	@commands.command()
-	async def yt(self, ctx, *, url):
+	async def play(self, ctx, *, url):
 		"""Plays from a url (almost anything youtube_dl supports)"""
 
 		async with ctx.typing():
@@ -141,7 +142,7 @@ class MusicBot(commands.Cog):
 
 		await ctx.voice_client.disconnect()
 
-	@yt.before_invoke
+	@play.before_invoke
 	@stream.before_invoke
 	async def ensure_voice(self, ctx):
 		if ctx.voice_client is None:

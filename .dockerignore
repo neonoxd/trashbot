@@ -1,0 +1,9 @@
+/stuff.md
+/bot.log
+/.gitignore
+/.env
+/usr/
+**/.git
+**/.idea
+**/venv
+**/__pycache__

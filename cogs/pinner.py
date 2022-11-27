@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import discord
 
 from utils.helpers import todo
 from discord.ext import commands
@@ -27,7 +28,7 @@ class PinnerCog(commands.Cog):
 
 	def persist_pins(self):
 		with open(self.pin_path, 'w') as outfile:
-			json.dump(self.pins, outfile)
+			json.dump(self.pins, outfile, indent=4, sort_keys=True)
 
 	async def add_pin(self, ctx, pin_obj):
 		self.pins = {**self.pins, **pin_obj}
@@ -55,8 +56,11 @@ class PinnerCog(commands.Cog):
 			self.persist_pins()
 
 	@commands.command(name='pins')
-	async def list_pins(self, ctx):
-		await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
+	async def list_pins(self, ctx, arg=None):
+		if arg is not None and arg == "dump":
+			await ctx.send(file=discord.File(self.pin_path, 'pins.json'))
+		else:
+			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
 
 
 def setup(bot):

@@ -1,4 +1,7 @@
 venv
 .env
-usr
 .idea
+usr/**
+/bot.log
+__pycache__/
+*.pyc

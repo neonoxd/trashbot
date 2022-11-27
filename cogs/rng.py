@@ -14,7 +14,7 @@ class RandomsCog(commands.Cog):
 
 	@commands.command(name='vandam')
 	async def vandam(self,ctx, *args):
-		from cogs.shitpost import mercy_maybe
+		from cogs.impl.shitpost import mercy_maybe
 		self.logger.info("command called: {}".format(ctx.command))
 		if len(args) > 0:
 			await mercy_maybe(self.bot, ctx.channel, int(args[0]))
@@ -32,11 +32,6 @@ class RandomsCog(commands.Cog):
 		if len(args) == 0:
 			return
 		await ctx.send("a ketrec harc gyöz tese: {}".format(random.choice(args)))
-
-	@commands.Cog.listener()
-	async def on_message(self, message):
-		if message.author == self.bot.user:
-			return
 
 
 def roll(args):

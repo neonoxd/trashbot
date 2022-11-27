@@ -18,7 +18,9 @@ class SoundBoardCog(commands.Cog):
 		self.current_vc = None
 
 	def read_sounds(self):
-		path = self.bot.cvars["SNDS_PATH"]
+		path = self.bot.globals.sounds_path
+		if not os.path.exists(path):
+			return {}
 		all_sounds = {}
 		categories = [f.name for f in os.scandir(path) if f.is_dir()]
 		for cat in categories:
@@ -26,11 +28,28 @@ class SoundBoardCog(commands.Cog):
 		return all_sounds
 
 	def sound_path(self, category, soundfile):
-		return os.path.join(self.bot.cvars["SNDS_PATH"], category, soundfile)
+		return os.path.join(self.bot.globals.sounds_path, category, soundfile)
 
 	async def play_file(self, vc, file):
 		await asyncio.sleep(.5)
-		vc.play(discord.FFmpegPCMAudio(executable=self.bot.cvars["FFMPEG_PATH"], source=file))
+		vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=file))
+
+	def find_sound_by_name(self, name):
+		file = None
+		sounds = self.sounds
+		found_sounds = []
+
+		for category in list(sounds.keys()):
+			for idx, sound in enumerate(sounds[category]):
+				if name == sound or name == os.path.splitext(sound)[0]:
+					found_sounds.append((category, idx))
+
+		if len(found_sounds) > 0:
+			cat = found_sounds[0][0]
+			s_idx = found_sounds[0][1]
+			f_name = self.sounds[cat][s_idx]
+			file = self.sound_path(cat, f_name)
+		return file
 
 	def get_random_sound(self):
 		categ = random.choice(list(self.sounds.keys()))
@@ -50,7 +69,6 @@ class SoundBoardCog(commands.Cog):
 		return self.current_vc is not None and self.current_vc.is_connected()
 
 	async def get_or_connect_vc(self, ctx):
-		vc = None
 		if self.in_vc():
 			vc = self.current_vc
 		else:
@@ -58,10 +76,10 @@ class SoundBoardCog(commands.Cog):
 			self.current_vc = vc
 		return vc
 
-	@commands.command(name='sr', hidden=True)
-	@commands.is_owner()
-	async def reload_sounds(self, ctx):
-		self.sounds = self.read_sounds_list()
+	@commands.command(name='reloadsounds')
+	async def reload(self, ctx):
+		module_logger.debug("reloading sounds")
+		self.sounds = self.read_sounds()
 
 	@commands.command(name='summon')
 	async def summon(self, ctx):
@@ -78,18 +96,35 @@ class SoundBoardCog(commands.Cog):
 			await ctx.send(str(ctx.author.name) + "is not in a channel.")
 		await ctx.message.delete()
 
-	def find_sound_by_name(self, name):
-		file = None
-		r = [(z, self.sounds[z].index(name)) for z in list(self.sounds.keys()) if name in self.sounds[z]]
-		if len(r) > 0:
-			cat = r[0][0]
-			s_idx = r[0][1]
-			f_name = self.sounds[cat][s_idx]
-			file = self.sound_path(cat, f_name)
-		return file
+	async def play_source_if_vc(self, source, delay):
+		if self.in_vc():
+			vc = self.current_vc
+			await asyncio.sleep(delay)
+			vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=source))
+
+	@commands.Cog.listener()
+	async def on_voice_state_update(self, member, before, after):
+
+		join_map = {
+			self.bot.globals.sz_id: f"resources/sounds/door{random.randrange(1,4)}.ogg",
+			self.bot.globals.d_id: f"resources/sounds/join_hola.wav",
+			self.bot.globals.ps_id: f"resources/sounds/pspsps.mp3"
+		}
+
+		exit_map = {
+			self.bot.globals.d_id: f"resources/sounds/out_chau.wav"
+		}
+
+		if before.channel is None and after.channel is not None:  # user connected
+			if member.id in join_map:
+				await self.play_source_if_vc(join_map[member.id], .5)
+
+		if before.channel is not None and after.channel is None:  # user disconnected
+			if member.id in exit_map:
+				await self.play_source_if_vc(exit_map[member.id], .5)
 
 	@commands.command(name='sound')
-	async def x(self, ctx, *args):
+	async def play_sound(self, ctx, *args):
 		file = None
 		async with ctx.typing():
 			vc = await self.get_or_connect_vc(ctx)
@@ -109,31 +144,32 @@ class SoundBoardCog(commands.Cog):
 			await ctx.send("mi")
 
 	@commands.command(name='listsounds')
-	async def listsnds(self, ctx):
+	async def list_sounds(self, ctx):
 		snds = ""
 		for key in list(self.sounds.keys()):
-			snds += f'{key}:\n\t{", ".join(self.sounds[key])}\n'
+			snds += f'{key}:\n\t{", ".join([os.path.splitext(snd)[0] for snd in self.sounds[key]])}\n'
 		await ctx.send(f'```yml\n{snds}```')
 
 	@staticmethod
-	def format_embed_sounds(slice, page):
-
+	def format_embed_sounds(sounds_slice, page):
 		embed = discord.Embed(title="valasz vmit", description=f"{page + 1}. oldal", color=0xed0707)
-		for i in range(len(slice)):
-			embed.add_field(name=f"{i}.", value=slice[i], inline=True)
-		embed.set_footer(text="all rights to artsits 2020 @ kTJ")
+		for i in range(len(sounds_slice)):
+			embed.add_field(name=f"{i}.", value=sounds_slice[i])
+		embed.set_footer(text="all right to artsits 2022 @ kTJ")
 
 		return embed
 
 	@commands.command(name="select", hidden=True)
-	async def select(self, ctx):
-		# TODO: make paginator generic
+	async def select(self, ctx, *args):
+		# TODO: make paginator generic, fix reading new sound list format
 		self.logger.debug('sound selecta')
+
+		chosen_category = args[0] if len(args) > 0 else random.choice(list(self.sounds.keys()))
 
 		page_size = 10
 		page = 0
 
-		act_slice = list(self.sounds.keys())[page * page_size:page * page_size + page_size]
+		act_slice = list(self.sounds[chosen_category])[page * page_size:page * page_size + page_size]
 		msg = await ctx.channel.send(embed=self.format_embed_sounds(act_slice, page))
 		await ctx.message.delete()
 
@@ -160,15 +196,15 @@ class SoundBoardCog(commands.Cog):
 
 				if reaction.emoji in ["◀", "▶"]:
 					self.logger.info(f'switching page {reaction.emoji}')
-					page = page + 1
-					act_slice = list(self.sounds.keys())[page * page_size:page * page_size + page_size]
+					page = page + 1 if reaction.emoji == "▶" else page - 1
+					act_slice = list(self.sounds[chosen_category])[page * page_size:page * page_size + page_size]
 					await msg.edit(embed=self.format_embed_sounds(act_slice, page))
 				else:
 					try:
 						remoji_num = reaction.emoji[:-1]
 						selectable_nums = n_emojis[:10]
 						if remoji_num in selectable_nums:
-							selection = selectable_nums.index(remoji_num)
+							selection = selectable_nums.index(str(remoji_num))
 					except TypeError as ex:
 						await ctx.send(f'te hülye vagy gec {user.mention}')
 			except asyncio.TimeoutError:
@@ -177,8 +213,12 @@ class SoundBoardCog(commands.Cog):
 			except Exception as e:
 				self.logger.error(e, exc_info=True)
 				selection = -2
-		if selection > 0:
+		if selection >= 0:
 			self.logger.debug(f'selected: {selection}. -> {act_slice[selection]}')
+			vc = await self.get_or_connect_vc(ctx)
+			file = self.sound_path(chosen_category, act_slice[selection])
+			await self.play_file(vc, file)
+
 		await msg.delete()
 
 
