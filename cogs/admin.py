@@ -1,8 +1,11 @@
 import asyncio
+import json
 import logging
 import time
 import random
 import os
+
+import aiohttp
 import discord
 from discord import Member
 from discord.ext import commands
@@ -10,6 +13,9 @@ from discord.ext import commands
 from utils.helpers import get_resource_name_or_user_override
 
 module_logger = logging.getLogger('trashbot.AdminCog')
+
+editor_url = os.getenv("EDITOR_API_URL")
+editor_allowlist_config = os.getenv("EDITOR_ALLOWLIST_CFG")
 
 
 def command_list_aware(cls):
@@ -32,12 +38,45 @@ def set_command(name=None):
     return inner
 
 
+class EditorFileSelect(discord.ui.Select):
+    def __init__(self):
+        self.logger = module_logger
+        with open(editor_allowlist_config, "r") as f:
+            allowlist_config = json.loads(f.read())
+            options = [
+                discord.SelectOption(label=cfg_k, emoji="📜", description=allowlist_config[cfg_k])
+                for cfg_k in list(allowlist_config.keys())
+            ]
+            super().__init__(placeholder="Select an option", max_values=1, min_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction):
+        url = f'{editor_url}/request/{self.values[0]}'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as r:
+                if r.status == 200:
+                    resp = await r.read()
+                    await interaction.response.send_message(content=resp.decode(), ephemeral=True)
+                else:
+                    self.logger.warning(f"resp {r}")
+
+
+class EditorFileSelectView(discord.ui.View):
+    def __init__(self, *, timeout=180):
+        super().__init__(timeout=timeout)
+        self.add_item(EditorFileSelect())
+
+
 @command_list_aware
 class AdminCog(commands.Cog):
     def __init__(self, bot):
         module_logger.info("initializing AdminCog")
         self.bot = bot
         self.logger = module_logger
+
+    @commands.command(name="edit", hidden=True)
+    async def edit(self, ctx):
+        await ctx.message.delete()
+        await ctx.send("Editable files:", view=EditorFileSelectView())
 
     @commands.command(name="info", hidden=True)
     async def dump_info(self, ctx):
