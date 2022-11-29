@@ -4,11 +4,13 @@ import logging
 import time
 import random
 import os
+from typing import Optional, Literal
 
 import aiohttp
 import discord
-from discord import Member
+from discord import Member, app_commands
 from discord.ext import commands
+from discord.ext.commands import Context, Greedy
 
 from utils.helpers import get_resource_name_or_user_override
 
@@ -57,8 +59,7 @@ class EditorFileSelect(discord.ui.Select):
                 async with session.get(url) as r:
                     if r.status == 200:
                         resp = await r.read()
-                        await interaction.message.delete()
-                        await interaction.response.send_message(content=resp.decode(), ephemeral=True)
+                        await interaction.response.edit_message(content=resp.decode(), view=None)
                     else:
                         self.logger.warning(f"resp {r}")
         else:
@@ -78,10 +79,60 @@ class AdminCog(commands.Cog):
         self.bot = bot
         self.logger = module_logger
 
-    @commands.command(name="edit", hidden=True)
-    async def edit(self, ctx):
+    @commands.command(name="sync", hidden=True)
+    @commands.guild_only()
+    @commands.is_owner()
+    async def sync(self, ctx: Context, guilds: Greedy[discord.Object], spec: Optional[Literal["~", "*", "^"]] = None) -> None:
+        """
+            do bist stollen
+            synchronizes slash commands with server
+        """
         await ctx.message.delete()
-        await ctx.send("Editable files:", view=EditorFileSelectView(ctx.message.author))
+        if not guilds:
+            if spec == "~":
+                synced = await ctx.bot.tree.sync(guild=ctx.guild)
+            elif spec == "*":
+                ctx.bot.tree.copy_global_to(guild=ctx.guild)
+                synced = await ctx.bot.tree.sync(guild=ctx.guild)
+            elif spec == "^":
+                ctx.bot.tree.clear_commands(guild=ctx.guild)
+                await ctx.bot.tree.sync(guild=ctx.guild)
+                synced = []
+            else:
+                synced = await ctx.bot.tree.sync()
+
+            await ctx.send(
+                f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+            )
+            return
+
+        ret = 0
+        for guild in guilds:
+            try:
+                await ctx.bot.tree.sync(guild=guild)
+            except discord.HTTPException:
+                pass
+            else:
+                ret += 1
+
+        await ctx.send(f"Synced the tree to {ret}/{len(guilds)}.")
+
+    @app_commands.command(name="edit-usercontent")
+    async def edit(self, interaction: discord.Interaction):
+        """ /edit-usercontent """
+        await interaction.response.send_message("Editable files:", view=EditorFileSelectView(interaction.user), ephemeral=True)
+
+    @app_commands.command(name="add-usercontent")
+    async def addusercontent(self, interaction: discord.Interaction) -> None:
+        """ /add-usercontent """
+        url = f'{editor_url}/request_upload'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as r:
+                if r.status == 200:
+                    resp = await r.read()
+                    await interaction.response.send_message(content=resp.decode(), ephemeral=True)
+                else:
+                    self.logger.warning(f"resp {r}")
 
     @commands.command(name="info", hidden=True)
     async def dump_info(self, ctx):
