@@ -3,18 +3,20 @@ import logging
 import os
 import random
 import re
+from typing import Optional
 
 import discord
 from discord.ext import commands
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Context
 
 from utils.helpers import get_resource_name_or_user_override
+from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.QuoterCog')
 
 
 class QuoterCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		module_logger.info("initializing QuoterCog")
 		self.logger = module_logger
 		self.bot = bot
@@ -57,7 +59,7 @@ class QuoterCog(commands.Cog):
 		return content
 
 	@staticmethod
-	def embed_for(page_name, bot: Bot, author: str):
+	def embed_for(page_name, bot: TrashBot, author: str):
 		pm = None
 		for q_src_n in list(bot.state.quotecfg.keys()):
 			if "alias" in bot.state.quotecfg[q_src_n]:
@@ -82,10 +84,10 @@ class QuoterCog(commands.Cog):
 		return embed
 
 
-async def send_motd(bot: Bot):
+async def send_motd(bot: TrashBot):
 	quotekeys = list(bot.state.quotecfg.keys())
 	random_pagename = random.choice(quotekeys)
-	cog = bot.get_cog('QuoterCog')
+	cog: Optional[QuoterCog] = bot.get_cog('QuoterCog')
 	embed = cog.embed_for(random_pagename, bot, 'mindenkinek aki szereti 🙂🙂')
 
 	guild_state = bot.state.guilds[0]
@@ -97,5 +99,5 @@ async def send_motd(bot: Bot):
 	bot.state.motd = embed
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(QuoterCog(bot))

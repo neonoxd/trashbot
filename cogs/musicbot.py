@@ -1,13 +1,14 @@
 import asyncio
 import logging
+import os
 
 import discord
 import youtube_dl as youtube_dl
-from discord.ext import commands
-import os
-
 from discord import opus
-from discord.ext.commands import Bot, Context
+from discord.ext import commands
+from discord.ext.commands import Context
+
+from utils.state import TrashBot
 
 
 def load_opus_lib():
@@ -83,7 +84,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class MusicBot(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		load_opus_lib()
 		self.bot = bot
 		self.queue = []
@@ -156,5 +157,5 @@ class MusicBot(commands.Cog):
 			ctx.voice_client.stop()
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(MusicBot(bot))

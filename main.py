@@ -12,7 +12,7 @@ from discord.ext import commands
 from dotenv import load_dotenv
 
 from utils.helpers import get_resource_name_or_user_override
-from utils.state import BotState, BotConfig
+from utils.state import BotState, BotConfig, TrashBot
 
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -49,7 +49,8 @@ cogs_dir = "cogs"
 
 intents = discord.Intents.all()
 
-bot = commands.Bot(command_prefix=get_prefix, intents=intents)
+
+bot = TrashBot(command_prefix=get_prefix, intents=intents)
 
 
 async def setup_state():

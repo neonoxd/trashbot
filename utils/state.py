@@ -6,6 +6,7 @@ from typing import List
 
 import discord
 from discord import Member, VoiceChannel
+from discord.ext import commands
 
 module_logger = logging.getLogger('trashbot.State')
 
@@ -134,3 +135,8 @@ class BotConfig:
 			return True
 		else:
 			return False
+
+
+class TrashBot(commands.Bot):
+	state: BotState
+	globals: BotConfig

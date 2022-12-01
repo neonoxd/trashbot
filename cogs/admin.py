@@ -13,6 +13,7 @@ from discord.ext import commands
 from discord.ext.commands import Context, Greedy, Bot
 
 from utils.helpers import get_resource_name_or_user_override
+from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.AdminCog')
 
@@ -74,7 +75,7 @@ class EditorFileSelectView(discord.ui.View):
 
 @command_list_aware
 class AdminCog(commands.Cog):
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: TrashBot):
         module_logger.info("initializing AdminCog")
         self.bot = bot
         self.logger = module_logger
@@ -234,5 +235,5 @@ class AdminCog(commands.Cog):
         state.clear_nick(member)
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
     await bot.add_cog(AdminCog(bot))

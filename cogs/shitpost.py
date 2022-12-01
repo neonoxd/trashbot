@@ -4,13 +4,15 @@ import logging
 import discord
 from discord import Message, Member
 from discord.ext import commands
-from discord.ext.commands import Context, Bot
+from discord.ext.commands import Context
+
+from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.Shitpost')
 
 
 class ShitpostCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		module_logger.info("initializing Shitpost")
 		self.bot = bot
 		self.logger = module_logger
@@ -93,5 +95,5 @@ class ShitpostCog(commands.Cog):
 		await event_message(self, message)
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(ShitpostCog(bot))

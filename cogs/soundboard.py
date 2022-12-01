@@ -8,11 +8,13 @@ from discord import Member
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
+from utils.state import TrashBot
+
 module_logger = logging.getLogger('trashbot.SoundBoardCog')
 
 
 class SoundBoardCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		self.bot = bot
 		self.logger = module_logger
 		module_logger.info("initializing SoundBoardCog")
@@ -224,5 +226,5 @@ class SoundBoardCog(commands.Cog):
 		await msg.delete()
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(SoundBoardCog(bot))

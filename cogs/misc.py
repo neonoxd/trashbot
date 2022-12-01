@@ -2,22 +2,23 @@ import asyncio
 import datetime
 import io
 import logging
-import os
 import random
+
 import aiohttp
 import discord
 import timeago
 from discord import Embed
 from discord.ext import commands
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Context
 
 from utils.helpers import create_alphanumeric_string, get_resource_name_or_user_override
+from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.MiscCog')
 
 
 class MiscCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		module_logger.info("initializing MiscCog")
 		self.bot = bot
 		self.logger = module_logger
@@ -149,6 +150,10 @@ class MiscCog(commands.Cog):
 
 	@commands.command(name="kot")
 	async def kot(self, ctx: Context):
+		"""
+			DEPRECATED: site probably down
+			FIXME: maybe
+		"""
 		await ctx.message.delete()
 		async with aiohttp.ClientSession() as session:
 			async with session.get('http://aws.random.cat/meow') as r:
@@ -160,6 +165,10 @@ class MiscCog(commands.Cog):
 
 	@commands.command(name="cook")
 	async def cook(self, ctx: Context, *args):
+		"""
+			DEPRECATED: probably got banned
+			FIXME: maybe
+		"""
 		if not len(args):
 			await ctx.message.delete()
 			return
@@ -253,5 +262,5 @@ class MiscCog(commands.Cog):
 		await ctx.send("\n".join(statuses))
 
 
-async def setup(bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(MiscCog(bot))

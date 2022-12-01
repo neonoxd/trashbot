@@ -10,6 +10,8 @@ import os
 
 from discord.ext.commands import Context, Bot
 
+from utils.state import TrashBot
+
 module_logger = logging.getLogger('trashbot.TtsEngine')
 
 
@@ -18,7 +20,7 @@ class TtsEngine(commands.Cog):
 		DEPRECATED: TTS SITE OFFLINE
 		FIXME: MAYBE
 	"""
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		self.bot = bot
 		module_logger.info("initializing TtsEngine")
 
@@ -53,5 +55,5 @@ class TtsEngine(commands.Cog):
 		ctx.voice_client.play(discord.FFmpegPCMAudio(executable=self.bot.cvars["FFMPEG_PATH"], source=filename), after=lambda e: os.remove(filename))
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(TtsEngine(bot))

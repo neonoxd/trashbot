@@ -4,11 +4,13 @@ import random
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
 
+from utils.state import TrashBot
+
 module_logger = logging.getLogger('trashbot.RandomsCog')
 
 
 class RandomsCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		module_logger.info("initializing RandomsCog")
 		self.bot = bot
 		self.logger = module_logger
@@ -35,7 +37,7 @@ class RandomsCog(commands.Cog):
 		await ctx.send("a ketrec harc gyöz tese: {}".format(random.choice(args)))
 
 
-def roll(args):
+def roll(args) -> int:
 	if len(args) == 1:
 		return random.randrange(0, int(args[0]))
 	elif len(args) == 2:
@@ -44,5 +46,9 @@ def roll(args):
 		return random.randrange(0, 100)
 
 
-async def setup(bot: Bot):
+def roll(args) -> str:
+	return str(roll(args))
+
+
+async def setup(bot: TrashBot):
 	await bot.add_cog(RandomsCog(bot))

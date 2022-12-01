@@ -2,16 +2,18 @@ import json
 import logging
 import os
 import discord
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Context
 
 from utils.helpers import todo
 from discord.ext import commands
+
+from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.PinnerCog')
 
 
 class PinnerCog(commands.Cog):
-	def __init__(self, bot: Bot):
+	def __init__(self, bot: TrashBot):
 		module_logger.info("initializing PinnerCog")
 		pin_dir = 'usr'
 		pin_fname = 'pins.json'
@@ -64,5 +66,5 @@ class PinnerCog(commands.Cog):
 			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
 
 
-async def setup(bot: Bot):
+async def setup(bot: TrashBot):
 	await bot.add_cog(PinnerCog(bot))
