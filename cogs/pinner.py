@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import discord
+from discord.ext.commands import Bot, Context
 
 from utils.helpers import todo
 from discord.ext import commands
@@ -10,7 +11,7 @@ module_logger = logging.getLogger('trashbot.PinnerCog')
 
 
 class PinnerCog(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		module_logger.info("initializing PinnerCog")
 		pin_dir = 'usr'
 		pin_fname = 'pins.json'
@@ -30,13 +31,13 @@ class PinnerCog(commands.Cog):
 		with open(self.pin_path, 'w') as outfile:
 			json.dump(self.pins, outfile, indent=4, sort_keys=True)
 
-	async def add_pin(self, ctx, pin_obj):
+	async def add_pin(self, ctx: Context, pin_obj):
 		self.pins = {**self.pins, **pin_obj}
 		self.logger.debug(f'current pins: {self.pins}')
 		await ctx.send(f'✅ Pin saved: {list(pin_obj.keys())[0]}')
 
 	@commands.command(name='pin')
-	async def pin(self, ctx, pin_name=None, *, pin_content=None):
+	async def pin(self, ctx: Context, pin_name=None, *, pin_content=None):
 		self.logger.info("command called: {}".format(ctx.command))
 		if pin_name is None:
 			# send usage
@@ -56,12 +57,12 @@ class PinnerCog(commands.Cog):
 			self.persist_pins()
 
 	@commands.command(name='pins')
-	async def list_pins(self, ctx, arg=None):
+	async def list_pins(self, ctx: Context, arg=None):
 		if arg is not None and arg == "dump":
 			await ctx.send(file=discord.File(self.pin_path, 'pins.json'))
 		else:
 			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(PinnerCog(bot))

@@ -8,17 +8,22 @@ from discord.ext import commands
 import uuid
 import os
 
+from discord.ext.commands import Context, Bot
 
 module_logger = logging.getLogger('trashbot.TtsEngine')
 
 
 class TtsEngine(commands.Cog):
-	def __init__(self, bot):
+	"""
+		DEPRECATED: TTS SITE OFFLINE
+		FIXME: MAYBE
+	"""
+	def __init__(self, bot: Bot):
 		self.bot = bot
 		module_logger.info("initializing TtsEngine")
 
-	@commands.command(name="trams")
-	async def trams(self, ctx, *, args):
+	@commands.command(name="trams", hidden=True)
+	async def trams(self, ctx: Context, *, args):
 		url = "https://mumble.stream/speak"
 		headers = {
 			"Accept": "application/json",
@@ -48,5 +53,5 @@ class TtsEngine(commands.Cog):
 		ctx.voice_client.play(discord.FFmpegPCMAudio(executable=self.bot.cvars["FFMPEG_PATH"], source=filename), after=lambda e: os.remove(filename))
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(TtsEngine(bot))

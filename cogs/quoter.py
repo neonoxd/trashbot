@@ -6,6 +6,7 @@ import re
 
 import discord
 from discord.ext import commands
+from discord.ext.commands import Bot, Context
 
 from utils.helpers import get_resource_name_or_user_override
 
@@ -13,7 +14,7 @@ module_logger = logging.getLogger('trashbot.QuoterCog')
 
 
 class QuoterCog(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		module_logger.info("initializing QuoterCog")
 		self.logger = module_logger
 		self.bot = bot
@@ -21,7 +22,7 @@ class QuoterCog(commands.Cog):
 		bot.state.quotecontent = self.read_quotes()
 
 	@commands.command(name='qr')
-	async def quote_reload(self, ctx):
+	async def quote_reload(self, ctx: Context):
 		"""reload quotes"""
 		await ctx.message.delete()
 		self.logger.info("command called: {}".format(ctx.command))
@@ -29,14 +30,14 @@ class QuoterCog(commands.Cog):
 		ctx.bot.state.quotecontent = self.read_quotes()
 
 	@commands.command(name='quote', aliases=['q'])
-	async def quote(self, ctx, *args):
+	async def quote(self, ctx: Context, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		pn = args[0] if len(args) > 0 else random.choice(list(self.bot.state.quotecfg.keys()))
-		await ctx.send(embed=self.embed_for(pn, ctx.bot, ctx.message.author))
+		await ctx.send(embed=self.embed_for(pn, ctx.bot, str(ctx.message.author)))
 
 	@commands.command(name='motd')
-	async def motd(self, ctx):
+	async def motd(self, ctx: Context):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		if ctx.bot.state.motd is not None:
@@ -56,7 +57,7 @@ class QuoterCog(commands.Cog):
 		return content
 
 	@staticmethod
-	def embed_for(page_name, bot, author):
+	def embed_for(page_name, bot: Bot, author: str):
 		pm = None
 		for q_src_n in list(bot.state.quotecfg.keys()):
 			if "alias" in bot.state.quotecfg[q_src_n]:
@@ -81,7 +82,7 @@ class QuoterCog(commands.Cog):
 		return embed
 
 
-async def send_motd(bot):
+async def send_motd(bot: Bot):
 	quotekeys = list(bot.state.quotecfg.keys())
 	random_pagename = random.choice(quotekeys)
 	cog = bot.get_cog('QuoterCog')
@@ -96,5 +97,5 @@ async def send_motd(bot):
 	bot.state.motd = embed
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(QuoterCog(bot))

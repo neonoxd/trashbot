@@ -11,7 +11,6 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from cogs.impl.shitpost import announce_friday_mfs
 from utils.helpers import get_resource_name_or_user_override
 from utils.state import BotState, BotConfig
 
@@ -113,6 +112,7 @@ async def main():
 
 @bot.event
 async def on_ready():
+	from cogs.impl.shitpost import think
 	ver = os.popen("git rev-parse --short HEAD").read()
 	bot.globals.verinfo["Tibi"] = ver
 	bot.globals.verinfo["discord.py"] = discord.__version__
@@ -131,7 +131,6 @@ async def on_ready():
 	logger.debug(f'Setting up state for {len(bot.guilds)} guilds')
 
 	for guild in bot.guilds:
-		from cogs.impl.shitpost import think
 		bot.state.track_guild(guild.id)
 		bot.loop.create_task(think(bot, guild.system_channel))
 		await guild.system_channel.send("na re")
@@ -147,6 +146,7 @@ async def trigger_cron():
 
 @aiocron.crontab("0 20 * * FRI")
 async def trigger_friday_mfs():
+	from cogs.impl.shitpost import announce_friday_mfs
 	await announce_friday_mfs(bot)
 
 

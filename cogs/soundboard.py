@@ -4,13 +4,15 @@ import os
 import random
 
 import discord
+from discord import Member
 from discord.ext import commands
+from discord.ext.commands import Bot, Context
 
 module_logger = logging.getLogger('trashbot.SoundBoardCog')
 
 
 class SoundBoardCog(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		self.bot = bot
 		self.logger = module_logger
 		module_logger.info("initializing SoundBoardCog")
@@ -68,7 +70,7 @@ class SoundBoardCog(commands.Cog):
 	def in_vc(self):
 		return self.current_vc is not None and self.current_vc.is_connected()
 
-	async def get_or_connect_vc(self, ctx):
+	async def get_or_connect_vc(self, ctx: Context):
 		if self.in_vc():
 			vc = self.current_vc
 		else:
@@ -77,12 +79,12 @@ class SoundBoardCog(commands.Cog):
 		return vc
 
 	@commands.command(name='reloadsounds')
-	async def reload(self, ctx):
+	async def reload(self, ctx: Context):
 		module_logger.debug("reloading sounds")
 		self.sounds = self.read_sounds()
 
 	@commands.command(name='summon')
-	async def summon(self, ctx):
+	async def summon(self, ctx: Context):
 		voice_channel = ctx.author.voice.channel
 		if voice_channel is not None:
 			if self.in_vc():
@@ -103,7 +105,7 @@ class SoundBoardCog(commands.Cog):
 			vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=source))
 
 	@commands.Cog.listener()
-	async def on_voice_state_update(self, member, before, after):
+	async def on_voice_state_update(self, member: Member, before, after):
 
 		join_map = {
 			self.bot.globals.sz_id: f"resources/sounds/door{random.randrange(1,4)}.ogg",
@@ -124,7 +126,7 @@ class SoundBoardCog(commands.Cog):
 				await self.play_source_if_vc(exit_map[member.id], .5)
 
 	@commands.command(name='sound')
-	async def play_sound(self, ctx, *args):
+	async def play_sound(self, ctx: Context, *args):
 		file = None
 		async with ctx.typing():
 			vc = await self.get_or_connect_vc(ctx)
@@ -144,7 +146,7 @@ class SoundBoardCog(commands.Cog):
 			await ctx.send("mi")
 
 	@commands.command(name='listsounds')
-	async def list_sounds(self, ctx):
+	async def list_sounds(self, ctx: Context):
 		snds = ""
 		for key in list(self.sounds.keys()):
 			snds += f'{key}:\n\t{", ".join([os.path.splitext(snd)[0] for snd in self.sounds[key]])}\n'
@@ -160,7 +162,7 @@ class SoundBoardCog(commands.Cog):
 		return embed
 
 	@commands.command(name="select", hidden=True)
-	async def select(self, ctx, *args):
+	async def select(self, ctx: Context, *args):
 		# TODO: make paginator generic, fix reading new sound list format
 		self.logger.debug('sound selecta')
 
@@ -222,5 +224,5 @@ class SoundBoardCog(commands.Cog):
 		await msg.delete()
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(SoundBoardCog(bot))

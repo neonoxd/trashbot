@@ -2,18 +2,19 @@ import logging
 import random
 
 from discord.ext import commands
+from discord.ext.commands import Bot, Context
 
 module_logger = logging.getLogger('trashbot.RandomsCog')
 
 
 class RandomsCog(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		module_logger.info("initializing RandomsCog")
 		self.bot = bot
 		self.logger = module_logger
 
 	@commands.command(name='vandam')
-	async def vandam(self,ctx, *args):
+	async def vandam(self, ctx: Context, *args):
 		from cogs.impl.shitpost import mercy_maybe
 		self.logger.info("command called: {}".format(ctx.command))
 		if len(args) > 0:
@@ -22,12 +23,12 @@ class RandomsCog(commands.Cog):
 			await mercy_maybe(self.bot, ctx.channel)
 
 	@commands.command(name='roll', aliases=['gurit'])
-	async def roll_cmd(self, ctx, *args):
+	async def roll_cmd(self, ctx: Context, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.send(roll(args))
 
 	@commands.command(name='arena')
-	async def fight(self,ctx, *args):
+	async def fight(self, ctx: Context, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		if len(args) == 0:
 			return
@@ -43,5 +44,5 @@ def roll(args):
 		return random.randrange(0, 100)
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(RandomsCog(bot))

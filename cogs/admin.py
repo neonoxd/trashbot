@@ -10,7 +10,7 @@ import aiohttp
 import discord
 from discord import Member, app_commands
 from discord.ext import commands
-from discord.ext.commands import Context, Greedy
+from discord.ext.commands import Context, Greedy, Bot
 
 from utils.helpers import get_resource_name_or_user_override
 
@@ -74,7 +74,7 @@ class EditorFileSelectView(discord.ui.View):
 
 @command_list_aware
 class AdminCog(commands.Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Bot):
         module_logger.info("initializing AdminCog")
         self.bot = bot
         self.logger = module_logger
@@ -135,7 +135,7 @@ class AdminCog(commands.Cog):
                     self.logger.warning(f"resp {r}")
 
     @commands.command(name="info", hidden=True)
-    async def dump_info(self, ctx):
+    async def dump_info(self, ctx: commands.Context):
         await ctx.message.delete()
         embed = discord.Embed(title="Van itt minden", description="ez meg az")
         embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
@@ -158,13 +158,13 @@ class AdminCog(commands.Cog):
             content=f"Pong! {round(self.bot.latency * 1000)}ms\nAPI: {round((end_time - start_time) * 1000)}ms")
 
     @commands.command(name='clear', hidden=True)
-    async def clear(self, ctx, user: Member):
+    async def clear(self, ctx: commands.Context, user: Member):
         state = ctx.bot.state.get_guild_state_by_id(ctx.guild.id)
         state.clear_nick(user)
         await user.edit(nick=None)
 
     @commands.command(name='rr', hidden=True)
-    async def reload_resources(self, ctx):
+    async def reload_resources(self, ctx: commands.Context):
         with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
             ctx.bot.globals.slurs = file.readlines()
 
@@ -176,14 +176,14 @@ class AdminCog(commands.Cog):
         ))
 
     @commands.command(name='rs', hidden=True)
-    async def roll_status(self, ctx):
+    async def roll_status(self, ctx: commands.Context):
         await ctx.bot.change_presence(activity=discord.Game(
             random.choice(ctx.bot.globals.statuses)
         ))
 
     @commands.command(name='set', hidden=True)
     @commands.is_owner()
-    async def setter_command(self, ctx, *args):
+    async def setter_command(self, ctx: commands.Context, *args):
         try:
             module_logger.debug(f"set command invoked with args: {args}")
             command = args[0]
@@ -199,12 +199,12 @@ class AdminCog(commands.Cog):
             module_logger.error(e, exc_info=True)
 
     @set_command(name='phtoken')
-    async def cmd_set_ph_token(self, ctx, args):
+    async def cmd_set_ph_token(self, ctx: commands.Context, args):
         module_logger.debug(f"cmd_set_ph_token called with args {args}")
         self.bot.globals.ph_token = args
 
     @set_command(name='nick')
-    async def cmd_set_nick(self, ctx, member, *nick):
+    async def cmd_set_nick(self, ctx: commands.Context, member, *nick):
         converter = commands.MemberConverter()
         _member = await converter.convert(ctx, member)
         module_logger.debug(f"cmd_set_nick called with args {member} {nick}")
@@ -216,7 +216,7 @@ class AdminCog(commands.Cog):
         ctx.bot.loop.create_task(self.autoclear_task(ctx, _member))
 
     @set_command(name='tension')
-    async def cmd_set_tension(self, ctx, *args):
+    async def cmd_set_tension(self, ctx: commands.Context, *args):
         module_logger.debug(f"cmd_set_tension called with args {args}")
         try:
             new_tension = int(args[0])
@@ -227,12 +227,12 @@ class AdminCog(commands.Cog):
             module_logger.error(e, exc_info=True)
 
     @staticmethod
-    async def autoclear_task(ctx, member: Member):
+    async def autoclear_task(ctx: commands.Context, member: Member):
         module_logger.debug(f"queued nick autoclear task for member in 60 mins {member}")
         await asyncio.sleep(60 * 60)
         state = ctx.bot.state.get_guild_state_by_id(ctx.guild.id)
         state.clear_nick(member)
 
 
-async def setup(bot):
+async def setup(bot: Bot):
     await bot.add_cog(AdminCog(bot))

@@ -9,6 +9,7 @@ import discord
 import timeago
 from discord import Embed
 from discord.ext import commands
+from discord.ext.commands import Bot, Context
 
 from utils.helpers import create_alphanumeric_string, get_resource_name_or_user_override
 
@@ -16,7 +17,7 @@ module_logger = logging.getLogger('trashbot.MiscCog')
 
 
 class MiscCog(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		module_logger.info("initializing MiscCog")
 		self.bot = bot
 		self.logger = module_logger
@@ -31,7 +32,7 @@ class MiscCog(commands.Cog):
 				await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
 
 	@commands.command(name="mik")
-	async def mik(self, ctx):
+	async def mik(self, ctx: Context):
 		now = datetime.datetime.now()
 		embed = Embed(title="ezek fönek sogor 🤣", color=0xFF5733)
 		event_list_str = []
@@ -52,7 +53,7 @@ class MiscCog(commands.Cog):
 			await ctx.send(embed=embed)
 
 	@commands.command(name="kik", hidden=True)
-	async def whomst(self, ctx):
+	async def whomst(self, ctx: Context):
 		now = datetime.datetime.now()
 		guild_state = self.bot.state.get_guild_state_by_id(ctx.message.guild.id)
 		t_locale = random.choice(['zh_CN', 'hu', 'en'])
@@ -84,7 +85,7 @@ class MiscCog(commands.Cog):
 			await ctx.send(embed=embed)
 
 	@commands.command(name="ki", hidden=True)
-	async def who(self, ctx, *args):
+	async def who(self, ctx: Context, *args):
 		guild_state = self.bot.state.get_guild_state_by_id(ctx.message.guild.id)
 		if self.bot.user.mentioned_in(ctx.message):
 			last_events = guild_state.last_vc_events
@@ -126,13 +127,13 @@ class MiscCog(commands.Cog):
 				await ctx.send('👀')
 
 	@commands.command(name='say', aliases=['mondd'])
-	async def say(self, ctx, *args):
+	async def say(self, ctx: Context, *args):
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		await ctx.send(' '.join(args))
 
 	@commands.command(name='impostor', hidden=True)
-	async def impost(self, ctx, *args):
+	async def impost(self, ctx: Context, *args):
 		await ctx.message.delete()
 		if len(args) > 0:
 			impostor = args[0]
@@ -147,7 +148,7 @@ class MiscCog(commands.Cog):
 		await ctx.send(tmpl)
 
 	@commands.command(name="kot")
-	async def kot(self, ctx):
+	async def kot(self, ctx: Context):
 		await ctx.message.delete()
 		async with aiohttp.ClientSession() as session:
 			async with session.get('http://aws.random.cat/meow') as r:
@@ -158,7 +159,7 @@ class MiscCog(commands.Cog):
 					self.logger.warning(f"resp {r}")
 
 	@commands.command(name="cook")
-	async def cook(self, ctx, *args):
+	async def cook(self, ctx: Context, *args):
 		if not len(args):
 			await ctx.message.delete()
 			return
@@ -227,7 +228,7 @@ class MiscCog(commands.Cog):
 		return part
 
 	@commands.command(name="trash")
-	async def get_live_statuses(self, ctx):
+	async def get_live_statuses(self, ctx: Context):
 		import requests
 
 		class Channel:

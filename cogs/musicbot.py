@@ -7,6 +7,7 @@ from discord.ext import commands
 import os
 
 from discord import opus
+from discord.ext.commands import Bot, Context
 
 
 def load_opus_lib():
@@ -82,14 +83,14 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 
 class MusicBot(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot: Bot):
 		load_opus_lib()
 		self.bot = bot
 		self.queue = []
 		module_logger.info("initializing MusicBot")
 
 	@commands.command()
-	async def join(self, ctx):
+	async def join(self, ctx: Context):
 		"""Joins a voice channel"""
 		channel = ctx.author.voice.channel
 		if ctx.voice_client is not None:
@@ -107,7 +108,7 @@ class MusicBot(commands.Cog):
 	# 	await ctx.send('Now playing: {}'.format(query))
 
 	@commands.command()
-	async def play(self, ctx, *, url):
+	async def play(self, ctx: Context, *, url):
 		"""Plays from a url (almost anything youtube_dl supports)"""
 
 		async with ctx.typing():
@@ -117,7 +118,7 @@ class MusicBot(commands.Cog):
 		await ctx.send(f'akkor nyomom a következőt: {player.title}\n{player.link}')
 
 	@commands.command()
-	async def stream(self, ctx, *, url):
+	async def stream(self, ctx: Context, *, url):
 		"""Streams from a url (same as yt, but doesn't predownload)"""
 
 		async with ctx.typing():
@@ -127,7 +128,7 @@ class MusicBot(commands.Cog):
 		await ctx.send('Now playing: {}'.format(player.title))
 
 	@commands.command()
-	async def volume(self, ctx, volume: int):
+	async def volume(self, ctx: Context, volume: int):
 		"""Changes the player's volume"""
 
 		if ctx.voice_client is None:
@@ -137,14 +138,14 @@ class MusicBot(commands.Cog):
 		await ctx.send("Changed volume to {}%".format(volume))
 
 	@commands.command()
-	async def stop(self, ctx):
+	async def stop(self, ctx: Context):
 		"""Stops and disconnects the bot from voice"""
 
 		await ctx.voice_client.disconnect()
 
 	@play.before_invoke
 	@stream.before_invoke
-	async def ensure_voice(self, ctx):
+	async def ensure_voice(self, ctx: Context):
 		if ctx.voice_client is None:
 			if ctx.author.voice:
 				await ctx.author.voice.channel.connect()
@@ -155,5 +156,5 @@ class MusicBot(commands.Cog):
 			ctx.voice_client.stop()
 
 
-async def setup(bot):
+async def setup(bot: Bot):
 	await bot.add_cog(MusicBot(bot))
