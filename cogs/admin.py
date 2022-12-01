@@ -1,16 +1,16 @@
 import asyncio
 import json
 import logging
-import time
-import random
 import os
+import random
+import time
 from typing import Optional, Literal
 
 import aiohttp
 import discord
 from discord import Member, app_commands
 from discord.ext import commands
-from discord.ext.commands import Context, Greedy, Bot
+from discord.ext.commands import Context, Greedy
 
 from utils.helpers import get_resource_name_or_user_override
 from utils.state import TrashBot

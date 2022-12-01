@@ -1,14 +1,12 @@
-import asyncio
 import json
 import logging
+import os
+import uuid
 
 import aiohttp
 import discord
 from discord.ext import commands
-import uuid
-import os
-
-from discord.ext.commands import Context, Bot
+from discord.ext.commands import Context
 
 from utils.state import TrashBot
 
@@ -52,7 +50,8 @@ class TtsEngine(commands.Cog):
 						module_logger.error("something went wrong")
 						await ctx.send("mind1...")
 
-		ctx.voice_client.play(discord.FFmpegPCMAudio(executable=self.bot.cvars["FFMPEG_PATH"], source=filename), after=lambda e: os.remove(filename))
+		ctx.voice_client.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=filename),
+							  after=lambda e: os.remove(filename))
 
 
 async def setup(bot: TrashBot):

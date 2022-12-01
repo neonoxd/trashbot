@@ -6,7 +6,7 @@ import random
 import discord
 from discord import Member
 from discord.ext import commands
-from discord.ext.commands import Bot, Context
+from discord.ext.commands import Context
 
 from utils.state import TrashBot
 
