@@ -60,17 +60,18 @@ class EditorFileSelect(discord.ui.Select):
                 async with session.get(url) as r:
                     if r.status == 200:
                         resp = await r.read()
-                        await interaction.response.edit_message(content=resp.decode(), view=None)
+                        await interaction.response.edit_message(content=None, view=SimpleView(discord.ui.Button(label="Open Editor Site", url=resp.decode())))
                     else:
                         self.logger.warning(f"resp {r}")
         else:
             await interaction.response.send_message(content="you call yourself an athlete?", ephemeral=True)
 
 
-class EditorFileSelectView(discord.ui.View):
-    def __init__(self, author, *, timeout=180):
+class SimpleView(discord.ui.View):
+    def __init__(self, *items, timeout=180):
         super().__init__(timeout=timeout)
-        self.add_item(EditorFileSelect(author))
+        for item in items:
+            self.add_item(item)
 
 
 @command_list_aware
@@ -121,7 +122,7 @@ class AdminCog(commands.Cog):
     @app_commands.command(name="edit-usercontent")
     async def edit(self, interaction: discord.Interaction):
         """ /edit-usercontent """
-        await interaction.response.send_message("Editable files:", view=EditorFileSelectView(interaction.user), ephemeral=True)
+        await interaction.response.send_message("Editable files:", view=SimpleView(EditorFileSelect(interaction.user)), ephemeral=True)
 
     @app_commands.command(name="add-usercontent")
     async def addusercontent(self, interaction: discord.Interaction) -> None:

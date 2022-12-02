@@ -130,7 +130,6 @@ class SoundBoardCog(commands.Cog):
 
 	@commands.command(name='sound')
 	async def play_sound(self, ctx: Context, *args):
-		file = None
 		async with ctx.typing():
 			vc = await self.get_or_connect_vc(ctx)
 			await ctx.message.delete()
