@@ -33,7 +33,7 @@ class PinModal(discord.ui.Modal, title='Saving Pin'):
 		self.cog.logger.debug(f'pinning {self.name} with content: {self.message.content}')
 		await self.cog.add_pin2(interaction, pin_obj, self.message)
 		self.cog.persist_pins()
-		await interaction.response.defer()
+		await interaction.response.send_message(content="", ephemeral=True, delete_after=1)
 
 
 class PinnerCog(commands.Cog):

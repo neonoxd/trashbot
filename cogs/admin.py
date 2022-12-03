@@ -106,7 +106,7 @@ class AdminCog(commands.Cog):
             self.logger.debug(f"synced: {synced}")
 
             await ctx.send(
-                f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
+                f"{len(synced)} trükköt tud a báttya{'!' if spec is None else '!?'}"
             )
             return
 
@@ -119,7 +119,7 @@ class AdminCog(commands.Cog):
             else:
                 ret += 1
 
-        await ctx.send(f"Synced the tree to {ret}/{len(guilds)}.")
+        await ctx.send(f"tanit a báttya {ret}/{len(guilds)}.")
 
     @app_commands.command(name="edit-usercontent")
     async def edit(self, interaction: discord.Interaction):
