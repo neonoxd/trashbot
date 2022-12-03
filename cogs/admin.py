@@ -103,6 +103,8 @@ class AdminCog(commands.Cog):
             else:
                 synced = await ctx.bot.tree.sync()
 
+            self.logger.debug(f"synced: {synced}")
+
             await ctx.send(
                 f"Synced {len(synced)} commands {'globally' if spec is None else 'to the current guild.'}"
             )
