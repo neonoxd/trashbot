@@ -12,8 +12,8 @@ from utils.state import TrashBot
 module_logger = logging.getLogger('trashbot.PinnerCog')
 
 
-class PinModal(discord.ui.Modal, title='Saving Pin'):
-	name = discord.ui.TextInput(label='Name')
+class PinModal(discord.ui.Modal, title='milyen néven??'):
+	name = discord.ui.TextInput(label='hát')
 
 	def __init__(self, cog, message: discord.Message, timeout=180):
 		super().__init__(timeout=timeout)
