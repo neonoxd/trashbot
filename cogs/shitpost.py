@@ -19,6 +19,11 @@ class ShitpostCog(commands.Cog):
 		with open('resources/beemovie.txt', 'r', encoding="utf8") as file:
 			self.beescript = file.read().split("\n\n  \n")
 
+		@bot.tree.context_menu(name="nyomod fasz!")
+		async def nyomod(interaction: discord.Interaction, message: discord.Message):
+			await message.reply("nyomod fasz!!")
+			await interaction.response.send_message(content="hehe", ephemeral=True, delete_after=1)
+
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx: Context):
 		from cogs.impl.shitpost import command_befli
