@@ -31,9 +31,12 @@ class PinModal(discord.ui.Modal, title='milyen néven??'):
 
 		pin_obj = {str(self.name): pin_content}
 		self.cog.logger.debug(f'pinning {self.name} with content: {self.message.content}')
+		await interaction.response.send_message(content="várjál tesomsz", ephemeral=True, delete_after=1)
 		await self.cog.add_pin2(interaction, pin_obj, self.message)
 		self.cog.persist_pins()
-		await interaction.response.send_message(content="", ephemeral=True, delete_after=1)
+
+	async def on_error(self, interaction: discord.Interaction, error: Exception, /) -> None:
+		module_logger.error(error, exc_info=True)
 
 
 class PinnerCog(commands.Cog):
