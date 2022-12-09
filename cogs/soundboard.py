@@ -113,7 +113,8 @@ class SoundBoardCog(commands.Cog):
 			self.bot.globals.sz_id: f"resources/sounds/door{random.randrange(1,4)}.ogg",
 			self.bot.globals.d_id: f"resources/sounds/join_hola.wav",
 			self.bot.globals.ps_id: f"resources/sounds/pspsps.mp3",
-			self.bot.globals.m_id: f"resources/sounds/DUKNUK14.ogg"
+			self.bot.globals.m_id: f"resources/sounds/DUKNUK14.ogg",
+			self.bot.globals.denik_id: f"resources/sounds/ittvokgec.ogg"
 		}
 
 		exit_map = {
