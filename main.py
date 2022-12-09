@@ -69,7 +69,8 @@ async def setup_state():
 		dzs_id=int(os.getenv("DZS_ID")),
 		d_id=int(os.getenv("D_ID")),
 		m_id=int(os.getenv("M_ID")),
-		l_id=int(os.getenv("L_ID"))
+		l_id=int(os.getenv("L_ID")),
+		denik_id=int(os.getenv("DENIK_ID"))
 	)
 
 	with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
