@@ -33,6 +33,7 @@ class QuoterCog(commands.Cog):
 
 	@commands.command(name='quote', aliases=['q'])
 	async def quote(self, ctx: Context, *args):
+		"""sends a random quote"""
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		pn = args[0] if len(args) > 0 else random.choice(list(self.bot.state.quotecfg.keys()))
@@ -40,6 +41,7 @@ class QuoterCog(commands.Cog):
 
 	@commands.command(name='motd')
 	async def motd(self, ctx: Context):
+		"""displays the message of the day"""
 		self.logger.info("command called: {}".format(ctx.command))
 		await ctx.message.delete()
 		if ctx.bot.state.motd is not None:

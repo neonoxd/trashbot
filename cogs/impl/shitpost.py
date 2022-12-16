@@ -91,7 +91,7 @@ async def command_gba(cog, ctx):
         newnick = get_kutfuras()
         module_logger.info(f"[CMD::GBA] generated nick [{newnick}]")
         cog.bot.globals.add_timeout("gba", expiry_td=datetime.timedelta(minutes=1))
-        member = get(cog.bot.get_all_members(), id=cog.bot.globals.gba_id)
+        member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["gba"])
         await member.edit(nick=newnick)
         await ctx.send(f"{author} szerint: {member.mention}")
     else:
@@ -106,7 +106,7 @@ async def command_cz(cog, ctx):
         newnick = get_breveg()
         module_logger.info(f"[CMD::CZ] generated nick [{newnick}]")
         cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
-        member = get(cog.bot.get_all_members(), id=cog.bot.globals.cz_id)
+        member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["cz"])
         await member.edit(nick=newnick)
         await ctx.send(f"{author} szerint: {member.mention}")
     else:
@@ -122,26 +122,26 @@ async def event_voice_state_update(cog, member, before, after):
         guild_state.push_last_vc_event(VCEvent(1, member, after.channel, datetime.datetime.timestamp(now)))
 
         #  elmano alert
-        if cog.bot.globals.m_id == member.id:
+        if cog.bot.globals.goofies["m"] == member.id:
             if cog.bot.globals.is_expired("m") and guild_state.tension % 2 == 0:
                 cog.bot.globals.add_timeout("m", expiry_td=datetime.timedelta(minutes=60))
                 await guild.system_channel.send(file=discord.File('resources/img/elmano.gif'))
 
         #  cz alert
-        if cog.bot.globals.cz_id == member.id:
+        if cog.bot.globals.goofies["cz"] == member.id:
             if cog.bot.globals.is_expired("cz") and guild_state.tension % 2 == 0:
                 cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
                 await member.edit(nick=get_breveg())
                 await guild.system_channel.send(file=discord.File('resources/img/peter2_alert.jpg'))
 
         #  p alert
-        if cog.bot.globals.p_id == member.id:
+        if cog.bot.globals.goofies["p"] == member.id:
             if cog.bot.globals.is_expired("p") and guild_state.tension % 2 == 0:
                 cog.bot.globals.add_timeout("p", expiry_td=datetime.timedelta(minutes=60))
                 await guild.system_channel.send(file=discord.File('resources/img/peter_alert.png'))
 
         #  sz alert
-        if cog.bot.globals.sz_id == member.id:
+        if cog.bot.globals.goofies["sz"] == member.id:
             if cog.bot.globals.is_expired("sz"):
                 cog.bot.globals.add_timeout("sz", expiry_td=datetime.timedelta(minutes=60))
                 await guild.system_channel.send(file=discord.File('resources/img/brunya_alezredes_alert.png'))
@@ -162,7 +162,7 @@ async def event_voice_state_update(cog, member, before, after):
         guild_state.push_last_vc_event(VCEvent(0, member, before.channel, datetime.datetime.timestamp(now)))
 
         #  sz shleep event
-        if cog.bot.globals.sz_id == member.id:
+        if cog.bot.globals.goofies["sz"] == member.id:
             now = datetime.datetime.now()
             if cog.bot.globals.is_expired("sz"):
                 module_logger.debug("expired")
@@ -175,7 +175,7 @@ async def event_voice_state_update(cog, member, before, after):
                     random.choice(["?", "ájjál le", f"{member.mention} 😡💢", "megmeresztema tüdödet"]))
 
         #  l shleep event
-        if cog.bot.globals.l_id == member.id:
+        if cog.bot.globals.goofies["l"] == member.id:
             now = datetime.datetime.now()
             if cog.bot.globals.is_expired("l"):
                 module_logger.debug("expired")
@@ -188,7 +188,7 @@ async def event_voice_state_update(cog, member, before, after):
                 await guild.system_channel.send(
                     random.choice(["?", f"{member.mention} 😡💢"]))
 
-        if cog.bot.globals.dzs_id == member.id:
+        if cog.bot.globals.goofies["dzs"] == member.id:
             if cog.bot.globals.is_expired("dzs") and guild_state.tension % 2 == 0:
                 cog.bot.globals.add_timeout("dzs", expiry_td=datetime.timedelta(minutes=60))
                 await guild.system_channel.send("-Dzsoki")
@@ -293,9 +293,9 @@ async def event_message(cog, message):
     if current_tension is not None and current_tension > 50:
         await sentience_reply(cog, message, now, chance)
 
-    if message.author.id in [cog.bot.globals.p_id, cog.bot.globals.sz_id, cog.bot.globals.cz_id] \
+    if message.author.id in [cog.bot.globals.goofies["p"], cog.bot.globals.goofies["sz"], cog.bot.globals.goofies["cz"]] \
             and random.randrange(0, 1000) == 17:
-        if message.author.id == cog.bot.globals.cz_id:
+        if message.author.id == cog.bot.globals.goofies["cz"]:
             await message.author.edit(nick=get_breveg())
         await message.channel.send(
             file=discord.File("resources/img/forklift.png", 'forklift.png'),
@@ -652,7 +652,7 @@ async def set_daily_tension(bot, tension=None):
     for guild_state in bot.state.guilds:
         module_logger.debug(f'setting tension for guild : {guild_state.id}')
 
-        guild_state.tension = tension if tension is not None else roll("100")
+        guild_state.tension = tension if tension is not None else roll(100)
         guild = discord.utils.get(bot.guilds, id=guild_state.id)
         channel = guild.system_channel
 

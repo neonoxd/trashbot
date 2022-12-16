@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import os
 import random
@@ -59,19 +60,11 @@ async def setup_state():
 		ph_token=os.getenv("PHTOKEN"),
 		yt_cookie=os.getenv("YTCOOKIE"),
 		ffmpeg_path=os.getenv("FFMPEG_PATH"),
-		sounds_path=os.getenv("SNDS_PATH"),
-		sz_id=int(os.getenv("SZ_ID")),
-		p_id=int(os.getenv("P_ID")),
-		ps_id=int(os.getenv("PS_ID")),
-		g_id=int(os.getenv("G_ID")),
-		gba_id=int(os.getenv("GBA_ID")),
-		cz_id=int(os.getenv("CZ_ID")),
-		dzs_id=int(os.getenv("DZS_ID")),
-		d_id=int(os.getenv("D_ID")),
-		m_id=int(os.getenv("M_ID")),
-		l_id=int(os.getenv("L_ID")),
-		denik_id=int(os.getenv("DENIK_ID"))
+		sounds_path=os.getenv("SNDS_PATH")
 	)
+
+	with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
+		bot.globals.goofies = json.loads(file.read())
 
 	with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
 		bot.globals.slurs = file.readlines()

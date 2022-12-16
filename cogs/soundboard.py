@@ -110,15 +110,15 @@ class SoundBoardCog(commands.Cog):
 	async def on_voice_state_update(self, member: Member, before, after):
 
 		join_map = {
-			self.bot.globals.sz_id: f"resources/sounds/door{random.randrange(1,4)}.ogg",
-			self.bot.globals.d_id: f"resources/sounds/join_hola.wav",
-			self.bot.globals.ps_id: f"resources/sounds/pspsps.mp3",
-			self.bot.globals.m_id: f"resources/sounds/DUKNUK14.ogg",
-			self.bot.globals.denik_id: f"resources/sounds/ittvokgec.ogg"
+			self.bot.globals.goofies["sz"]: f"resources/sounds/door{random.randrange(1,4)}.ogg",
+			self.bot.globals.goofies["d"]: f"resources/sounds/join_hola.wav",
+			self.bot.globals.goofies["ps"]: f"resources/sounds/pspsps.mp3",
+			self.bot.globals.goofies["m"]: f"resources/sounds/DUKNUK14.ogg",
+			self.bot.globals.goofies["denik"]: f"resources/sounds/ittvokgec.ogg"
 		}
 
 		exit_map = {
-			self.bot.globals.d_id: f"resources/sounds/out_chau.wav"
+			self.bot.globals.goofies["d"]: f"resources/sounds/out_chau.wav"
 		}
 
 		if before.channel is None and after.channel is not None:  # user connected

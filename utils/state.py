@@ -99,17 +99,6 @@ class BotConfig:
 	sounds_path: str
 	ph_token: str
 	yt_cookie: str
-	sz_id: int
-	p_id: int
-	ps_id: int
-	gba_id: int
-	g_id: int
-	cz_id: int
-	m_id: int
-	dzs_id: int
-	d_id: int
-	l_id: int
-	denik_id: int
 	global_timeouts: dict = field(default_factory=dict)
 	slurs: List[str] = field(default_factory=list)
 	statuses: List[str] = field(default_factory=list)
@@ -118,6 +107,7 @@ class BotConfig:
 	startup_at: datetime = datetime.now()
 	queued_hotpots: dict = field(default_factory=dict)
 	verinfo: dict = field(default_factory=dict)
+	goofies: dict = field(default_factory=dict)
 
 	def add_timeout(self, name: str, expires_at: datetime = None, expiry_td: timedelta = None):
 		module_logger.debug(f"adding expire {name}")

@@ -5,3 +5,6 @@ usr/**
 /bot.log
 __pycache__/
 *.pyc
+/usr/
+*.log
+/dummy/

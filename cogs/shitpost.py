@@ -55,7 +55,7 @@ class ShitpostCog(commands.Cog):
 		guild = ctx.bot.guilds[0]
 		sz_vc = [
 			c for c in guild.channels if c.type == discord.ChannelType.voice
-			and len([member for member in c.members if member.id == ctx.bot.globals.sz_id]) > 0
+			and len([member for member in c.members if member.id == ctx.bot.globals.goofies["sz"]]) > 0
 		]
 		await ctx.message.delete()
 		if len(sz_vc) > 0 and len(sz_vc[0].members) > 5:
