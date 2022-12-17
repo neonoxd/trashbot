@@ -65,6 +65,8 @@ async def setup_state():
 
 	with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
 		bot.globals.goofies = json.loads(file.read())
+		for b_key in list(bot.globals.goofies.keys()):
+			bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
 
 	with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
 		bot.globals.slurs = file.readlines()
