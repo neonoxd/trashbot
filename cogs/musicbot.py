@@ -91,24 +91,6 @@ class MusicBot(commands.Cog):
 		module_logger.info("initializing MusicBot")
 
 	@commands.command()
-	async def join(self, ctx: Context):
-		"""Joins a voice channel"""
-		channel = ctx.author.voice.channel
-		if ctx.voice_client is not None:
-			return await ctx.voice_client.move_to(channel)
-
-		await channel.connect()
-
-	# @commands.command()
-	# async def play(self, ctx, *, query):
-	# 	"""Plays a file from the local filesystem"""
-	#
-	# 	source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(query))
-	# 	ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
-	#
-	# 	await ctx.send('Now playing: {}'.format(query))
-
-	@commands.command()
 	async def play(self, ctx: Context, *, url):
 		"""Plays from a url (almost anything youtube_dl supports)"""
 

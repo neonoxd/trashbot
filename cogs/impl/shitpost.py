@@ -91,7 +91,8 @@ async def command_gba(cog, ctx):
         newnick = get_kutfuras()
         module_logger.info(f"[CMD::GBA] generated nick [{newnick}]")
         cog.bot.globals.add_timeout("gba", expiry_td=datetime.timedelta(minutes=1))
-        member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["gba"])
+        member = get(cog.bot.get_all_members(), id=int(cog.bot.globals.goofies["gba"]))
+        module_logger.info(member)
         await member.edit(nick=newnick)
         await ctx.send(f"{author} szerint: {member.mention}")
     else:

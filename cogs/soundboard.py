@@ -85,19 +85,16 @@ class SoundBoardCog(commands.Cog):
 		module_logger.debug("reloading sounds")
 		self.sounds = self.read_sounds()
 
-	@commands.command(name='summon')
+	@commands.command(name='summon', aliases=['join'])
 	async def summon(self, ctx: Context):
-		voice_channel = ctx.author.voice.channel
-		if voice_channel is not None:
-			if self.in_vc():
-				await self.current_vc.disconnect()
-				vc = await voice_channel.connect()
-				self.current_vc = vc
-			else:
-				vc = await voice_channel.connect()
-				self.current_vc = vc
+		channel = ctx.message.author.voice.channel
+		voice = discord.utils.get(ctx.guild.voice_channels, name=channel.name)
+		voice_client = discord.utils.get(self.bot.voice_clients, guild=ctx.guild)
+
+		if voice_client is None:
+			self.current_vc = await voice.connect()
 		else:
-			await ctx.send(str(ctx.author.name) + "is not in a channel.")
+			await voice_client.move_to(channel)
 		await ctx.message.delete()
 
 	async def play_source_if_vc(self, source, delay):
