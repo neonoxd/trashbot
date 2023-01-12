@@ -291,6 +291,10 @@ async def event_message(cog, message):
         ]
         await message.reply(content=random.choice(gifs), mention_author=True)
 
+    if len(message.content) > 100 and chance > 72 and current_tension > 50:
+        module_logger.debug(f"wojak procc! chance: {chance}")
+        await message.reply(file=discord.File("resources/img/wojak.png", 'wojak.png'))
+
     if current_tension is not None and current_tension > 50:
         await sentience_reply(cog, message, now, chance)
 
