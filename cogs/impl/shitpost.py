@@ -291,7 +291,7 @@ async def event_message(cog, message):
         ]
         await message.reply(content=random.choice(gifs), mention_author=True)
 
-    if len(message.content) > 200 and chance > 72 and current_tension > 50:
+    elif len(message.content) > 200 and chance > 72 and current_tension > 50:
         module_logger.debug(f"wojak procc! chance: {chance}")
         await message.reply(file=discord.File("resources/img/wojak.png", 'wojak.png'))
 
