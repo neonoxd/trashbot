@@ -46,7 +46,7 @@ class WarnerCog(commands.Cog):
 				await self.save_warn(ctx, member, reason)
 
 	@commands.command(name='warns')
-	async def warns(self, ctx: Context, member: typing.Union[Member | str | None]):
+	async def warns(self, ctx: Context, member: typing.Union[Member, str, None]):
 		module_logger.info(f"EEEE: {member}, {type(member)}")
 		who = str(member.id) if member not in [None, "all"] else str(ctx.author.id)
 		warns = "nicse"
