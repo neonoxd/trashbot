@@ -33,7 +33,8 @@ class WarnerCog(commands.Cog):
 		self.warns = read_warns()
 
 	@commands.command(name='warn')
-	async def warn(self, ctx: Context, member: Member, reason: str):
+	async def warn(self, ctx: Context, member: Member, *reason_sep: str):
+		reason = ' '.join(reason_sep)
 		async with ctx.typing():
 			module_logger.debug(f"{ctx.message.author} warns {member} for {reason}")
 			if len(reason) > 150:
