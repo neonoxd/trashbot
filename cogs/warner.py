@@ -4,11 +4,13 @@ import logging
 import os.path
 from datetime import datetime
 
+import discord.utils
 from discord import Member
 from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
 
+from utils.helpers import get_user_nick_or_name
 from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.WarnerCog')
@@ -43,10 +45,22 @@ class WarnerCog(commands.Cog):
 				await self.save_warn(ctx, member, reason)
 
 	@commands.command(name='warns')
-	async def warns(self, ctx: Context, member: Member = None):
-		who = str(member.id) if member is not None else str(ctx.author.id)
+	async def warns(self, ctx: Context, member: Member | str | None):
+		module_logger.info(f"EEEE: {member}, {type(member)}")
+		who = str(member.id) if member not in [None, "all"] else str(ctx.author.id)
 		warns = "nicse"
-		if who in self.warns:
+
+		if member == "all":
+			ids = list(self.warns.keys())
+			all_warns = []
+			for warned_id in ids:
+				usr_warns = self.warns[warned_id]
+				edited_warns = [[*warn, get_user_nick_or_name(discord.utils.get(ctx.bot.get_all_members(), id=int(warned_id)))] for warn in usr_warns]
+				all_warns += edited_warns
+
+			warn_string = self.format_warns_all(all_warns)
+			warns = self.split_warns(warn_string)
+		elif who in self.warns:
 			warn_string = self.format_warns(self.warns[who])
 			warns = self.split_warns(warn_string)
 
@@ -61,14 +75,16 @@ class WarnerCog(commands.Cog):
 
 	@staticmethod
 	def format_warns(warns):
-		headers = ["#", "KI", "MIKO", "MERT"]
-		data = []
-		warn_id = 0
-		for warn in warns:
-			data.append([warn_id, warn[0], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]])
-			warn_id += 1
+		headers = ["KI", "MIKO", "MER"]
+		data = [[warn[0], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
+		tabbed = tabulate(data, headers=headers, showindex=True)
+		return tabbed
 
-		tabbed = tabulate(data, headers=headers)
+	@staticmethod
+	def format_warns_all(warns):
+		headers = ["KI", "KIT", "MIKO", "MER"]
+		data = [[warn[0], warn[3], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
+		tabbed = tabulate(data, headers=headers, showindex=True)
 		return tabbed
 
 	@staticmethod
