@@ -4,6 +4,7 @@ import logging
 import os.path
 import typing
 from datetime import datetime
+import random
 
 import discord.utils
 from discord import Member
@@ -44,6 +45,8 @@ class WarnerCog(commands.Cog):
 				await ctx.message.reply("ennyit nem tok megjegyezni báttya")
 			else:
 				await self.save_warn(ctx, member, reason)
+		await asyncio.sleep(10)
+		await ctx.message.delete()
 
 	@commands.command(name='warns')
 	async def warns(self, ctx: Context, member: typing.Union[Member, str, None]):
@@ -106,18 +109,20 @@ class WarnerCog(commands.Cog):
 			msgs.append(out)
 		return msgs
 
-	async def save_warn(self, ctx, member, reason):
+	async def save_warn(self, ctx: Context, member, reason):
 		who = str(member.id)
 		warn = [ctx.message.author.name, reason, datetime.now().timestamp()]
 		if who in self.warns:
 			self.warns[who].append(warn)
 		else:
 			self.warns[who] = [warn]
-		print(self.warns)
 		with open(warnpath, "w") as f:
 			f.write(json.dumps(self.warns))
 		module_logger.info("saved warn")
-		await ctx.message.reply("megjegyeztem 😂")
+		msg = "megjegyeztem 😂"
+		if len(self.warns[who]) > 2:
+			msg += f" {random.choice(['má sokadik', 'de enyi', 'nem elsö'])} 😂 {len(self.warns[who])}"
+		await ctx.message.reply(msg, delete_after=5)
 
 
 async def setup(bot: TrashBot):
