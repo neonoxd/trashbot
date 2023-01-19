@@ -74,13 +74,13 @@ class WarnerCog(commands.Cog):
 									for warn in usr_warns
 								]
 				all_warns += edited_warns
-			all_warns = sorted(all_warns, key=lambda x: x[2], reverse=True)
+			all_warns = sorted(all_warns, key=lambda x: x[2])
 
 			warn_string = self.format_warns_all(all_warns)
 			warns = self.split_warns(warn_string)
 
 		elif victim in self.warns:
-			all_warns = sorted(self.warns[victim], key=lambda x: x[2], reverse=True)
+			all_warns = sorted(self.warns[victim], key=lambda x: x[2])
 			warn_string = self.format_warns(ctx, all_warns)
 			warns = self.split_warns(warn_string)
 
