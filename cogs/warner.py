@@ -12,7 +12,7 @@ from discord.ext import commands
 from discord.ext.commands import Context
 from tabulate import tabulate
 
-from utils.helpers import get_user_nick_or_name
+from utils.helpers import get_user_nick_or_name, find_member_by_id
 from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.WarnerCog')
@@ -36,6 +36,11 @@ class WarnerCog(commands.Cog):
 		module_logger.info(f"initializing {self.__cog_name__}")
 		self.warns = read_warns()
 
+	@commands.command(name='rw')
+	async def reload_warns(self, ctx: Context):
+		await ctx.message.delete()
+		self.warns = read_warns()
+
 	@commands.command(name='warn')
 	async def warn(self, ctx: Context, member: Member, *reason_sep: str):
 		reason = ' '.join(reason_sep)
@@ -51,7 +56,8 @@ class WarnerCog(commands.Cog):
 	@commands.command(name='warns')
 	async def warns(self, ctx: Context, member: typing.Union[Member, str, None]):
 		module_logger.info(f"EEEE: {member}, {type(member)}")
-		who = str(member.id) if member not in [None, "all"] else str(ctx.author.id)
+		victim = str(member.id) if member not in [None, "all"] else str(ctx.author.id)
+
 		warns = "nicse"
 
 		if member == "all":
@@ -59,13 +65,23 @@ class WarnerCog(commands.Cog):
 			all_warns = []
 			for warned_id in ids:
 				usr_warns = self.warns[warned_id]
-				edited_warns = [[*warn, get_user_nick_or_name(discord.utils.get(ctx.bot.get_all_members(), id=int(warned_id)))] for warn in usr_warns]
+				edited_warns = [
+									[
+										find_member_by_id(ctx.bot, warn[0]),
+										*warn[1:],
+										find_member_by_id(ctx.bot, warned_id)
+									]
+									for warn in usr_warns
+								]
 				all_warns += edited_warns
+			all_warns = sorted(all_warns, key=lambda x: x[2], reverse=True)
 
 			warn_string = self.format_warns_all(all_warns)
 			warns = self.split_warns(warn_string)
-		elif who in self.warns:
-			warn_string = self.format_warns(self.warns[who])
+
+		elif victim in self.warns:
+			all_warns = sorted(self.warns[victim], key=lambda x: x[2], reverse=True)
+			warn_string = self.format_warns(ctx, all_warns)
 			warns = self.split_warns(warn_string)
 
 		if warns == "nicse":
@@ -78,9 +94,9 @@ class WarnerCog(commands.Cog):
 				await ctx.message.reply(f"s még\n```{warn}```")
 
 	@staticmethod
-	def format_warns(warns):
+	def format_warns(ctx, warns):
 		headers = ["KI", "MIKO", "MER"]
-		data = [[warn[0], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
+		data = [[find_member_by_id(ctx.bot, warn[0]), datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
 		tabbed = tabulate(data, headers=headers, showindex=True)
 		return tabbed
 
@@ -111,7 +127,7 @@ class WarnerCog(commands.Cog):
 
 	async def save_warn(self, ctx: Context, member, reason):
 		who = str(member.id)
-		warn = [ctx.message.author.name, reason, datetime.now().timestamp()]
+		warn = [ctx.message.author.id, reason, datetime.now().timestamp()]
 		if who in self.warns:
 			self.warns[who].append(warn)
 		else:

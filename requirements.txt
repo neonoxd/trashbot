@@ -9,3 +9,4 @@ aiocron~=1.8
 timeago==1.0.16
 discord.py[voice]==2.1.0
 matplotlib~=3.6.2
+tabulate[widechars]

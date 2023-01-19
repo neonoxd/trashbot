@@ -2,6 +2,7 @@ import os
 import random
 import string
 
+import discord
 import matplotlib.font_manager as fontman
 
 
@@ -28,6 +29,10 @@ def replace_str_index(text, index=0, replacement=''):
 
 def get_user_nick_or_name(member):
 	return member.nick if member.nick is not None else member.name
+
+
+def find_member_by_id(bot, member_id):
+	return discord.utils.get(bot.get_all_members(), id=int(member_id))
 
 
 def find_font_file(query):
