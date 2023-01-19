@@ -21,11 +21,11 @@ warnpath = "usr/warns.json"
 
 def read_warns():
 	if not os.path.isfile(warnpath):
-		with open(warnpath, "w") as f:
+		with open(warnpath, "w", encoding="utf8") as f:
 			f.write("{}")
 			return {}
 	else:
-		with open(warnpath, "r") as f:
+		with open(warnpath, "r", encoding="utf8") as f:
 			return json.loads(f.read())
 
 
@@ -132,8 +132,8 @@ class WarnerCog(commands.Cog):
 			self.warns[who].append(warn)
 		else:
 			self.warns[who] = [warn]
-		with open(warnpath, "w") as f:
-			f.write(json.dumps(self.warns))
+		with open(warnpath, "w", encoding="utf8") as f:
+			f.write(json.dumps(self.warns, indent=4))
 		module_logger.info("saved warn")
 		msg = "megjegyeztem 😂"
 		if len(self.warns[who]) > 2:
