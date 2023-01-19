@@ -31,8 +31,10 @@ def get_user_nick_or_name(member):
 	return member.nick if member.nick is not None else member.name
 
 
-def find_member_by_id(bot, member_id):
-	return discord.utils.get(bot.get_all_members(), id=int(member_id))
+def find_member_by_id(guild, member_id):
+	for member in guild.members:
+		if member.id == int(member_id):
+			return member
 
 
 def find_font_file(query):

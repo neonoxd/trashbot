@@ -2,9 +2,11 @@ import asyncio
 import json
 import logging
 import os.path
+import traceback
 import typing
 from datetime import datetime
 import random
+from io import BytesIO
 
 import discord.utils
 from discord import Member
@@ -53,30 +55,38 @@ class WarnerCog(commands.Cog):
 		await asyncio.sleep(10)
 		await ctx.message.delete()
 
+	@commands.Cog.listener()
+	async def on_command_error(self, ctx, err):
+		module_logger.error(err)
+		traceback.print_exception(err)
+
 	@commands.command(name='warns')
-	async def warns(self, ctx: Context, member: typing.Union[Member, str, None]):
-		module_logger.info(f"EEEE: {member}, {type(member)}")
+	async def warns(self, ctx: Context, member: typing.Union[Member, str, None], dump=None):
 		victim = str(member.id) if member not in [None, "all"] else str(ctx.author.id)
 
 		warns = "nicse"
 
 		if member == "all":
+			module_logger.debug("dumping all warns")
 			ids = list(self.warns.keys())
 			all_warns = []
 			for warned_id in ids:
 				usr_warns = self.warns[warned_id]
 				edited_warns = [
 									[
-										find_member_by_id(ctx.bot, warn[0]),
+										find_member_by_id(ctx.guild, warn[0]),
 										*warn[1:],
-										find_member_by_id(ctx.bot, warned_id)
+										find_member_by_id(ctx.guild, warned_id)
 									]
 									for warn in usr_warns
 								]
 				all_warns += edited_warns
 			all_warns = sorted(all_warns, key=lambda x: x[2])
-
-			warn_string = self.format_warns_all(all_warns)
+			module_logger.debug(f"all_warns: {all_warns}")
+			warn_string = self.format_warns_all(ctx, all_warns, dump)
+			if dump:
+				await ctx.message.reply("iesmik", file=discord.File(BytesIO(warn_string.encode()), "warns.csv"))
+				return
 			warns = self.split_warns(warn_string)
 
 		elif victim in self.warns:
@@ -96,16 +106,28 @@ class WarnerCog(commands.Cog):
 	@staticmethod
 	def format_warns(ctx, warns):
 		headers = ["KI", "MIKO", "MER"]
-		data = [[find_member_by_id(ctx.bot, warn[0]), datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
+		data = [[find_member_by_id(ctx.guild, warn[0]), datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
 		tabbed = tabulate(data, headers=headers, showindex=True)
 		return tabbed
 
 	@staticmethod
-	def format_warns_all(warns):
+	def format_warns_all(ctx, warns, dump):
+		module_logger.debug("dumping all warns")
 		headers = ["KI", "KIT", "MIKO", "MER"]
-		data = [[warn[0], warn[3], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]] for warn in warns]
-		tabbed = tabulate(data, headers=headers, showindex=True)
-		return tabbed
+		data = []
+
+		for warn in warns:
+			data.append([warn[0], warn[3],
+			 datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]])
+
+		if dump:
+			out = ";\t".join(headers)+"\n"
+			for warnline in data:
+				out += ";\t".join([str(warnparam) for warnparam in warnline])+"\n"
+			return out
+		else:
+			tabbed = tabulate(data, headers=headers, showindex=True)
+			return tabbed
 
 	@staticmethod
 	def split_warns(tabbed):
