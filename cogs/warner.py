@@ -67,7 +67,7 @@ class WarnerCog(commands.Cog):
 		warns = "nicse"
 
 		if member == "all":
-			module_logger.debug("dumping all warns")
+			module_logger.debug("getting all warns")
 			ids = list(self.warns.keys())
 			all_warns = []
 			for warned_id in ids:
@@ -82,7 +82,6 @@ class WarnerCog(commands.Cog):
 								]
 				all_warns += edited_warns
 			all_warns = sorted(all_warns, key=lambda x: x[2])
-			module_logger.debug(f"all_warns: {all_warns}")
 			warn_string = self.format_warns_all(ctx, all_warns, dump)
 			if dump:
 				await ctx.message.reply("iesmik", file=discord.File(BytesIO(warn_string.encode()), "warns.csv"))
@@ -90,6 +89,7 @@ class WarnerCog(commands.Cog):
 			warns = self.split_warns(warn_string)
 
 		elif victim in self.warns:
+			module_logger.debug(f"getting warns for {victim}")
 			all_warns = sorted(self.warns[victim], key=lambda x: x[2])
 			warn_string = self.format_warns(ctx, all_warns)
 			warns = self.split_warns(warn_string)
@@ -112,15 +112,16 @@ class WarnerCog(commands.Cog):
 
 	@staticmethod
 	def format_warns_all(ctx, warns, dump):
-		module_logger.debug("dumping all warns")
 		headers = ["KI", "KIT", "MIKO", "MER"]
 		data = []
 
 		for warn in warns:
-			data.append([warn[0], warn[3],
-			 datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]])
+			data.append(
+				[warn[0], warn[3], datetime.fromtimestamp(warn[2]).strftime('%Y-%m-%d %H:%M:%S'), warn[1]]
+			)
 
 		if dump:
+			module_logger.debug("dumping as file warns")
 			out = ";\t".join(headers)+"\n"
 			for warnline in data:
 				out += ";\t".join([str(warnparam) for warnparam in warnline])+"\n"
