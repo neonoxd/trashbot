@@ -133,7 +133,7 @@ class WarnerCog(commands.Cog):
 		else:
 			self.warns[who] = [warn]
 		with open(warnpath, "w", encoding="utf8") as f:
-			f.write(json.dumps(self.warns, indent=4))
+			f.write(json.dumps(self.warns, indent=4, ensure_ascii=False))
 		module_logger.info("saved warn")
 		msg = "megjegyeztem 😂"
 		if len(self.warns[who]) > 2:
