@@ -265,6 +265,11 @@ async def event_message(cog, message):
         if await handle_maymay(message):
             return
 
+    if "https://twitter.com" in msg_content and "hete" not in msg_content:
+        await message.channel.send(f"{msg_content.replace('https://twitter.com', 'https://vxtwitter.com')} 😡😡")
+        await message.delete()
+
+
     now = datetime.datetime.now()
     chance = random.randrange(0, 100)
 
@@ -439,7 +444,9 @@ async def mercy_maybe(bot, channel, timeout=30):
     def check(reaction_obj, usr):
         return reaction_obj.message.id == cur_round["msgid"] and usr.mention not in cur_round["users"]
 
-    msg = await channel.send("A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal !! @here")
+    msg_roll = random.choice(["A likolok közül kiválasztok egy szerencsés tulélöt, a töbi sajnos meg hal !!",
+                              "a likolok között kisorsolok egy egetrengető állast de a többi se érezze magát biztonságban"])
+    msg = await channel.send(msg_roll + " @here")
     await roll_status(bot)
     cur_round["msgid"] = msg.id
     cur_round["date"] = datetime.datetime.now()
