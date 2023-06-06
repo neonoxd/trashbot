@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from utils.helpers import get_resource_name_or_user_override, sched_real
+from utils.helpers import get_resource_name_or_user_override, schedule_real_comedy
 from utils.state import BotState, BotConfig, TrashBot
 
 load_dotenv()

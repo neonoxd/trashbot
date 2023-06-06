@@ -21,8 +21,10 @@ class BeRealCog(commands.Cog):
 		self.last: Message | None = None
 
 	async def do(self, channel: TextChannel):
-		self.current_thread = await self.create(channel)
+		if len(self.posts) > 0:
+			self.last = self.find_best_message()
 		self.posts = []
+		self.current_thread = await self.create(channel)
 
 	@commands.command(name='bereal')
 	@commands.guild_only()
@@ -34,8 +36,11 @@ class BeRealCog(commands.Cog):
 	@commands.command(name='real')
 	async def current(self, ctx: Context):
 		await ctx.message.delete()
-		best: Message = await self.find_best_message()
-		await ctx.message.channel.send(f"Arany Komédia {best.jump_url} {best.author.mention}")
+		if self.last is not None:
+			best: Message = self.last
+			await ctx.message.channel.send(f"Arany Komédia {best.jump_url} {best.author.mention}")
+		else:
+			await ctx.message.channel.send("vársz")
 
 	async def find_best_message(self) -> Message:
 		return max(self.posts, key=lambda x: len(x.reactions))
@@ -72,11 +77,11 @@ class BeRealCog(commands.Cog):
 			await message.add_reaction("✅")
 
 
-async def trigger_first_real(bot: TrashBot, channel: TextChannel):
-	from utils.helpers import sched_real
+async def trigger_real_comedy(bot: TrashBot, channel: TextChannel):
+	from utils.helpers import schedule_real_comedy
 	cog: Optional[BeRealCog] = bot.get_cog('BeRealCog')
 	await cog.do(channel)
-	bot.loop.create_task(sched_real(bot, channel))
+	bot.loop.create_task(schedule_real_comedy(bot, channel))
 
 
 async def setup(bot: TrashBot):

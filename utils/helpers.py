@@ -52,13 +52,13 @@ def get_resource_name_or_user_override(res_path):
 	return usrp if os.path.isfile(usrp) else resp
 
 
-async def sched_real(robot: TrashBot, channel: TextChannel):
-	from cogs.bereal import trigger_first_real
+async def schedule_real_comedy(robot: TrashBot, channel: TextChannel):
+	from cogs.bereal import trigger_real_comedy
 	now = datetime.datetime.now()
 	target = get_next_run_time()
 	print(f"scheduled comedy @ {target}")
 	await asyncio.sleep((target - now).total_seconds())
-	await trigger_first_real(robot, channel)
+	await trigger_real_comedy(robot, channel)
 
 
 def get_next_run_time_debug():
