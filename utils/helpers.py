@@ -1,9 +1,13 @@
+import asyncio
+import datetime
 import os
 import random
 import string
 
-import discord
 import matplotlib.font_manager as fontman
+from discord import TextChannel
+
+from utils.state import TrashBot
 
 
 def todo(logger, msg):
@@ -46,3 +50,22 @@ def get_resource_name_or_user_override(res_path):
 	usrp = f"usr/{res_path}"
 	resp = f"resources/{res_path}"
 	return usrp if os.path.isfile(usrp) else resp
+
+
+async def sched_real(robot: TrashBot, channel: TextChannel):
+	from cogs.bereal import trigger_first_real
+	now = datetime.datetime.now()
+	target = get_next_run_time()
+	print(f"scheduled comedy @ {target}")
+	await asyncio.sleep((target - now).total_seconds())
+	await trigger_first_real(robot, channel)
+
+
+def get_next_run_time_debug():
+	return datetime.datetime.now() + datetime.timedelta(seconds=5)
+
+
+def get_next_run_time():
+	now = datetime.datetime.today()
+	tomorrow = now + datetime.timedelta(days=1)
+	return datetime.datetime(tomorrow.year, tomorrow.month, tomorrow.day, random.randint(9, 22), random.randint(0, 59))
