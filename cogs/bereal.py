@@ -1,8 +1,10 @@
 import logging
+import typing
 from datetime import datetime
 from typing import List, Optional
 
-from discord import Thread, Member, TextChannel, Message
+import discord
+from discord import Thread, Member, TextChannel, Message, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -22,18 +24,39 @@ class BeRealCog(commands.Cog):
 
 	async def do(self, channel: TextChannel):
 		if len(self.posts) > 0:
-			self.last = self.find_best_message()
+			self.last = await self.find_best_message()
+
 		self.posts = []
 		self.current_thread = await self.create(channel)
 
-	@commands.command(name='bereal')
+		if self.last is not None:
+			await channel.send(f"Arany Komédia tegnapról {self.last.jump_url} {self.last.author.mention}")
+
+	@app_commands.command(name="real-comedy-start")
+	@commands.is_owner()
+	async def start_comedy(self, interaction: discord.Interaction):
+		""" /real-comedy-start """
+		await interaction.response.send_message(content="zsa", ephemeral=True, delete_after=1)
+		channel: TextChannel = typing.cast(TextChannel, interaction.channel)
+		await self.do(channel)
+
+	@app_commands.command(name="real-comedy-gold")
+	async def show_last_gold(self, interaction: discord.Interaction):
+		""" /real-comedy-gold - show the best from last """
+		if self.last is not None:
+			best: Message = self.last
+			await interaction.response.send_message(content=f"Arany Komédia tegnapról {best.jump_url} {best.author.mention}")
+		else:
+			await interaction.response.send_message(content="vársz", delete_after=1)
+
+	@commands.command(name='bereal', hidden=True)
 	@commands.guild_only()
 	@commands.is_owner()
 	async def manual_run(self, ctx: Context):
 		await ctx.message.delete()
 		await self.do(ctx.channel)
 
-	@commands.command(name='real')
+	@commands.command(name='real', hidden=True)
 	async def current(self, ctx: Context):
 		await ctx.message.delete()
 		if self.last is not None:
