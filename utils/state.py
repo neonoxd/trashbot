@@ -39,6 +39,8 @@ class VCEvent:
 	channel: VoiceChannel
 	when: float
 
+
+
 @dataclass
 class GuildState:
 	id: int
@@ -131,3 +133,8 @@ class BotConfig:
 class TrashBot(commands.Bot):
 	state: BotState
 	globals: BotConfig
+	logger: logging.Logger
+
+	def log(self, message: str, name: str, level: int = logging.INFO, **kwargs) -> None:
+			self.logger.name = name
+			self.logger.log(level = level, msg = message, **kwargs)

@@ -52,6 +52,7 @@ intents = discord.Intents.all()
 
 
 bot = TrashBot(command_prefix=get_prefix, intents=intents)
+bot.logger = logger
 
 
 async def setup_state():
@@ -130,7 +131,7 @@ async def on_ready():
 	for guild in bot.guilds:
 		bot.state.track_guild(guild.id)
 		bot.loop.create_task(think(bot, guild.system_channel))
-		bot.loop.create_task(sched_real(bot, guild.system_channel))
+		bot.loop.create_task(schedule_real_comedy(bot, guild.system_channel))
 		await guild.system_channel.send("na re")
 
 	logger.debug(f'Successfully logged in and booted...!')

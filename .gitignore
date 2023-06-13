@@ -8,3 +8,6 @@ __pycache__/
 /usr/
 *.log
 /dummy/
+.mypy_cache
+.vscode
+/dump/

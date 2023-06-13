@@ -103,7 +103,8 @@ class AdminCog(commands.Cog):
             else:
                 synced = await ctx.bot.tree.sync()
 
-            self.logger.debug(f"synced: {synced}")
+            self.logger.debug(f"synced: {len(synced)} commands")
+            self.logger.debug("\n".join([str((cmd.name, cmd.type)) for cmd in synced]))
 
             await ctx.send(
                 f"{len(synced)} trükköt tud a báttya{'!' if spec is None else '!?'}"
