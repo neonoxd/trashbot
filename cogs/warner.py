@@ -53,7 +53,6 @@ class WarnerCog(commands.Cog):
                 except Exception as e:
                     module_logger.error(e)
                     await interaction.response.send_message(content="vmi nem jo gyerekeg", ephemeral=True, delete_after=5)
-        raise Exception("xd")
 
     @app_commands.command(name="warn-cfg")
     @commands.is_owner()
