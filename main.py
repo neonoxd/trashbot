@@ -110,7 +110,7 @@ async def main():
 
 @bot.event
 async def on_ready():
-	from cogs.impl.shitpost import think
+	from cogs.impl.shitpost_impl import think
 	ver = os.popen("git rev-parse --short HEAD").read()
 	bot.globals.verinfo["Tibi"] = ver
 	bot.globals.verinfo["discord.py"] = discord.__version__
@@ -139,19 +139,19 @@ async def on_ready():
 
 @aiocron.crontab('0 14 * * *')  # 14:00
 async def trigger_cron():
-	from cogs.impl.shitpost import set_daily_tension
+	from cogs.impl.shitpost_impl import set_daily_tension
 	await set_daily_tension(bot)
 
 
 @aiocron.crontab("0 20 * * FRI")
 async def trigger_friday_mfs():
-	from cogs.impl.shitpost import announce_friday_mfs
+	from cogs.impl.shitpost_impl import announce_friday_mfs
 	await announce_friday_mfs(bot)
 
 
 @aiocron.crontab('0 1 * * *')  # 01:00
 async def reset_alert_states():
-	from cogs.impl.shitpost import reset_alert_states
+	from cogs.impl.shitpost_impl import reset_alert_states
 	await reset_alert_states(bot)
 
 

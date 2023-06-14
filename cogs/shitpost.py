@@ -26,28 +26,28 @@ class ShitpostCog(commands.Cog):
 
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx: Context):
-		from cogs.impl.shitpost import command_befli
+		from cogs.impl.shitpost_impl import command_befli
 		await command_befli(self, ctx)
 
 	@commands.command(name='friday', hidden=True)
 	async def friday(self, ctx: Context):
-		from cogs.impl.shitpost import announce_friday_mfs
+		from cogs.impl.shitpost_impl import announce_friday_mfs
 		await ctx.message.delete()
 		await announce_friday_mfs(self.bot)
 
 	@commands.command(name='captcha')
 	async def captcha(self, ctx: Context):
-		from cogs.impl.shitpost import command_captcha
+		from cogs.impl.shitpost_impl import command_captcha
 		await command_captcha(self, ctx)
 
 	@commands.command(name='tenemos')
 	async def tenemos(self, ctx: Context):
-		from cogs.impl.shitpost import command_tenemos
+		from cogs.impl.shitpost_impl import command_tenemos
 		await command_tenemos(self, ctx)
 
 	@commands.command(name="gabo")
 	async def gabo(self, ctx: Context, *args):
-		from cogs.impl.shitpost import command_gabo
+		from cogs.impl.shitpost_impl import command_gabo
 		await command_gabo(self, ctx, args)
 
 	@commands.command(name="sanity")
@@ -71,32 +71,32 @@ class ShitpostCog(commands.Cog):
 
 	@commands.command(name='beemovie')
 	async def bmc(self, ctx: Context, *args):
-		from cogs.impl.shitpost import command_beemovie
+		from cogs.impl.shitpost_impl import command_beemovie
 		await command_beemovie(self, ctx, args)
 
 	@commands.command(name='tension')
 	async def show_tension(self, ctx: Context):
-		from cogs.impl.shitpost import command_tension
+		from cogs.impl.shitpost_impl import command_tension
 		await command_tension(self, ctx)
 
 	@commands.command(name='gba')
 	async def gba(self, ctx: Context):
-		from cogs.impl.shitpost import command_gba
+		from cogs.impl.shitpost_impl import command_gba
 		await command_gba(self, ctx)
 
 	@commands.command(name='cz')
 	async def cege(self, ctx: Context):
-		from cogs.impl.shitpost import command_cz
+		from cogs.impl.shitpost_impl import command_cz
 		await command_cz(self, ctx)
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member: Member, before, after):
-		from cogs.impl.shitpost import event_voice_state_update
+		from cogs.impl.shitpost_impl import event_voice_state_update
 		await event_voice_state_update(self, member, before, after)
 
 	@commands.Cog.listener()
 	async def on_message(self, message: Message):
-		from cogs.impl.shitpost import event_message
+		from cogs.impl.shitpost_impl import event_message
 		await event_message(self, message)
 
 
