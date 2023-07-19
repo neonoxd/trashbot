@@ -56,7 +56,7 @@ class BeRealCog(commands.Cog):
     async def create(channel: TextChannel, initiator: Member | None = None) -> Thread:
         module_logger.info(f"BeReal Triggered by {initiator}")
         message = await channel.send(f"⚠️ Komédia™️(BETA) idő ⚠️\n"
-                                     f"_2 perced van a fonákba elküldeni a legviccesebb vizuális tartalmat_\n"
+                                     f"_**10 perced** van a fonákba elküldeni a legviccesebb vizuális tartalmat_\n"
                                      f"_Ha késel sajnos meghalsz_")
         thread = await message.create_thread(
             name=f"BR{datetime.today().strftime('%y%m%d')}"
@@ -77,7 +77,7 @@ class BeRealCog(commands.Cog):
         
         module_logger.info(f"got a new post in {message.channel.name} by {message.author}")
         self.posts.append(message)
-        if (message.created_at - self.current_thread.created_at).total_seconds() / 60 > 2:
+        if (message.created_at - self.current_thread.created_at).total_seconds() / 60 >= 10:
             await message.add_reaction("❌")
         else:
             await message.add_reaction("✅")

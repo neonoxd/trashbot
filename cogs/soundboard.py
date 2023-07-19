@@ -5,7 +5,7 @@ import random
 from typing import List
 
 import discord
-from discord import Member, app_commands
+from discord import Member, VoiceState, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -24,8 +24,8 @@ class SoundBoardCog(commands.Cog):
         
     async def sounds_autocomplete(self, interaction: discord.Interaction, current: str) \
         -> List[app_commands.Choice[str]]:
-        category = next((option['value'] for option in interaction.data.get('options') if option['name'] == 'category'), None)
-        choices = [os.path.splitext(snd)[0] for snd in self.sounds[category]]
+        category = interaction.namespace.category or None
+        choices = [os.path.splitext(snd)[0] for snd in self.sounds[category]] if category is not None else []
         return [
             app_commands.Choice(name=choice, value=choice)
             for choice in choices if current.lower() in choice.lower()
@@ -134,21 +134,22 @@ class SoundBoardCog(commands.Cog):
             await voice_client.move_to(channel)
         await ctx.message.delete()
 
-    async def play_source_if_vc(self, source, delay):
+    async def play_source_if_vc(self, source, volume: float):
         if self.in_vc():
             vc = self.current_vc
-            await asyncio.sleep(delay)
+            await asyncio.sleep(0.5)
             vc.play(discord.FFmpegPCMAudio(executable=self.bot.globals.ffmpeg_path, source=source))
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member: Member, before, after):
+    async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
 
         join_map = {
             self.bot.globals.goofies["sz"]: f"resources/sounds/door{random.randrange(1,4)}.ogg",
             self.bot.globals.goofies["d"]: f"resources/sounds/join_hola.wav",
             self.bot.globals.goofies["ps"]: f"resources/sounds/pspsps.mp3",
             self.bot.globals.goofies["m"]: f"resources/sounds/DUKNUK14.ogg",
-            self.bot.globals.goofies["denik"]: f"resources/sounds/ittvokgec.ogg"
+            self.bot.globals.goofies["denik"]: f"resources/sounds/ittvokgec.ogg",
+            self.bot.globals.goofies["jamal"]: f"resources/sounds/kula.mp3"
         }
 
         exit_map = {

@@ -7,7 +7,7 @@ import random
 import aiohttp
 import discord
 import timeago
-from discord import Embed
+from discord import Embed, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
@@ -32,7 +32,7 @@ class MiscCog(commands.Cog):
 			if after.nick != forced_nick:
 				await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
 
-	@commands.command(name="mik")
+	@commands.command(name="mik") #  TODO: remove
 	async def mik(self, ctx: Context):
 		now = datetime.datetime.now()
 		embed = Embed(title="ezek fönek sogor 🤣", color=0xFF5733)
@@ -53,37 +53,57 @@ class MiscCog(commands.Cog):
 
 			await ctx.send(embed=embed)
 
-	@commands.command(name="kik", hidden=True)
-	async def whomst(self, ctx: Context):
-		now = datetime.datetime.now()
-		guild_state = self.bot.state.get_guild_state_by_id(ctx.message.guild.id)
-		t_locale = random.choice(['zh_CN', 'hu', 'en'])
-		if self.bot.user.mentioned_in(ctx.message):
-			embed = Embed(title="kb ezek vagy nemtom", color=0xFF5733)
-			event_list_str = []
+	@app_commands.command(name="ki", description="kik vót")
+	async def who_simple_cmd(self, interaction: discord.Interaction):
+		""" /ki """
+		guild_state = self.bot.state.get_guild_state_by_id(interaction.guild.id)
+		
+		last_events = guild_state.last_vc_events
 
-			if len(guild_state.last_vc_events):
-				for r in list(reversed(guild_state.last_vc_events)):
-					event_str = """"""
-					user = r.user.nick if r.user.nick is not None else r.user.name
-					when = datetime.datetime.fromtimestamp(r.when)
-					event_str = event_str + f"`[{timeago.format(when, now, t_locale)}] "
-					if r.event:
-						event_str = event_str + f"""{user} jött ide: {r.channel.name}`"""
-					else:
-						event_str = event_str + f"""{user} ment a g*ecibe`"""
-					event_list_str.append(event_str)
+		if not len(last_events):
+			await interaction.response.send("nemtom most keltem nem figyeltem")
+		else:
+			last_event = last_events[-1]
+			if str(last_event.user.id) == str(self.bot.globals.goofies["jamal"]):
+				await interaction.response.send_message(f"# LACI")
 			else:
-				when = ctx.bot.globals.startup_at
-				event_str = f"`[{timeago.format(when, now, t_locale)}] {random.choice(['sz*rtak a világra engem', 'keltem fel'])}`"
+				await interaction.response.send_message(
+				f"{random.choice(['ö', 'nem vok spicli de ö', 'sztem ö'])}" +
+				f"{random.choice(['t láttam asszem feljönni', ' jött erre']) if last_event.event else ' lépett le'}: " +
+				f"{last_event.user.name}"
+			)
+
+	@app_commands.command(name="kik", description="kik voltak szok")
+	async def who_cmd(self, interaction: discord.Interaction):
+		""" /kik """
+		now = datetime.datetime.now()
+		guild_state = self.bot.state.get_guild_state_by_id(interaction.guild.id)
+		t_locale = random.choice(['zh_CN', 'hu', 'en'])
+		embed = Embed(title="kb ezek vagy nemtom", color=0xFF5733)
+		event_list_str = []
+
+		if len(guild_state.last_vc_events):
+			for r in list(reversed(guild_state.last_vc_events)):
+				event_str = """"""
+				user = r.user.nick if r.user.nick is not None else r.user.name
+				when = datetime.datetime.fromtimestamp(r.when)
+				event_str = event_str + f"`[{timeago.format(when, now, t_locale)}] "
+				if r.event:
+					event_str = event_str + f"""{user} jött ide: {r.channel.name}`"""
+				else:
+					event_str = event_str + f"""{user} ment a g*ecibe`"""
 				event_list_str.append(event_str)
+		else:
+			when = self.bot.globals.startup_at
+			event_str = f"`[{timeago.format(when, now, t_locale)}] {random.choice(['sz*rtak a világra engem', 'keltem fel'])}`"
+			event_list_str.append(event_str)
 
-			embed.add_field(name="\u200b", value="\n".join(event_list_str))
+		embed.add_field(name="\u200b", value="\n".join(event_list_str))
 
-			embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
-							 icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
+		embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
+							icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
 
-			await ctx.send(embed=embed)
+		await interaction.response.send_message(embed=embed, ephemeral=True, delete_after=30)
 
 	@commands.command(name="ki", hidden=True)
 	async def who(self, ctx: Context, *args):

@@ -15,6 +15,8 @@ from discord.ext.commands import Context, Greedy
 from utils.helpers import get_resource_name_or_user_override
 from utils.state import TrashBot
 
+from cogs.warner import WarnerCog
+
 module_logger = logging.getLogger('trashbot.AdminCog')
 
 editor_url = os.getenv("EDITOR_API_URL")
@@ -64,7 +66,7 @@ class EditorFileSelect(discord.ui.Select):
                     else:
                         self.logger.warning(f"resp {r}")
         else:
-            await interaction.response.send_message(content="you call yourself an athlete?", ephemeral=True)
+            pass
 
 
 class SimpleView(discord.ui.View):
@@ -138,6 +140,22 @@ class AdminCog(commands.Cog):
                     await interaction.response.send_message(content=resp.decode(), ephemeral=True)
                 else:
                     self.logger.warning(f"resp {r}")
+
+    @commands.is_owner()
+    @app_commands.command(name="reload")
+    async def reload_cfg(self, interaction: discord.Interaction, action: Literal['warns', 'goofies']) -> None:
+        bot = self.bot
+        if action == 'warns':
+            cog: Optional[WarnerCog] = bot.get_cog('WarnerCog')
+            cog.warns = cog.read_warns()
+            await interaction.response.send_message(content="újratöltve", ephemeral=True, delete_after=5)
+        elif action == 'goofies':
+            with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
+                bot.globals.goofies = json.loads(file.read())
+                for b_key in list(bot.globals.goofies.keys()):
+                    bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
+        else:
+            await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 
     @commands.command(name="info", hidden=True)
     async def dump_info(self, ctx: commands.Context):
