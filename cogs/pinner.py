@@ -80,7 +80,7 @@ class PinnerCog(commands.Cog):
         -> List[app_commands.Choice[str]]: return [
             app_commands.Choice(name=choice, value=choice)
             for choice in list(self.pins.keys()) if current.lower() in choice.lower()
-        ]
+        ][:25]
 
 	@app_commands.command(name="pin")
 	@app_commands.autocomplete(pin_name=pin_autocomplete)
