@@ -4,6 +4,7 @@ import logging
 import os
 import random
 import time
+import subprocess
 from typing import Optional, Literal
 
 import aiohttp
@@ -203,6 +204,12 @@ class AdminCog(commands.Cog):
         await ctx.bot.change_presence(activity=discord.Game(
             random.choice(ctx.bot.globals.statuses)
         ))
+        
+    @commands.command(name='update', hidden=True)
+    @commands.is_owner()
+    async def update(self, ctx: commands.Context):
+        await ctx.message.delete()
+        subprocess.Popen(["update.sh"]) 
 
     @commands.command(name='set', hidden=True)
     @commands.is_owner()
