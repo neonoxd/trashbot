@@ -209,7 +209,7 @@ class AdminCog(commands.Cog):
     @commands.is_owner()
     async def update(self, ctx: commands.Context):
         await ctx.message.delete()
-        subprocess.Popen(["update.sh"]) 
+        subprocess.Popen(["./update.sh"]) 
 
     @commands.command(name='set', hidden=True)
     @commands.is_owner()
