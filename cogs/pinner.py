@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import io
 
 import discord
 from discord.ext import commands
@@ -98,8 +99,9 @@ class PinnerCog(commands.Cog):
 		if arg is not None and arg == "dump":
 			await ctx.send(file=discord.File(self.pin_path, 'pins.json'))
 		else:
-			await ctx.send(f'```{", ".join([pin for pin in self.pins])}```')
-
+			pin_content = f'{", ".join([pin for pin in self.pins])}'
+			pin_content_as_file = io.StringIO(pin_content)
+			await ctx.send(content="pinek_battya", file=discord.file(fp=pin_content_as_file, filename="pinekgeco.txt"))
 
 async def setup(bot: TrashBot):
 	await bot.add_cog(PinnerCog(bot))
