@@ -116,7 +116,7 @@ class PinnerCog(commands.Cog):
 		if arg is not None and arg == "dump":
 			await ctx.send(file=discord.File(self.pin_path, 'pins.json'))
 		else:
-			pin_content = f'{", /n".join([pin for pin in self.pins])}'
+			pin_content = {", \n".join([pin for pin in self.pins])}
 			pin_content_as_file = io.StringIO(pin_content)
 			await ctx.send(content="pinek_battya", file=discord.File(fp=pin_content_as_file, filename="pinekgeco.txt"))
 
