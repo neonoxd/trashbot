@@ -4,11 +4,13 @@ import os
 import io
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
 from utils.helpers import todo
 from utils.state import TrashBot
+from typing import List
 
 module_logger = logging.getLogger('trashbot.PinnerCog')
 
@@ -74,6 +76,21 @@ class PinnerCog(commands.Cog):
 		who = interaction.user.nick if interaction.user.nick is not None else interaction.user.name
 		await message.reply(f'megjegyeztem {who}...{list(pin_obj.keys())[0]} 📌')
 
+	async def pin_autocomplete(self, i: discord.Interaction, current: str) \
+        -> List[app_commands.Choice[str]]: return [
+            app_commands.Choice(name=choice, value=choice)
+            for choice in list(self.pins.keys()) if current.lower() in choice.lower()
+        ]
+
+	@app_commands.command(name="pin")
+	@app_commands.autocomplete(pin_name=pin_autocomplete)
+	@app_commands.describe(pin_name="name of the pin to post")
+	async def slash_sound(self, interaction: discord.Interaction, pin_name: str):
+		""" /pin <pin_name> - posts pin"""
+		self.logger.debug(f"looking for pin with name {pin_name}")
+		if pin_name in self.pins:
+			await interaction.response.send_message(self.pins[pin_name])
+
 	@commands.command(name='pin')
 	async def pin(self, ctx: Context, pin_name=None, *, pin_content=None):
 		self.logger.info("command called: {}".format(ctx.command))
@@ -101,7 +118,7 @@ class PinnerCog(commands.Cog):
 		else:
 			pin_content = f'{", ".join([pin for pin in self.pins])}'
 			pin_content_as_file = io.StringIO(pin_content)
-			await ctx.send(content="pinek_battya", file=discord.file(fp=pin_content_as_file, filename="pinekgeco.txt"))
+			await ctx.send(content="pinek_battya", file=discord.File(fp=pin_content_as_file, filename="pinekgeco.txt"))
 
 async def setup(bot: TrashBot):
 	await bot.add_cog(PinnerCog(bot))
