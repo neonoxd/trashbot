@@ -28,8 +28,7 @@ class QuoterCog(commands.Cog):
 		"""reload quotes"""
 		await ctx.message.delete()
 		self.logger.info("command called: {}".format(ctx.command))
-		ctx.bot.state.quotecfg = json.loads(open(get_resource_name_or_user_override("config/quote_sources.json"), "r", encoding="utf8").read())
-		ctx.bot.state.quotecontent = self.read_quotes()
+		await self.reload_quotes()
 
 	@commands.command(name='quote', aliases=['q'])
 	async def quote(self, ctx: Context, *args):
@@ -59,6 +58,10 @@ class QuoterCog(commands.Cog):
 					content[self.bot.state.quotecfg[q_src_n]['src']] = file.read().split("\n\n")
 
 		return content
+
+	async def reload_quotes(self):
+		self.bot.state.quotecfg = json.loads(open(get_resource_name_or_user_override("config/quote_sources.json"), "r", encoding="utf8").read())
+		self.bot.state.quotecontent = self.read_quotes()
 
 	@staticmethod
 	def embed_for(page_name, bot: TrashBot, author: str):
