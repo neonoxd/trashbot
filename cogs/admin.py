@@ -17,6 +17,7 @@ from utils.helpers import get_resource_name_or_user_override
 from utils.state import TrashBot
 
 from cogs.warner import WarnerCog
+from cogs.quoter import QuoterCog
 
 module_logger = logging.getLogger('trashbot.AdminCog')
 
@@ -144,7 +145,7 @@ class AdminCog(commands.Cog):
 
     @commands.is_owner()
     @app_commands.command(name="reload")
-    async def reload_cfg(self, interaction: discord.Interaction, action: Literal['warns', 'goofies']) -> None:
+    async def reload_cfg(self, interaction: discord.Interaction, action: Literal['warns', 'goofies', 'quotes']) -> None:
         bot = self.bot
         if action == 'warns':
             cog: Optional[WarnerCog] = bot.get_cog('WarnerCog')
@@ -155,6 +156,9 @@ class AdminCog(commands.Cog):
                 bot.globals.goofies = json.loads(file.read())
                 for b_key in list(bot.globals.goofies.keys()):
                     bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
+        elif action == 'quotes':
+            cog: Optional[QuoterCog] = bot.get_cog('QuoterCog')
+            await cog.reload_quotes()
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 
