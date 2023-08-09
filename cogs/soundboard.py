@@ -147,7 +147,6 @@ class SoundBoardCog(commands.Cog):
             self.bot.globals.goofies["sz"]: f"resources/sounds/door{random.randrange(1,4)}.ogg",
             self.bot.globals.goofies["d"]: f"resources/sounds/join_hola.wav",
             self.bot.globals.goofies["ps"]: f"resources/sounds/pspsps.mp3",
-            self.bot.globals.goofies["m"]: f"resources/sounds/DUKNUK14.ogg",
             self.bot.globals.goofies["denik"]: f"resources/sounds/ittvokgec.ogg",
             self.bot.globals.goofies["jamal"]: f"resources/sounds/kula.mp3"
         }
