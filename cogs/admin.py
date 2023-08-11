@@ -145,7 +145,7 @@ class AdminCog(commands.Cog):
 
     @commands.is_owner()
     @app_commands.command(name="reload")
-    async def reload_cfg(self, interaction: discord.Interaction, action: Literal['warns', 'goofies', 'quotes']) -> None:
+    async def reload_cfg(self, interaction: discord.Interaction, action: Literal['warns', 'goofies', 'quotes', 'greetings']) -> None:
         bot = self.bot
         if action == 'warns':
             cog: Optional[WarnerCog] = bot.get_cog('WarnerCog')
@@ -158,6 +158,9 @@ class AdminCog(commands.Cog):
             cog: Optional[QuoterCog] = bot.get_cog('QuoterCog')
             await cog.reload_quotes()
             await interaction.response.send_message(content="miket nem mondanak he", ephemeral=True, delete_after=5)
+        elif action == 'greetings':
+            with open(get_resource_name_or_user_override("config/greetings.json"), 'r', encoding="utf8") as file:
+                bot.globals.greetings = json.loads(file.read())
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 
