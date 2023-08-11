@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 
-from utils.helpers import get_resource_name_or_user_override, schedule_real_comedy
+from utils.helpers import get_resource_name_or_user_override, schedule_real_comedy, load_goofies
 from utils.state import BotState, BotConfig, TrashBot
 
 load_dotenv()
@@ -64,10 +64,10 @@ async def setup_state():
 		sounds_path=os.getenv("SNDS_PATH")
 	)
 
-	with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
-		bot.globals.goofies = json.loads(file.read())
-		for b_key in list(bot.globals.goofies.keys()):
-			bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
+	load_goofies(bot)
+
+	with open(get_resource_name_or_user_override("config/greetings.json"), 'r', encoding="utf8") as file:
+		bot.globals.greetings = json.loads(file.read())
 
 	with open(get_resource_name_or_user_override("lists/slur.list"), 'r', encoding="utf8") as file:
 		bot.globals.slurs = file.readlines()

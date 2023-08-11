@@ -19,22 +19,12 @@ module_logger = logging.getLogger('trashbot.WarnerCog')
 warnpath = "usr/warns.json"
 
 
-def read_warns():
-    if not os.path.isfile(warnpath):
-        with open(warnpath, "w", encoding="utf8") as f:
-            f.write("{}")
-            return {}
-    else:
-        with open(warnpath, "r", encoding="utf8") as f:
-            return json.loads(f.read())
-
-
 class WarnerCog(commands.Cog):
     def __init__(self, bot: TrashBot):
         self.bot = bot
         self.logger = module_logger
         module_logger.info(f"initializing {self.__cog_name__}")
-        self.warns = read_warns()
+        self.warns = self.read_warns()
 
     @app_commands.command(name="warn")
     @app_commands.describe(member='a tag, a báttya, az ipse akit felnyomsz', reason="a vádirat miszerint")
@@ -58,7 +48,7 @@ class WarnerCog(commands.Cog):
     @commands.is_owner()
     async def warn_config(self, interaction: discord.Interaction, action: Literal['reload-warns']):
         if action == 'reload-warns':
-            self.warns = read_warns()
+            self.warns = self.read_warns()
             await interaction.response.send_message(content="újratöltve", ephemeral=True, delete_after=5)
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
@@ -102,13 +92,13 @@ class WarnerCog(commands.Cog):
         guild = interaction.guild
         member_id_str = str(victim.id)
         warns = "nicse"
-        
+
         if member_id_str in self.warns:
             module_logger.debug(f"getting warns for {member_id_str}")
             all_warns = sorted(self.warns[member_id_str], key=lambda x: x[2])
             warn_string = self.format_warns(guild, all_warns)
             warns = self.split_warns(warn_string)
-            
+
         if warns == "nicse":
             await interaction.response.send_message(warns)
         else:
@@ -163,6 +153,19 @@ class WarnerCog(commands.Cog):
         if out != splitted[0] + "\n" + splitted[1] + "\n":
             msgs.append(out)
         return msgs
+
+    @staticmethod
+    def read_warns():
+        if not os.path.isfile(warnpath):
+            with open(warnpath, "w", encoding="utf8") as f:
+                f.write("{}")
+                return {}
+        else:
+            with open(warnpath, "r", encoding="utf8") as f:
+                return json.loads(f.read())
+
+    def reload_warns(self):
+        self.warns = self.read_warns()
 
     async def do_save_warn(self, id: str, warned_id: str, reason: str):
         module_logger.info(f"doing warn: {id} {warned_id}, {reason}")

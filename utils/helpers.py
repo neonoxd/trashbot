@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import json
 import os
 import random
 import string
@@ -69,3 +70,10 @@ def get_next_run_time():
 	now = datetime.datetime.today()
 	tomorrow = now + datetime.timedelta(days=1)
 	return datetime.datetime(tomorrow.year, tomorrow.month, tomorrow.day, random.randint(9, 22), random.randint(0, 59))
+
+
+def load_goofies(bot):
+	with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
+		bot.globals.goofies = json.loads(file.read())
+		for b_key in list(bot.globals.goofies.keys()):
+			bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
