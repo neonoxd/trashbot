@@ -1,0 +1,12 @@
+{
+    "join": {
+        "sz": ["door1.ogg", "door2.ogg", "door3.ogg"],
+        "d": "join_hola.wav",
+        "ps": "pspsps.mp3",
+        "denik": "ittvokgec.ogg",
+        "jamal": "kula.mp3"
+    },
+    "exit": {
+        "d": "out_chau.wav"
+    }
+}

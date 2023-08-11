@@ -9,6 +9,7 @@ from discord import Member, VoiceState, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
+from utils.helpers import get_resource_name_or_user_override
 from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.SoundBoardCog')
@@ -143,25 +144,21 @@ class SoundBoardCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
 
-        join_map = {
-            self.bot.globals.goofies["sz"]: f"resources/sounds/door{random.randrange(1,4)}.ogg",
-            self.bot.globals.goofies["d"]: f"resources/sounds/join_hola.wav",
-            self.bot.globals.goofies["ps"]: f"resources/sounds/pspsps.mp3",
-            self.bot.globals.goofies["denik"]: f"resources/sounds/ittvokgec.ogg",
-            self.bot.globals.goofies["jamal"]: f"resources/sounds/kula.mp3"
-        }
+        join_map = self.bot.globals.greetings["join"]
 
-        exit_map = {
-            self.bot.globals.goofies["d"]: f"resources/sounds/out_chau.wav"
-        }
+        exit_map = self.bot.globals.greetings["exit"]
 
-        if before.channel is None and after.channel is not None:  # user connected
-            if member.id in join_map:
-                await self.play_source_if_vc(join_map[member.id], .5)
+        goofy_short_id = next((k for k, v in self.bot.globals.goofies.items() if v == member.id), None)
 
-        if before.channel is not None and after.channel is None:  # user disconnected
-            if member.id in exit_map:
-                await self.play_source_if_vc(exit_map[member.id], .5)
+        if before.channel is None and after.channel is not None and goofy_short_id in join_map:  # user connected
+            join_value = join_map[goofy_short_id]
+            snd = join_value if type(join_value) == str else random.choice(join_value)
+            await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
+
+        if before.channel is not None and after.channel is None and goofy_short_id in exit_map:  # user disconnected
+            exit_value = exit_map[goofy_short_id]
+            snd = exit_value if type(exit_value) == str else random.choice(exit_value)
+            await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
 
     @commands.command(name='sound')
     async def play_sound(self, ctx: Context, *args):

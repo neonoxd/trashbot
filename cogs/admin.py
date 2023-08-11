@@ -13,7 +13,7 @@ from discord import Member, app_commands
 from discord.ext import commands
 from discord.ext.commands import Context, Greedy
 
-from utils.helpers import get_resource_name_or_user_override
+from utils.helpers import get_resource_name_or_user_override, load_goofies
 from utils.state import TrashBot
 
 from cogs.warner import WarnerCog
@@ -139,7 +139,7 @@ class AdminCog(commands.Cog):
             async with session.get(url) as r:
                 if r.status == 200:
                     resp = await r.read()
-                    await interaction.response.send_message(content=resp.decode(), ephemeral=True)
+                    await interaction.response.send_message(content=None, view=SimpleView(discord.ui.Button(label="Open Uploader Site", url=resp.decode())),  ephemeral=True)
                 else:
                     self.logger.warning(f"resp {r}")
 
@@ -149,16 +149,15 @@ class AdminCog(commands.Cog):
         bot = self.bot
         if action == 'warns':
             cog: Optional[WarnerCog] = bot.get_cog('WarnerCog')
-            cog.warns = cog.read_warns()
+            cog.reload_warns()
             await interaction.response.send_message(content="újratöltve", ephemeral=True, delete_after=5)
         elif action == 'goofies':
-            with open(get_resource_name_or_user_override("config/goofies.json"), 'r', encoding="utf8") as file:
-                bot.globals.goofies = json.loads(file.read())
-                for b_key in list(bot.globals.goofies.keys()):
-                    bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
+            load_goofies(bot)
+            await interaction.response.send_message(content="uj bohocok?", ephemeral=True, delete_after=5)
         elif action == 'quotes':
             cog: Optional[QuoterCog] = bot.get_cog('QuoterCog')
             await cog.reload_quotes()
+            await interaction.response.send_message(content="miket nem mondanak he", ephemeral=True, delete_after=5)
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 

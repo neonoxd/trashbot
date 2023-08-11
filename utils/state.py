@@ -110,6 +110,7 @@ class BotConfig:
 	queued_hotpots: dict = field(default_factory=dict)
 	verinfo: dict = field(default_factory=dict)
 	goofies: dict = field(default_factory=dict)
+	greetings: dict = field(default_factory=dict)
 
 	def add_timeout(self, name: str, expires_at: datetime = None, expiry_td: timedelta = None):
 		module_logger.debug(f"adding expire {name}")
