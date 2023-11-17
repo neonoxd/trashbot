@@ -369,7 +369,7 @@ async def sentience_answer_question(cog, message, roll):
         "jo kerdes batya",
         "ilyen hulye kerdest te😂"
     ]
-    if roll > 80 and message.content.endswith("?"):
+    if roll > 80 and message.content.endswith("?") and message.author.id != cog.bot.globals.goofies["lo"]:
         cog.logger.info("uncle answered a question")
         await message.reply(random.choice(answers))
         await cog.bot.change_presence(activity=discord.Game(
