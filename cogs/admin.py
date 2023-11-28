@@ -161,6 +161,7 @@ class AdminCog(commands.Cog):
         elif action == 'greetings':
             with open(get_resource_name_or_user_override("config/greetings.json"), 'r', encoding="utf8") as file:
                 bot.globals.greetings = json.loads(file.read())
+                await interaction.response.send_message(content="ez nagy lesz", ephemeral=True, delete_after=5)
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 
