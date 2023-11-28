@@ -265,7 +265,7 @@ async def event_message(cog, message):
 
     await sentience_answer_question(cog, message, chance)
 
-    if len(message.content) > 250 and chance > 69:
+    if len(message.content) > 250 and chance == 69:
         module_logger.debug(f"long msg procc /w chance {chance}")
         gifs = [
             "https://tenor.com/view/noted-note-the-office-writing-taking-notes-gif-15981193",
@@ -369,7 +369,7 @@ async def sentience_answer_question(cog, message, roll):
         "jo kerdes batya",
         "ilyen hulye kerdest te😂"
     ]
-    if roll > 80 and message.content.endswith("?") and message.author.id != cog.bot.globals.goofies["lo"]:
+    if roll > 95 and message.content.endswith("?") and message.author.id != cog.bot.globals.goofies["lo"]:
         cog.logger.info("uncle answered a question")
         await message.reply(random.choice(answers))
         await cog.bot.change_presence(activity=discord.Game(
@@ -394,7 +394,7 @@ async def roll_status(bot):
 async def sentience_reply(cog, message, now, roll):
     guild_state = cog.bot.state.get_guild_state_by_id(message.guild.id)
     # skippers smh
-    if any(skip_word in message.content for skip_word in ["-skip", "!skip"]) and roll < 40:
+    if any(skip_word in message.content for skip_word in ["-skip", "!skip", "$s", "$skip"]) and roll < 40:
         cog.logger.info("got lucky with roll chance: %s" % roll)
         await message.channel.send("az jo köcsög volt")
         await roll_status(cog.bot)

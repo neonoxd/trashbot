@@ -6,7 +6,6 @@ from typing import List, Optional
 import discord
 from discord import Thread, Member, TextChannel, Message, app_commands
 from discord.ext import commands
-from discord.ext.commands import Context
 
 from utils.state import TrashBot
 
