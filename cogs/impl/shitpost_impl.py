@@ -458,6 +458,9 @@ async def think(bot, channel):
         elif roll_small < 5:
             module_logger.info("rolled %s" % roll_small)
             await channel.send("most majdnem ki nyirtam vkit")
+        elif roll_small < 10:
+            # TODO: random user tagelés
+            await channel.send("Azariah óriási flowban van! - Hallgasd őt és sok más füstölgő slágert!")
         await asyncio.sleep(600)
 
 
