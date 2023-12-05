@@ -152,12 +152,12 @@ class SoundBoardCog(commands.Cog):
 
         if before.channel is None and after.channel is not None and goofy_short_id in join_map:  # user connected
             join_value = join_map[goofy_short_id]
-            snd = join_value if join_value is str else random.choice(join_value)
+            snd = join_value if type(join_value) is str else random.choice(join_value)
             await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
 
         if before.channel is not None and after.channel is None and goofy_short_id in exit_map:  # user disconnected
             exit_value = exit_map[goofy_short_id]
-            snd = exit_value if exit_value is str else random.choice(exit_value)
+            snd = exit_value if type(exit_value) is str else random.choice(exit_value)
             await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
 
     @commands.command(name='sound')
