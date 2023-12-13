@@ -77,3 +77,11 @@ def load_goofies(bot):
 		bot.globals.goofies = json.loads(file.read())
 		for b_key in list(bot.globals.goofies.keys()):
 			bot.globals.goofies[b_key] = int(bot.globals.goofies[b_key])
+
+
+async def get_image_as_bytes(image_url):
+	import aiohttp
+	async with aiohttp.ClientSession() as session:
+		async with session.get(image_url) as r:
+			if r.status == 200:
+				return await r.content.read()
