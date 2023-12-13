@@ -57,7 +57,7 @@ class SteamCog(commands.Cog):
 	async def _search(self, app_name: str, user_id: int):
 		result = await self.search_app_by_name(app_name)
 		self.last_results[user_id] = {res['name']: res for res in result}
-		return [res['name'] for res in result]
+		return [res['name'] for res in result][:25]
 
 	async def steam_autocomplete(self, interaction: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
 		choices = await self._search(current, interaction.user.id)
@@ -78,14 +78,20 @@ class SteamCog(commands.Cog):
 	@app_commands.autocomplete(app_name=steam_autocomplete)
 	async def slash_steamevent(self, interaction: discord.Interaction, app_name: str):
 		app_search_data = self.last_results[interaction.user.id][app_name]
-		event = await self.create_event_for_app(app_search_data, interaction)
+		event = await self.create_event_for_app(int(app_search_data['appid']), interaction)
 		if event is not None:
 			await interaction.response.send_message(event.url)
 		del self.last_results[interaction.user.id]
 
-	async def create_event_for_app(self, app_search_data, interaction):
-		app_id = app_search_data['appid']
-		app_data = await self.search_app_by_id(app_search_data['appid'])
+	@app_commands.command(name="steamevent-appid")
+	async def slash_steamevent(self, interaction: discord.Interaction, app_id: int):
+		event = await self.create_event_for_app(app_id, interaction)
+		if event is not None:
+			await interaction.response.send_message(event.url)
+
+	async def create_event_for_app(self, appid: int, interaction):
+		app_data = await self.search_app_by_id(appid)
+		app_id = str(appid)
 
 		if not app_data[app_id]["success"]:
 			await interaction.response.send_message("vmi gyász")
