@@ -88,11 +88,6 @@ class SteamCog(commands.Cog):
 		app_data = await self.search_app_by_id(app_search_data['appid'])
 
 		if not app_data[app_id]["success"]:
-			module_logger.info("search_app_by_id failed, waiting 5 seconds to retry...")
-			await asyncio.sleep(5)
-			app_data = await self.search_app_by_id(app_search_data['appid'])
-
-		if not app_data[app_id]["success"]:
 			await interaction.response.send_message("vmi gyász")
 			return None
 
