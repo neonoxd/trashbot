@@ -1,3 +1,4 @@
+import asyncio
 import datetime
 import logging
 import os
@@ -11,6 +12,7 @@ from discord import app_commands, PrivacyLevel, EntityType
 from discord.ext import commands
 
 from utils.state import TrashBot
+from utils.helpers import get_image_as_bytes
 
 module_logger = logging.getLogger('trashbot.SteamCog')
 
@@ -82,10 +84,18 @@ class SteamCog(commands.Cog):
 		del self.last_results[interaction.user.id]
 
 	async def create_event_for_app(self, app_search_data, interaction):
-		from utils.helpers import get_image_as_bytes
-
 		app_id = app_search_data['appid']
 		app_data = await self.search_app_by_id(app_search_data['appid'])
+
+		if not app_data[app_id]["success"]:
+			module_logger.info("search_app_by_id failed, waiting 5 seconds to retry...")
+			await asyncio.sleep(5)
+			app_data = await self.search_app_by_id(app_search_data['appid'])
+
+		if not app_data[app_id]["success"]:
+			await interaction.response.send_message("vmi gyász")
+			return None
+
 		app_data_d = app_data[app_id]['data']
 		app_data_release_date = app_data_d['release_date']
 
