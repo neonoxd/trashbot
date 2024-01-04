@@ -53,6 +53,11 @@ class MiscCog(commands.Cog):
 
 			await ctx.send(embed=embed)
 
+	@app_commands.command(name="laci", description="mikó vót")
+	async def jamal(self, interaction: discord.Interaction):
+		last_dt = self.bot.state.get_guild_state_by_id(interaction.guild.id).last_shaolin_appearance
+		await interaction.response.send_message(f"{timeago.format(last_dt, datetime.datetime.now(), 'hu')} láttuk a férget legutóbb")
+
 	@app_commands.command(name="ki", description="kik vót")
 	async def who_simple_cmd(self, interaction: discord.Interaction):
 		""" /ki """

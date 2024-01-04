@@ -1,4 +1,7 @@
+import dataclasses
+import json
 import logging
+import os
 import sys
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
@@ -40,14 +43,13 @@ class VCEvent:
 	when: float
 
 
-
 @dataclass
 class GuildState:
 	id: int
-	last_slur_dt: datetime = datetime.now()
 	channels: List[ChannelState] = field(default_factory=list)
 	last_vc_events: List[VCEvent] = field(default_factory=list)
 	forced_nicks: dict = field(default_factory=dict)
+	last_slur_dt: datetime = datetime.now()
 	tension: int = 0
 	bee_initialized = False
 	bee_active: bool = False
@@ -55,6 +57,42 @@ class GuildState:
 	ghost_state: int = 0
 	ghost_alerted_today = False
 	last_roll: int = -1
+	last_shaolin_appearance: datetime = datetime.fromtimestamp(0)
+
+	def serialize(self):
+		js = json.dumps(self, cls=EnhancedJSONEncoder)
+		module_logger.info(js)
+
+	def save_state(self):
+		module_logger.info("saving state...")
+		state = {
+			"last_slur_dt": self.last_slur_dt.isoformat(),
+			"tension": self.tension,
+			"ghost_state": self.ghost_state,
+			"ghost_alerted_today": self.ghost_alerted_today,
+			"last_shaolin_appearance": self.last_shaolin_appearance.isoformat(),
+		}
+		state_json = json.dumps(state)
+		module_logger.debug(state_json)
+		with open(f"usr/state/guild_{self.id}.json", "w") as f:
+			f.write(state_json)
+		return state_json
+
+	def load_state(self):
+		module_logger.info("loading state...")
+		state_file = f"usr/state/guild_{self.id}.json"
+		if not os.path.isfile(state_file):
+			module_logger.warning(f"no state found for guild: {self.id}")
+			return
+		with open(state_file, "r") as f:
+			saved_state = json.load(f)
+			module_logger.debug(saved_state)
+			self.last_slur_dt = datetime.fromisoformat(saved_state["last_slur_dt"])
+			self.tension = saved_state["tension"]
+			self.ghost_state = saved_state["ghost_state"]
+			self.ghost_alerted_today = saved_state["ghost_alerted_today"]
+			self.last_shaolin_appearance = datetime.fromisoformat(saved_state["last_shaolin_appearance"])
+		os.remove(state_file)
 
 	def force_nick(self, victim: Member, nick: str, invoker: Member):
 		module_logger.debug(f"{invoker} forced nick [{nick}] for {victim}")
@@ -87,12 +125,14 @@ class BotState:
 	quotecontent: dict = field(default_factory=dict)
 	motd: discord.Embed = None
 
-	def get_guild_state_by_id(self, guild_id):
+	def get_guild_state_by_id(self, guild_id) -> GuildState:
 		return next((guild_state for guild_state in self.guilds if guild_state.id == guild_id), None)
 
 	def track_guild(self, guild_id):
 		module_logger.debug(f"tracking guild: {guild_id}")
-		self.guilds.append(GuildState(guild_id))
+		gs = GuildState(guild_id)
+		gs.load_state()
+		self.guilds.append(gs)
 
 
 @dataclass
@@ -129,6 +169,17 @@ class BotConfig:
 			return True
 		else:
 			return False
+
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+	def default(self, o):
+		if isinstance(o, datetime):
+			return o.isoformat()
+		if isinstance(o, VCEvent) or isinstance(o, ChannelState):
+			return None
+		if dataclasses.is_dataclass(o):
+			return dataclasses.asdict(o, dict_factory=lambda x: {k: v for (k, v) in x if v is not None and k not in ["channels", "last_vc_events"]})
+		return super().default(o)
 
 
 class TrashBot(commands.Bot):

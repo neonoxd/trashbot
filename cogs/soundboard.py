@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import logging
 import os
 import random
@@ -144,21 +145,29 @@ class SoundBoardCog(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
 
-        join_map = self.bot.globals.greetings["join"]
+        if before.channel is None and after.channel is not None:  # user connected
+            await self.on_join_vc(member, before, after)
 
-        exit_map = self.bot.globals.greetings["exit"]
+        if before.channel is not None and after.channel is None:  # user disconnected
+            await self.on_leave_vc(member, before, after)
 
+    async def on_join_vc(self, member: Member, before: VoiceState, after: VoiceState):
+        await self.bump_jamal_join(member, after.channel.guild.id)
+        await self.play_sound_for_goofy_on_vc_event(member, self.bot.globals.greetings["join"])
+
+    async def on_leave_vc(self, member: Member, before: VoiceState, after: VoiceState):
+        await self.play_sound_for_goofy_on_vc_event(member, self.bot.globals.greetings["exit"])
+
+    async def play_sound_for_goofy_on_vc_event(self, member: Member, sound_map):
         goofy_short_id = next((k for k, v in self.bot.globals.goofies.items() if v == member.id), None)
-
-        if before.channel is None and after.channel is not None and goofy_short_id in join_map:  # user connected
-            join_value = join_map[goofy_short_id]
-            snd = join_value if type(join_value) is str else random.choice(join_value)
-            await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
-
-        if before.channel is not None and after.channel is None and goofy_short_id in exit_map:  # user disconnected
-            exit_value = exit_map[goofy_short_id]
+        if goofy_short_id in sound_map:
+            exit_value = sound_map[goofy_short_id]
             snd = exit_value if type(exit_value) is str else random.choice(exit_value)
             await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
+
+    async def bump_jamal_join(self, member, guild_id):
+        if str(self.bot.globals.goofies["jamal"]) == str(member.id):
+            self.bot.state.get_guild_state_by_id(guild_id).last_shaolin_appearance = datetime.datetime.now()
 
     @commands.command(name='sound')
     async def play_sound(self, ctx: Context, *args):

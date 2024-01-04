@@ -165,6 +165,27 @@ class AdminCog(commands.Cog):
         else:
             await interaction.response.send_message(content="miva", ephemeral=True, delete_after=5)
 
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.command(name="serial", hidden=True)
+    async def serialize(self, ctx: commands.Context):
+        gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
+        gs.serialize()
+
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.command(name="savestate", hidden=True)
+    async def savestate(self, ctx: commands.Context):
+        gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
+        gs.save_state()
+
+    @commands.guild_only()
+    @commands.is_owner()
+    @commands.command(name="loadstate", hidden=True)
+    async def loadstate(self, ctx: commands.Context):
+        gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
+        gs.load_state()
+
     @commands.command(name="info", hidden=True)
     async def dump_info(self, ctx: commands.Context):
         await ctx.message.delete()
@@ -216,6 +237,11 @@ class AdminCog(commands.Cog):
     @commands.is_owner()
     async def update(self, ctx: commands.Context):
         await ctx.message.delete()
+
+        for guild in self.bot.guilds:
+            gs = self.bot.state.get_guild_state_by_id(guild.id)
+            gs.save_state()
+
         subprocess.Popen(["./update.sh"], preexec_fn=os.setpgrp) 
 
     @commands.command(name='set', hidden=True)
