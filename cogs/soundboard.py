@@ -132,10 +132,12 @@ class SoundBoardCog(commands.Cog):
 
         if voice_client is None:
             self.current_vc = await voice.connect()
+            await self.play_file(self.current_vc, self.find_sound_by_name('aaaaaaaa')) #kiabal joinkor
         else:
             await voice_client.move_to(channel)
+            await self.play_file(voice_client, self.find_sound_by_name('aaaaaaaa')) #kiabal channel valtaskor
         await ctx.message.delete()
-        await self.play_file(voice_client, (self.find_sound_by_name('aaaaaaaa')))
+
 
     async def play_source_if_vc(self, source, volume: float):
         if self.in_vc():
