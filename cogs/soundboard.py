@@ -137,7 +137,6 @@ class SoundBoardCog(commands.Cog):
             await voice_client.move_to(channel)
             await self.play_file(voice_client, self.find_sound_by_name('aaaaaaaa')) #kiabal channel valtaskor
         await ctx.message.delete()
-        await self.play_file(voice_client, (self.find_sound_by_name('aaaaaaaa')))
 
     async def play_source_if_vc(self, source, volume: float):
         if self.in_vc():
