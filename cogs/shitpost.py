@@ -97,7 +97,7 @@ class ShitpostCog(commands.Cog):
 	@commands.Cog.listener()
 	async def on_message(self, message: Message):
 		from cogs.impl.shitpost_impl import event_message
-		await event_message(self, message)
+		await event_message(self.bot, message)
 
 
 async def setup(bot: TrashBot):

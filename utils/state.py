@@ -122,9 +122,8 @@ class GuildState:
 @dataclass
 class BotState:
 	guilds: List[GuildState] = field(default_factory=list)
-	quotecfg: dict = field(default_factory=dict)
-	quotecontent: dict = field(default_factory=dict)
 	motd: discord.Embed = None
+	global_timeouts: dict = field(default_factory=dict)
 
 	def get_guild_state_by_id(self, guild_id) -> GuildState:
 		return next((guild_state for guild_state in self.guilds if guild_state.id == guild_id), None)
@@ -134,24 +133,6 @@ class BotState:
 		gs = GuildState(guild_id)
 		gs.load_state(bot)
 		self.guilds.append(gs)
-
-
-@dataclass
-class BotConfig:
-	ffmpeg_path: str
-	sounds_path: str
-	ph_token: str
-	yt_cookie: str
-	global_timeouts: dict = field(default_factory=dict)
-	slurs: List[str] = field(default_factory=list)
-	statuses: List[str] = field(default_factory=list)
-	t_states: List[str] = field(default_factory=list)
-	ghost_ids: List[int] = field(default_factory=list)
-	startup_at: datetime = datetime.now()
-	queued_hotpots: dict = field(default_factory=dict)
-	verinfo: dict = field(default_factory=dict)
-	goofies: dict = field(default_factory=dict)
-	greetings: dict = field(default_factory=dict)
 
 	def add_timeout(self, name: str, expires_at: datetime = None, expiry_td: timedelta = None):
 		module_logger.debug(f"adding expire {name}")
@@ -170,6 +151,25 @@ class BotConfig:
 			return True
 		else:
 			return False
+
+
+@dataclass
+class BotConfig:
+	ffmpeg_path: str
+	sounds_path: str
+	ph_token: str
+	yt_cookie: str
+	slurs: List[str] = field(default_factory=list)
+	statuses: List[str] = field(default_factory=list)
+	t_states: List[str] = field(default_factory=list)
+	ghost_ids: List[int] = field(default_factory=list)
+	startup_at: datetime = datetime.now()
+	queued_hotpots: dict = field(default_factory=dict)
+	verinfo: dict = field(default_factory=dict)
+	goofies: dict = field(default_factory=dict)
+	greetings: dict = field(default_factory=dict)
+	quotecfg: dict = field(default_factory=dict)
+	quotecontent: dict = field(default_factory=dict)
 
 
 class EnhancedJSONEncoder(json.JSONEncoder):

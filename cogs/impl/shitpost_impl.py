@@ -5,13 +5,14 @@ import io
 import logging
 import os
 import random
-import typing
+from typing import Optional, Callable, Any
 
 import discord
 import requests
 from PIL import Image, ImageDraw, ImageFont
 from discord.utils import get
 
+from cogs.shitpost import ShitpostCog
 from utils.helpers import has_link, replace_str_index, get_user_nick_or_name, find_font_file, \
     get_resource_name_or_user_override
 
@@ -88,10 +89,10 @@ async def command_gba(cog, ctx):
     module_logger.info(f"[CMD::GBA] called by [{ctx.message.author}]")
     await ctx.message.delete()
     author = get_user_nick_or_name(ctx.message.author)
-    if cog.bot.globals.is_expired("gba"):
+    if cog.bot.state.is_expired("gba"):
         newnick = get_kutfuras()
         module_logger.info(f"[CMD::GBA] generated nick [{newnick}]")
-        cog.bot.globals.add_timeout("gba", expiry_td=datetime.timedelta(minutes=1))
+        cog.bot.state.add_timeout("gba", expiry_td=datetime.timedelta(minutes=1))
         member = get(cog.bot.get_all_members(), id=int(cog.bot.globals.goofies["gba"]))
         module_logger.info(member)
         await member.edit(nick=newnick)
@@ -104,10 +105,10 @@ async def command_cz(cog, ctx):
     module_logger.info(f"[CMD::CZ] called by [{ctx.message.author}]")
     await ctx.message.delete()
     author = get_user_nick_or_name(ctx.message.author)
-    if cog.bot.globals.is_expired("cz"):
+    if cog.bot.state.is_expired("cz"):
         newnick = get_breveg()
         module_logger.info(f"[CMD::CZ] generated nick [{newnick}]")
-        cog.bot.globals.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
+        cog.bot.state.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
         member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["cz"])
         await member.edit(nick=newnick)
         await ctx.send(f"{author} szerint: {member.mention}")
@@ -119,7 +120,7 @@ async def event_voice_state_update(cog, member, before, after):
     from utils.state import VCEvent
     now = datetime.datetime.now()
 
-    join_map: dict[typing.Any, tuple[str] | tuple[str, typing.Callable]] = {
+    join_map: dict[Any, tuple[str] | tuple[str, Callable]] = {
         cog.bot.globals.goofies["m"]:   ('resources/img/elmano.gif',),
         cog.bot.globals.goofies["cz"]:  ('resources/img/peter2_alert.jpg', lambda _member: _member.edit(nick=get_breveg())),
         cog.bot.globals.goofies["p"]:   ('resources/img/peter_alert.png',),
@@ -138,13 +139,14 @@ async def event_voice_state_update(cog, member, before, after):
         guild_state.push_last_vc_event(VCEvent(1, member, after.channel, datetime.datetime.timestamp(now)))
 
         #  join image
-        if member.id in join_map and cog.bot.globals.is_expired(str(member.id)) and guild_state.tension % 2 == 0:
-            entry = join_map[member.id]
+        if member.id in join_map and cog.bot.state.is_expired(str(member.id)) and guild_state.tension % 2 == 0:
+            entry: tuple[str] | tuple[str, Callable] = join_map[member.id]
             module_logger.debug(f"entry: {entry}")
-            cog.bot.globals.add_timeout(str(member.id), expiry_td=datetime.timedelta(minutes=60))
+            cog.bot.state.add_timeout(str(member.id), expiry_td=datetime.timedelta(minutes=60))
             await guild.system_channel.send(file=discord.File(entry[0]))
             if len(entry) > 1:
-                extra_command: typing.Callable = entry[1]
+                cmd_entry: tuple[str, Callable] = entry
+                extra_command: Callable = cmd_entry[1]
                 await extra_command(member)
 
         #  ghosts alert
@@ -162,8 +164,8 @@ async def event_voice_state_update(cog, member, before, after):
         guild_state.push_last_vc_event(VCEvent(0, member, before.channel, datetime.datetime.timestamp(now)))
 
         if member.id in exit_map and now.hour >= 21 or now.hour <= 3:
-            if cog.bot.globals.is_expired(str(member.id)):
-                cog.bot.globals.add_timeout(str(member.id), expiry_td=datetime.timedelta(minutes=60))
+            if cog.bot.state.is_expired(str(member.id)):
+                cog.bot.state.add_timeout(str(member.id), expiry_td=datetime.timedelta(minutes=60))
                 resp = exit_map[member.id][0]
                 if resp is not None:
                     await guild.system_channel.send(file=discord.File(resp))
@@ -234,7 +236,8 @@ def get_breveg():
     return replace_str_index(out, 0, out[0].capitalize())
 
 
-async def event_message(cog, message):
+async def event_message(bot, message):
+    cog: Optional[ShitpostCog] = bot.get_cog('ShitpostCog')
     if message.author == cog.bot.user or not message.guild:
         return
     msg_content = str(message.content)
@@ -246,7 +249,6 @@ async def event_message(cog, message):
         await message.channel.send(f"{msg_content.replace('https://twitter.com', 'https://vxtwitter.com')} 😡😡")
         await message.delete()
 
-
     now = datetime.datetime.now()
     chance = random.randrange(0, 100)
 
@@ -256,7 +258,7 @@ async def event_message(cog, message):
     if guild_state.get_channel_state_by_id(message.channel.id) is None:
         guild_state.track_channel(message.channel.id)
 
-    if cog.bot.globals.is_expired("spam"):
+    if cog.bot.state.is_expired("spam"):
         await sentience_spam(cog, message)
 
     await sentience_flipper(cog, message, chance)
@@ -309,7 +311,7 @@ async def sentience_spam(cog, message):
         if channel_state.shall_i():
             await asyncio.sleep(1)
             await message.channel.send(message.content)
-            cog.bot.globals.add_timeout("spam", expiry_td=datetime.timedelta(minutes=5))
+            cog.bot.state.add_timeout("spam", expiry_td=datetime.timedelta(minutes=5))
 
 
 async def sentience_flipper(cog, message, roll):

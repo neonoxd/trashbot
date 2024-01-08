@@ -24,6 +24,8 @@ class BeRealCog(commands.Cog):
     async def do(self, channel: TextChannel):
         if len(self.posts) > 0:
             self.last = await self.find_best_message()
+        else:
+            self.last = None
 
         self.posts = []
         self.current_thread = await self.create(channel)
