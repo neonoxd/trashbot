@@ -15,11 +15,6 @@ module_logger = logging.getLogger('trashbot.State')
 
 
 @dataclass
-class UserStats:
-	pass
-
-
-@dataclass
 class ChannelState:
 	id: int
 	last_messages: List[int] = field(default_factory=list)
@@ -59,10 +54,6 @@ class GuildState:
 	last_roll: int = -1
 	last_shaolin_appearance: datetime = datetime.fromtimestamp(0)
 
-	def serialize(self):
-		js = json.dumps(self, cls=EnhancedJSONEncoder)
-		module_logger.info(js)
-
 	def save_state(self):
 		module_logger.info("saving state...")
 		state = {
@@ -71,6 +62,7 @@ class GuildState:
 			"ghost_state": self.ghost_state,
 			"ghost_alerted_today": self.ghost_alerted_today,
 			"last_shaolin_appearance": self.last_shaolin_appearance.isoformat(),
+			"last_vc_events": [{"channel": x.channel.id, "event": x.event, "user": x.user.id, "when": x.when} for x in self.last_vc_events]
 		}
 		state_json = json.dumps(state)
 		module_logger.debug(state_json)
@@ -78,7 +70,7 @@ class GuildState:
 			f.write(state_json)
 		return state_json
 
-	def load_state(self):
+	def load_state(self, bot):
 		module_logger.info("loading state...")
 		state_file = f"usr/state/guild_{self.id}.json"
 		if not os.path.isfile(state_file):
@@ -87,11 +79,20 @@ class GuildState:
 		with open(state_file, "r") as f:
 			saved_state = json.load(f)
 			module_logger.debug(saved_state)
+
 			self.last_slur_dt = datetime.fromisoformat(saved_state["last_slur_dt"])
 			self.tension = saved_state["tension"]
 			self.ghost_state = saved_state["ghost_state"]
 			self.ghost_alerted_today = saved_state["ghost_alerted_today"]
 			self.last_shaolin_appearance = datetime.fromisoformat(saved_state["last_shaolin_appearance"])
+			self.last_vc_events = []
+			module_logger.debug("loading vc events")
+			for event in saved_state["last_vc_events"]:
+				channel = discord.utils.get(bot.get_all_channels(), id=event["channel"])
+				member = discord.utils.get(bot.get_all_members(), id=event["user"])
+				vce = VCEvent(event=event["event"], user=member, channel=channel, when=event["when"])
+				self.last_vc_events.append(vce)
+
 		os.remove(state_file)
 
 	def force_nick(self, victim: Member, nick: str, invoker: Member):
@@ -128,10 +129,10 @@ class BotState:
 	def get_guild_state_by_id(self, guild_id) -> GuildState:
 		return next((guild_state for guild_state in self.guilds if guild_state.id == guild_id), None)
 
-	def track_guild(self, guild_id):
+	def track_guild(self, guild_id, bot):
 		module_logger.debug(f"tracking guild: {guild_id}")
 		gs = GuildState(guild_id)
-		gs.load_state()
+		gs.load_state(bot)
 		self.guilds.append(gs)
 
 

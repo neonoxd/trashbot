@@ -167,13 +167,6 @@ class AdminCog(commands.Cog):
 
     @commands.guild_only()
     @commands.is_owner()
-    @commands.command(name="serial", hidden=True)
-    async def serialize(self, ctx: commands.Context):
-        gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
-        gs.serialize()
-
-    @commands.guild_only()
-    @commands.is_owner()
     @commands.command(name="savestate", hidden=True)
     async def savestate(self, ctx: commands.Context):
         gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
@@ -184,7 +177,7 @@ class AdminCog(commands.Cog):
     @commands.command(name="loadstate", hidden=True)
     async def loadstate(self, ctx: commands.Context):
         gs = self.bot.state.get_guild_state_by_id(ctx.guild.id)
-        gs.load_state()
+        gs.load_state(ctx.bot)
 
     @commands.command(name="info", hidden=True)
     async def dump_info(self, ctx: commands.Context):
@@ -276,7 +269,7 @@ class AdminCog(commands.Cog):
         _nick = " ".join(nick)
         await _member.edit(nick=_nick)
         state.force_nick(_member, _nick, ctx.author)
-        ctx.bot.loop.create_task(self.autoclear_task(ctx, _member))
+        await ctx.bot.loop.create_task(self.autoclear_task(ctx, _member))
 
     @set_command(name='tension')
     async def cmd_set_tension(self, ctx: commands.Context, *args):
