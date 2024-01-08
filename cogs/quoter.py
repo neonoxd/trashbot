@@ -3,13 +3,14 @@ import logging
 import os
 import random
 import re
-from typing import Optional
+from typing import Optional, List
 
 import discord
+from discord import app_commands
 from discord.ext import commands
 from discord.ext.commands import Context
 
-from utils.helpers import get_resource_name_or_user_override
+from utils.helpers import get_resource_name_or_user_override, create_autocomplete_source
 from utils.state import TrashBot
 
 module_logger = logging.getLogger('trashbot.QuoterCog')
@@ -22,6 +23,16 @@ class QuoterCog(commands.Cog):
 		self.bot = bot
 		bot.state.quotecfg = json.loads(open(get_resource_name_or_user_override("config/quote_sources.json"), "r", encoding="utf8").read())
 		bot.state.quotecontent = self.read_quotes()
+		self.quotecfg = bot.state.quotecfg
+
+	async def quote_autocomplete(self, i: discord.Interaction, current: str) -> List[app_commands.Choice[str]]:
+		return create_autocomplete_source(list(self.quotecfg.keys()), current)
+
+	@app_commands.command(name="quote")
+	@app_commands.autocomplete(quote_source=quote_autocomplete)
+	async def slash_quote(self, interaction: discord.Interaction, quote_source: Optional[str] = None):
+		source = quote_source or random.choice(list(self.bot.state.quotecfg.keys()))
+		await interaction.response.send_message(embed=self.embed_for(source, self.bot, str(interaction.user)))
 
 	@commands.command(name='qr')
 	async def quote_reload(self, ctx: Context):

@@ -4,6 +4,7 @@ import json
 import os
 import random
 import string
+from typing import List
 
 import matplotlib.font_manager as fontman
 from discord import TextChannel
@@ -85,3 +86,11 @@ async def get_image_as_bytes(image_url):
 		async with session.get(image_url) as r:
 			if r.status == 200:
 				return await r.content.read()
+
+
+def create_autocomplete_source(source: List, current_search: str):
+	from discord import app_commands
+	return [
+		app_commands.Choice(name=choice, value=choice)
+		for choice in source if current_search.lower() in choice.lower()
+	]
