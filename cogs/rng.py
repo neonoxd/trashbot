@@ -27,7 +27,7 @@ class RandomsCog(commands.Cog):
 	@commands.command(name='roll', aliases=['gurit'])
 	async def roll_cmd(self, ctx: Context, *args):
 		self.logger.info("command called: {}".format(ctx.command))
-		await ctx.send(str(roll(args)))
+		await ctx.send(str(roll(*args)))
 
 	@commands.command(name='arena')
 	async def fight(self, ctx: Context, *args):
@@ -41,7 +41,7 @@ def roll(*args) -> int:
 	if len(args) == 1:
 		return random.randrange(0, int(args[0]))
 	elif len(args) == 2:
-		return random.randrange(int(args[0]), int(args[1]))
+		return random.randrange(*map(int, args))
 	else:
 		return random.randrange(0, 100)
 
