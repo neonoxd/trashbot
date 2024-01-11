@@ -32,26 +32,18 @@ class MiscCog(commands.Cog):
 			if after.nick != forced_nick:
 				await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
 
-	@commands.command(name="mik") #  TODO: remove
-	async def mik(self, ctx: Context):
-		now = datetime.datetime.now()
-		embed = Embed(title="ezek fönek sogor 🤣", color=0xFF5733)
-		event_list_str = []
-		queue = ctx.bot.globals.queued_hotpots
-
-		for r in list(queue.keys()):
-			time_ago = timeago.format(queue[r]["when"], now, "hu")
-			event_str = """"""
-			event_str = event_str + f"""`[{time_ago}] - {queue[r]['author']} - {r}`"""
-			event_list_str.append(event_str)
-
-		if len(event_list_str):
-			embed.add_field(name="\u200b", value="\n".join(event_list_str))
-
-			embed.set_author(name="Kovács Tibor József", url="https://www.facebook.com/tibikevok.jelolj/",
-							icon_url="https://cdn.discordapp.com/attachments/248727639127359490/913774079423684618/422971_115646341961102_1718197155_n.jpg")
-
-			await ctx.send(embed=embed)
+	@app_commands.command(name="google-translate", description="mia neved angolul")
+	async def google_translate(self, interaction: discord.Interaction, text: str):
+		tl_map = {
+			"a": "gee", "b": "eh", "c": "fin", "d": "tr", "e": "go", "f": "tax", "g": "stock", "k": "ou", "l": "08",
+			"m": "in", "n": "fr", "o": "oo", "p": "ee", "q": "aa", "r": "ii", "s": "oo", "t": "uu", "u": "y",
+			"v": "g", "w": "1", "x": "2", "y": "3", "z": "4",
+		}
+		translated_input = "".join([tl_map[tl] if tl in tl_map else " " for tl in text])
+		await interaction.response.send_message(
+			content=translated_input,
+			file=discord.File(get_resource_name_or_user_override("img/accurate.png"))
+		)
 
 	@app_commands.command(name="laci", description="mikó vót")
 	async def jamal(self, interaction: discord.Interaction):
