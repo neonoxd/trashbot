@@ -3,6 +3,7 @@ import datetime
 import io
 import logging
 import random
+from typing import Optional
 
 import aiohttp
 import discord
@@ -33,17 +34,26 @@ class MiscCog(commands.Cog):
 				await after.edit(nick=guild_state.forced_nicks[after.id]["nick"])
 
 	@app_commands.command(name="google-translate", description="mia neved angolul")
-	async def google_translate(self, interaction: discord.Interaction, text: str):
-		tl_map = {
-			"a": "gee", "b": "eh", "c": "fin", "d": "tr", "e": "go", "f": "tax", "g": "stock", "k": "ou", "l": "08",
-			"m": "in", "n": "fr", "o": "oo", "p": "ee", "q": "aa", "r": "ii", "s": "oo", "t": "uu", "u": "y",
-			"v": "g", "w": "1", "x": "2", "y": "3", "z": "4",
-		}
-		translated_input = "".join([tl_map[tl] if tl in tl_map else " " for tl in text])
-		await interaction.response.send_message(
-			content=translated_input,
-			file=discord.File(get_resource_name_or_user_override("img/accurate.png"))
-		)
+	async def google_translate(self, interaction: discord.Interaction, text: Optional[str] = None):
+
+		if text is None:
+			await interaction.response.send_message(file=discord.File(get_resource_name_or_user_override("img/tutoiral.jpg")))
+		else:
+			tl_map = {
+				"a": "gee", "b": "eh", "c": "fin", "d": "tr", "e": "go", "f": "tax", "g": "stock", "k": "ou", "l": "08",
+				"m": "in", "n": "fr", "o": "oo", "p": "ee", "q": "aa", "r": "ii", "s": "oo", "t": "uu", "u": "y",
+				"v": "g", "w": "1", "x": "2", "y": "3", "z": "4",
+			}
+			translated_input = "".join([tl_map[tl] if tl in tl_map else " " for tl in text])
+
+			if self.bot.state.is_expired("google-translate"):
+				self.bot.state.add_timeout("google-translate", expiry_td=datetime.timedelta(minutes=10))
+				await interaction.response.send_message(
+					content=translated_input,
+					file=discord.File(get_resource_name_or_user_override("img/accurate.png"))
+				)
+			else:
+				await interaction.response.send_message(content=translated_input)
 
 	@app_commands.command(name="laci", description="mikó vót")
 	async def jamal(self, interaction: discord.Interaction):
