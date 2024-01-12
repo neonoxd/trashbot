@@ -195,8 +195,8 @@ class MiscCog(commands.Cog):
 					origin = breeds[0].get('origin', 'nemtom')
 					weight_data = breeds[0].get('weight', {})
 					metric_weight = weight_data.get('metric', 'nemtomxd')
-
-					table_message= f"""
+									##todo: replace ascii table with warns table :(
+					table_message= f""" 
                         ceca🙂🙂🙂
                     `|--------|------------------|`
                     `|-szeles-|{str(height).center(18, '-')}|`
@@ -205,7 +205,7 @@ class MiscCog(commands.Cog):
 					`|-kilo---|{str(metric_weight).center(18, '-')}|`
 					`|--------|------------------|`
                 """
-					if breeds: 		##if API sends breeds info - always if set in url
+					if breeds: 		##in case API sends breeds info - always if set in url
 						breed_names = ', '.join(breed.get('name', 'nemtomxd') for breed in breeds)
 						table_message += f"""    `|-fajta--|{str(breed_names).center(18, '-')}|`
 					`|--------|------------------|` """
@@ -213,7 +213,9 @@ class MiscCog(commands.Cog):
 					image_bytes = await get_image_as_bytes(image_url)
 					file = discord.File(io.BytesIO(image_bytes), filename="macsek.png")
 					await ctx.send(content=table_message, file=file)
-
+				elif r.status == 429:
+					await ctx.send(f"sok a kérés báttya! ezt külték: {r.status}")
+					self.logger.warning(f"resp {r}")
 				else:
 					self.logger.warning(f"resp {r}")
 
