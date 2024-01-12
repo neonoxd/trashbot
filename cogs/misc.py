@@ -15,6 +15,7 @@ from discord.ext.commands import Context
 
 from utils.helpers import create_alphanumeric_string, get_resource_name_or_user_override
 from utils.state import TrashBot
+from utils.helpers import get_image_as_bytes
 
 module_logger = logging.getLogger('trashbot.MiscCog')
 
@@ -208,9 +209,10 @@ class MiscCog(commands.Cog):
 						breed_names = ', '.join(breed.get('name', 'nemtomxd') for breed in breeds)
 						table_message += f"""    `|-fajta--|{str(breed_names).center(18, '-')}|`
 					`|--------|------------------|` """
-
-					await ctx.send(table_message)
-					await ctx.send(image_url)
+						
+					image_bytes = await get_image_as_bytes(image_url)
+					file = discord.File(io.BytesIO(image_bytes), filename="macsek.png")
+					await ctx.send(content=table_message, file=file)
 
 				else:
 					self.logger.warning(f"resp {r}")
