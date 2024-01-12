@@ -4,6 +4,7 @@ import io
 import logging
 import random
 from typing import Optional
+import os
 
 import aiohttp
 import discord
@@ -175,18 +176,42 @@ class MiscCog(commands.Cog):
 ,　　　　.　 .　　       ."""
 		await ctx.send(tmpl)
 
-	@commands.command(name="kot")
+	@commands.command(name="kot") ##todo: implement new discord command
 	async def kot(self, ctx: Context):
-		"""
-			DEPRECATED: site probably down
-			FIXME: maybe
-		"""
 		await ctx.message.delete()
 		async with aiohttp.ClientSession() as session:
-			async with session.get('http://aws.random.cat/meow') as r:
+			apikey = os.getenv("KOT_APIKEY")
+			url = f'https://api.thecatapi.com/v1/images/search?api_key={apikey}&has_breeds=1'
+			async with session.get(url) as r:
 				if r.status == 200:
 					js = await r.json()
-					await ctx.send(js['file'])
+
+					cat_data = js[0] ##todo: implement more cat data such as country code, temperament, wiki article
+					image_url = cat_data['url']
+					width = cat_data.get('width', 'nincsen')
+					height = cat_data.get('height', 'nincsen')
+					breeds = cat_data.get('breeds', [])
+					origin = breeds[0].get('origin', 'nemtom')
+					weight_data = breeds[0].get('weight', {})
+					metric_weight = weight_data.get('metric', 'nemtomxd')
+
+					table_message= f"""
+                        ceca🙂🙂🙂
+                    `|--------|------------------|`
+                    `|-szeles-|{str(height).center(18, '-')}|`
+                    `|-magas--|{str(width).center(18, '-')}|`
+					`|-hol----|{str(origin).center(18, '-')}|`
+					`|-kilo---|{str(metric_weight).center(18, '-')}|`
+					`|--------|------------------|`
+                """
+					if breeds: 		##if API sends breeds info - always if set in url
+						breed_names = ', '.join(breed.get('name', 'nemtomxd') for breed in breeds)
+						table_message += f"""    `|-fajta--|{str(breed_names).center(18, '-')}|`
+					`|--------|------------------|` """
+
+					await ctx.send(table_message)
+					await ctx.send(image_url)
+
 				else:
 					self.logger.warning(f"resp {r}")
 
