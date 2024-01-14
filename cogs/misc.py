@@ -70,7 +70,7 @@ class MiscCog(commands.Cog):
 		last_events = guild_state.last_vc_events
 
 		if not len(last_events):
-			await interaction.response.send("nemtom most keltem nem figyeltem")
+			await interaction.response.send_message("nemtom most keltem nem figyeltem")
 		else:
 			last_event = last_events[-1]
 			if str(last_event.user.id) == str(self.bot.globals.goofies["jamal"]):
@@ -177,44 +177,46 @@ class MiscCog(commands.Cog):
 ,　　　　.　 .　　       ."""
 		await ctx.send(tmpl)
 
-	@commands.command(name="kot") ##todo: implement new discord command
-	async def kot(self, ctx: Context):
-		await ctx.message.delete()
+	@app_commands.command(name="kot", description="kuld egy cecat")
+	async def kot(self, interaction: discord.Interaction):
+		await interaction.response.defer(thinking=True)
 		async with aiohttp.ClientSession() as session:
 			apikey = os.getenv("KOT_APIKEY")
 			url = f'https://api.thecatapi.com/v1/images/search?api_key={apikey}&has_breeds=1'
 			async with session.get(url) as r:
 				if r.status == 200:
 					js = await r.json()
-
-					cat_data = js[0] ##todo: implement more cat data such as country code, temperament, wiki article
+					cat_data = js[0]
 					image_url = cat_data['url']
-					width = cat_data.get('width', 'nincsen')
-					height = cat_data.get('height', 'nincsen')
+					##	width = cat_data.get('width', 'nincsen')
+					##	height = cat_data.get('height', 'nincsen')
 					breeds = cat_data.get('breeds', [])
 					origin = breeds[0].get('origin', 'nemtom')
 					weight_data = breeds[0].get('weight', {})
 					metric_weight = weight_data.get('metric', 'nemtomxd')
-									##todo: replace ascii table with warns table :(
+					if breeds and 'country_code' in breeds[0]:
+						cc=breeds[0]['country_code']
+					##ha van countrycode
+					if cc:
+						flag = f':flag_{cc.lower()}:'
+					else:
+						flag = ''
+
+						##assemble message text			
 					table_message= f""" 
-                        ceca🙂🙂🙂
-                    `|--------|------------------|`
-                    `|-szeles-|{str(height).center(18, '-')}|`
-                    `|-magas--|{str(width).center(18, '-')}|`
-					`|-hol----|{str(origin).center(18, '-')}|`
-					`|-kilo---|{str(metric_weight).center(18, '-')}|`
-					`|--------|------------------|`
-                """
-					if breeds: 		##in case API sends breeds info - always if set in url
+                        {random.choice(['ceca🙂🙂🙂','macseg 🙂','mi a gyasz ez', 'majnem olyan mint a pütyök 🙂', 'ittvan', 'uj macsk 😘 kovács KKovács Gizella ErzsébetErzsébet 😘'])}
+`|hol: {str(origin)}` {str(flag)} `|kilo: {str(metric_weight)}|` """
+						##in case API sends breeds info - always if set in url: append breeds
+					if breeds: 		
 						breed_names = ', '.join(breed.get('name', 'nemtomxd') for breed in breeds)
-						table_message += f"""    `|-fajta--|{str(breed_names).center(18, '-')}|`
-					`|--------|------------------|` """
-						
+						table_message += f"""`|fajta: {str(breed_names)}|`"""
+						##assemble image
 					image_bytes = await get_image_as_bytes(image_url)
 					file = discord.File(io.BytesIO(image_bytes), filename="macsek.png")
-					await ctx.send(content=table_message, file=file)
+						##send complete msg
+					await interaction.followup.send(content=table_message, file=file)
 				elif r.status == 429:
-					await ctx.send(f"sok a kérés báttya! ezt külték: {r.status}")
+					await interaction.followup.send(f"sok a kérés báttya! ezt külték: {r.status}")
 					self.logger.warning(f"resp {r}")
 				else:
 					self.logger.warning(f"resp {r}")
