@@ -179,6 +179,7 @@ class MiscCog(commands.Cog):
 
 	@app_commands.command(name="kot", description="kuld egy cecat")
 	async def kot(self, interaction: discord.Interaction):
+		await interaction.response.defer(thinking=True)
 		async with aiohttp.ClientSession() as session:
 			apikey = os.getenv("KOT_APIKEY")
 			url = f'https://api.thecatapi.com/v1/images/search?api_key={apikey}&has_breeds=1'
@@ -213,9 +214,9 @@ class MiscCog(commands.Cog):
 					image_bytes = await get_image_as_bytes(image_url)
 					file = discord.File(io.BytesIO(image_bytes), filename="macsek.png")
 						##send complete msg
-					await interaction.response.send_message(content=table_message, file=file)
+					await interaction.followup.send(content=table_message, file=file)
 				elif r.status == 429:
-					await interaction.response.send_message(f"sok a kérés báttya! ezt külték: {r.status}")
+					await interaction.followup.send(f"sok a kérés báttya! ezt külték: {r.status}")
 					self.logger.warning(f"resp {r}")
 				else:
 					self.logger.warning(f"resp {r}")
