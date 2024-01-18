@@ -115,6 +115,19 @@ async def command_cz(cog, ctx):
     else:
         await ctx.send("pill...")
 
+async def command_cz_new(cog, interaction: discord.Interaction):
+    module_logger.info(f"[CMD::CZ] called by [{interaction.user}]")
+    author = get_user_nick_or_name(interaction.user)
+    if cog.bot.state.is_expired("cz"):
+        newnick = get_breveg()
+        module_logger.info(f"[CMD::CZ] generated nick [{newnick}]")
+        cog.bot.state.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
+        member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["cz"])
+        await member.edit(nick=newnick)
+        await interaction.send(f"{author} szerint: {member.mention}")
+    else:
+        await interaction.send("pill...")
+
 
 async def event_voice_state_update(cog, member, before, after):
     from utils.state import VCEvent
