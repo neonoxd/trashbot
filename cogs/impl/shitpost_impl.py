@@ -124,9 +124,9 @@ async def command_cz_new(cog, interaction: discord.Interaction):
         cog.bot.state.add_timeout("cz", expiry_td=datetime.timedelta(minutes=1))
         member = get(cog.bot.get_all_members(), id=cog.bot.globals.goofies["cz"])
         await member.edit(nick=newnick)
-        await interaction.send(f"{author} szerint: {member.mention}")
+        await interaction.response.send_message(f"{author} szerint: {member.mention}")
     else:
-        await interaction.send("pill...")
+        await interaction.response.send_message("pill...")
 
 
 async def event_voice_state_update(cog, member, before, after):
