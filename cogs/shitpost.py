@@ -5,6 +5,7 @@ import discord
 from discord import Message, Member
 from discord.ext import commands
 from discord.ext.commands import Context
+from discord import Embed, app_commands
 
 from utils.state import TrashBot
 
@@ -88,6 +89,11 @@ class ShitpostCog(commands.Cog):
 	async def cege(self, ctx: Context):
 		from cogs.impl.shitpost_impl import command_cz
 		await command_cz(self, ctx)
+
+	@app_commands.command(name="cz", description="cegenyit atkereszteli")
+	async def cege(self, interaction: discord.Interaction):
+		from cogs.impl.shitpost_impl import command_cz_new
+		await command_cz_new(self, interaction)
 
 	@commands.Cog.listener()
 	async def on_voice_state_update(self, member: Member, before, after):
