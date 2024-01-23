@@ -13,6 +13,7 @@ from discord.ext import commands
 
 from utils.state import TrashBot
 from utils.helpers import get_image_as_bytes
+from utils.views import SimpleView
 
 module_logger = logging.getLogger('trashbot.SteamCog')
 
@@ -51,7 +52,6 @@ class SteamCog(commands.Cog):
 				if r.status == 200:
 					data = await r.json()
 					self.logger.info(f"Search results for {app_id}")
-					self.logger.info(data)
 					return data
 
 	async def _search(self, app_name: str, user_id: int):
@@ -77,35 +77,30 @@ class SteamCog(commands.Cog):
 	@app_commands.command(name="steamevent")
 	@app_commands.autocomplete(app_name=steam_autocomplete)
 	async def slash_steamevent(self, interaction: discord.Interaction, app_name: str):
+		await interaction.response.defer(thinking=True)
 		app_search_data = self.last_results[interaction.user.id][app_name]
 		event = await self.create_event_for_app(int(app_search_data['appid']), interaction)
 		if event is not None:
-			await interaction.response.send_message(event.url)
+			await interaction.followup.send(event.url)
 		del self.last_results[interaction.user.id]
 
 	@app_commands.command(name="steamevent-appid")
 	async def slash_steamevent(self, interaction: discord.Interaction, app_id: int):
+		await interaction.response.defer(thinking=True)
 		event = await self.create_event_for_app(app_id, interaction)
 		if event is not None:
-			await interaction.response.send_message(event.url)
+			await interaction.followup.send(event.url)
 
 	async def create_event_for_app(self, appid: int, interaction):
 		app_data = await self.search_app_by_id(appid)
 		app_id = str(appid)
 
 		if not app_data[app_id]["success"]:
-			await interaction.response.send_message("vmi gyász")
+			await interaction.followup.send("vmi gyász")
 			return None
 
 		app_data_d = app_data[app_id]['data']
 		app_data_release_date = app_data_d['release_date']
-
-		is_coming_soon = app_data_release_date['coming_soon'] if 'coming_soon' in app_data_release_date else False
-		if not is_coming_soon:
-			await interaction.response.send_message("má kinvan sztem")
-			return None
-
-		release_date = await self.parse_date(app_data_d['release_date'])
 
 		header_img_url = f"https://cdn.cloudflare.steamstatic.com/steam/apps/{app_id}/header.jpg"
 		steam_page_url = f"https://store.steampowered.com/app/{app_id}"
@@ -119,49 +114,45 @@ class SteamCog(commands.Cog):
 			'image': img_data
 		}
 
+		is_coming_soon = app_data_release_date['coming_soon'] if 'coming_soon' in app_data_release_date else False
+
+		if not is_coming_soon:
+			await interaction.followup.send(view=SimpleView(CustomButton(interaction.user, {"event_data": event_data}, label="má kinvan, habár?")))
+			return None
+
+		release_date = await parse_date(app_data_d['release_date'])
+
 		if release_date is None:
-			await interaction.response.send_modal(DateFillModal(self, event_data))
+			await interaction.followup.send(view=SimpleView(CustomButton(interaction.user, {"event_data": event_data}, label="miez a dátum báttya??")))
 			return None
 
 		return await interaction.guild.create_scheduled_event(name=app_data_d['name'], start_time=release_date, end_time=release_date + datetime.timedelta(hours=1), description=str(app_data_d['short_description']), image=img_data, location=steam_page_url, entity_type=EntityType.external, privacy_level=PrivacyLevel.guild_only)
 
-	async def parse_date(self, date) -> datetime.datetime:
 
-		parsed_date: datetime.datetime | None = None
+class CustomButton(discord.ui.Button):
+	def __init__(self, original_author, args: dict, **kwargs):
+		self.args = args
+		self.original_author = original_author
+		super().__init__(**kwargs)
 
-		date_str = date['date']
-
-		q_regex: Match = re.match("(Q[1-4]) (\\d{4})", date_str)
-		q_regex_year: Match = re.match("^\\d{4}$", date_str, flags=re.RegexFlag.MULTILINE)
-		if q_regex:
-			module_logger.info(f"Quarter date matched: {date_str}")
-			quarter = int(q_regex.groups()[0][1])
-			year = int(q_regex.groups()[1])
-			parsed_date = datetime.datetime(year, quarter * 3, 1, hour=17, minute=0, tzinfo=datetime.timezone.utc)
-		elif q_regex_year:
-			module_logger.info(f"date matched: {date_str}")
-			parsed_date = datetime.datetime(int(q_regex_year.group(0)), 12, 31, hour=17, minute=0, tzinfo=datetime.timezone.utc)
+	async def callback(self, button_interaction: discord.Interaction):
+		if button_interaction.user == self.original_author:
+			module_logger.info(f"i press button {self.args}")
+			await button_interaction.response.send_modal(DateFillModal(self.args["event_data"]))
 		else:
-			try:
-				parsed_date = datetime.datetime.strptime(date_str, '%d %b, %Y')
-				parsed_date = parsed_date.replace(hour=17, minute=0, tzinfo=datetime.timezone.utc)
-			except ValueError:
-				self.logger.info(f"{date_str} is not parseable")
-
-		return parsed_date
+			pass
 
 
 class DateFillModal(discord.ui.Modal, title='várjál tesomsz de ez miko?'):
 	date_str = discord.ui.TextInput(label='igy', placeholder="nap Hón, év | Q1 2024 | 2024")
 
-	def __init__(self, cog: SteamCog, event_data, timeout=180):
+	def __init__(self, event_data, timeout=180):
 		super().__init__(timeout=timeout)
-		self.cog = cog
 		self.event_data = event_data
 
 	async def on_submit(self, interaction: discord.Interaction):
 		date_obj = {'coming_soon': True, 'date': self.date_str.value}
-		parsed_date = await self.cog.parse_date(date_obj)
+		parsed_date = await parse_date(date_obj)
 		from discord import EntityType
 		event = await interaction.guild.create_scheduled_event(name=self.event_data['name'], start_time=parsed_date,
 															  end_time=parsed_date + datetime.timedelta(hours=1),
@@ -173,6 +164,32 @@ class DateFillModal(discord.ui.Modal, title='várjál tesomsz de ez miko?'):
 
 	async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
 		module_logger.error(error, exc_info=True)
+
+
+async def parse_date(date) -> datetime.datetime:
+
+	parsed_date: datetime.datetime | None = None
+
+	date_str = date['date']
+
+	q_regex: Match = re.match("(Q[1-4]) (\\d{4})", date_str)
+	q_regex_year: Match = re.match("^\\d{4}$", date_str, flags=re.RegexFlag.MULTILINE)
+	if q_regex:
+		module_logger.info(f"Quarter date matched: {date_str}")
+		quarter = int(q_regex.groups()[0][1])
+		year = int(q_regex.groups()[1])
+		parsed_date = datetime.datetime(year, quarter * 3, 1, hour=17, minute=0, tzinfo=datetime.timezone.utc)
+	elif q_regex_year:
+		module_logger.info(f"date matched: {date_str}")
+		parsed_date = datetime.datetime(int(q_regex_year.group(0)), 12, 31, hour=17, minute=0, tzinfo=datetime.timezone.utc)
+	else:
+		try:
+			parsed_date = datetime.datetime.strptime(date_str, '%d %b, %Y')
+			parsed_date = parsed_date.replace(hour=17, minute=0, tzinfo=datetime.timezone.utc)
+		except ValueError:
+			module_logger.info(f"{date_str} is not parseable")
+
+	return parsed_date
 
 
 async def setup(bot: TrashBot):

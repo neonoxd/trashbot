@@ -18,6 +18,7 @@ from utils.state import TrashBot
 
 from cogs.warner import WarnerCog
 from cogs.quoter import QuoterCog
+from utils.views import SimpleView
 
 module_logger = logging.getLogger('trashbot.AdminCog')
 
@@ -69,13 +70,6 @@ class EditorFileSelect(discord.ui.Select):
                         self.logger.warning(f"resp {r}")
         else:
             pass
-
-
-class SimpleView(discord.ui.View):
-    def __init__(self, *items, timeout=180):
-        super().__init__(timeout=timeout)
-        for item in items:
-            self.add_item(item)
 
 
 @command_list_aware
@@ -139,7 +133,7 @@ class AdminCog(commands.Cog):
             async with session.get(url) as r:
                 if r.status == 200:
                     resp = await r.read()
-                    await interaction.response.send_message(content=None, view=SimpleView(discord.ui.Button(label="Open Uploader Site", url=resp.decode())),  ephemeral=True)
+                    await interaction.response.send_message(content=None, view=SimpleView(discord.ui.Button(label="Open Uploader Site", url=resp.decode())), ephemeral=True)
                 else:
                     self.logger.warning(f"resp {r}")
 
