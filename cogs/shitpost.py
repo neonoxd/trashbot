@@ -91,7 +91,7 @@ class ShitpostCog(commands.Cog):
 		await command_cz(self, ctx)
 
 	@app_commands.command(name="cz", description="cegenyit atkereszteli")
-	async def cege(self, interaction: discord.Interaction):
+	async def cege_new(self, interaction: discord.Interaction):
 		from cogs.impl.shitpost_impl import command_cz_new
 		await command_cz_new(self, interaction)
 
