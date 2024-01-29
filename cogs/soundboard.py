@@ -154,10 +154,10 @@ class SoundBoardCog(commands.Cog):
             await self.on_leave_vc(member, before, after)
 
     async def on_join_vc(self, member: Member, before: VoiceState, after: VoiceState):
-        await self.bump_jamal_join(member, after.channel.guild.id)
         await self.play_sound_for_goofy_on_vc_event(member, self.bot.globals.greetings["join"])
 
     async def on_leave_vc(self, member: Member, before: VoiceState, after: VoiceState):
+        await self.bump_jamal_leave(member, before.channel.guild.id)
         await self.play_sound_for_goofy_on_vc_event(member, self.bot.globals.greetings["exit"])
 
     async def play_sound_for_goofy_on_vc_event(self, member: Member, sound_map):
@@ -167,10 +167,14 @@ class SoundBoardCog(commands.Cog):
             snd = exit_value if type(exit_value) is str else random.choice(exit_value)
             await self.play_source_if_vc(get_resource_name_or_user_override(f"sounds/{snd}"), .5)
 
-    async def bump_jamal_join(self, member, guild_id):
-        if str(self.bot.globals.goofies["jamal"]) == str(member.id):
-            self.bot.state.get_guild_state_by_id(guild_id).last_shaolin_appearance = datetime.datetime.now()
-
+    async def bump_jamal_leave(self, member, guild_id):
+        try:
+            if str(self.bot.globals.goofies["jamal"]) == str(member.id):
+                self.bot.state.get_guild_state_by_id(guild_id).last_shaolin_appearance = datetime.datetime.now()
+                module_logger.info(f"Saved new jamal leave date for guild {guild_id}: {datetime.datetime.now()}")
+        except Exception as e:
+            module_logger.exception(f"Vmi szar itt: bump_jamal_leave: {e}")
+        
     @commands.command(name='sound')
     async def play_sound(self, ctx: Context, *args):
         async with ctx.typing():
