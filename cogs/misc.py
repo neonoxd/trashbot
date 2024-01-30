@@ -114,7 +114,7 @@ class MiscCog(commands.Cog):
 	@app_commands.command(name="kik", description="kik voltak szok")
 	async def who_cmd(self, interaction: discord.Interaction):
 		""" /kik """
-		now = datetime.datetime.now()
+		now = datetime.now()
 		guild_state = self.bot.state.get_guild_state_by_id(interaction.guild.id)
 		t_locale = random.choice(['zh_CN', 'hu', 'en'])
 		embed = Embed(title="kb ezek vagy nemtom", color=0xFF5733)
@@ -124,7 +124,7 @@ class MiscCog(commands.Cog):
 			for r in list(reversed(guild_state.last_vc_events)):
 				event_str = """"""
 				user = r.user.nick if r.user.nick is not None else r.user.name
-				when = datetime.datetime.fromtimestamp(r.when)
+				when = datetime.fromtimestamp(r.when)
 				event_str = event_str + f"`[{timeago.format(when, now, t_locale)}] "
 				if r.event:
 					event_str = event_str + f"""{user} jött ide: {r.channel.name}`"""
@@ -287,7 +287,7 @@ class MiscCog(commands.Cog):
 			queue = ctx.bot.globals.queued_hotpots
 			queue[description] = {
 				"author": ctx.message.author.name,
-				"when": datetime.datetime.now()
+				"when": datetime.now()
 			}
 			module_logger.info(f"{ctx.message.author.id} queued: {description}")
 			url = "https://ml.hotpot.ai"
