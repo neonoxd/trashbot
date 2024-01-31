@@ -17,7 +17,7 @@ from discord import VoiceChannel
 from utils.helpers import create_alphanumeric_string, get_resource_name_or_user_override
 from utils.state import TrashBot
 from utils.helpers import get_image_as_bytes
-from utils.helpers import is_member_in_voice_channel
+from utils.helpers import get_member_voice_channel
 from datetime import datetime, time
 
 module_logger = logging.getLogger('trashbot.MiscCog')
@@ -64,7 +64,7 @@ class MiscCog(commands.Cog):
 	async def jamal(self, interaction: discord.Interaction):
 		member_id = self.bot.globals.goofies["jamal"]
 		guild = interaction.guild
-		is_in_voice_channel = await is_member_in_voice_channel(member_id, guild)
+		is_in_voice_channel = await get_member_voice_channel(member_id, guild)
 		member = guild.get_member(member_id)
 
 		if is_in_voice_channel: #laci on
@@ -73,14 +73,9 @@ class MiscCog(commands.Cog):
 
 			if datetime.now().weekday() not in [4, 5]: #not friday or saturday
             	#how much can he stay on today
-				current_time = datetime.now().time()
 				today_at_22 = datetime.combine(datetime.now().date(), time(22, 0))
-				time_until_22 = today_at_22 - datetime.combine(datetime.now().date(), current_time)
-				hours, remainder = divmod(time_until_22.seconds, 3600)
-				minutes, _ = divmod(remainder, 60)
-				formatted_time_until_22 = f"{hours} óra {minutes} perc"
 				if datetime.now() < today_at_22: #are we before 22 today
-					remaining_shaolin_time = f"\nmég ennyit lehet ma 🤔🤔: {formatted_time_until_22}"
+					remaining_shaolin_time = f"\n{timeago.format(today_at_22, datetime.now(), 'hu')} mennie kell 😨😨"
 				else:
 					remaining_shaolin_time= f"\n{random.choice(['még fön van','lol még fentvan 🙂🙂','menj ma aludni 😂😂'])}"
 
@@ -114,7 +109,7 @@ class MiscCog(commands.Cog):
 	@app_commands.command(name="kik", description="kik voltak szok")
 	async def who_cmd(self, interaction: discord.Interaction):
 		""" /kik """
-		now = datetime.datetime.now()
+		now = datetime.now()
 		guild_state = self.bot.state.get_guild_state_by_id(interaction.guild.id)
 		t_locale = random.choice(['zh_CN', 'hu', 'en'])
 		embed = Embed(title="kb ezek vagy nemtom", color=0xFF5733)
@@ -124,7 +119,7 @@ class MiscCog(commands.Cog):
 			for r in list(reversed(guild_state.last_vc_events)):
 				event_str = """"""
 				user = r.user.nick if r.user.nick is not None else r.user.name
-				when = datetime.datetime.fromtimestamp(r.when)
+				when = datetime.fromtimestamp(r.when)
 				event_str = event_str + f"`[{timeago.format(when, now, t_locale)}] "
 				if r.event:
 					event_str = event_str + f"""{user} jött ide: {r.channel.name}`"""
@@ -287,7 +282,7 @@ class MiscCog(commands.Cog):
 			queue = ctx.bot.globals.queued_hotpots
 			queue[description] = {
 				"author": ctx.message.author.name,
-				"when": datetime.datetime.now()
+				"when": datetime.now()
 			}
 			module_logger.info(f"{ctx.message.author.id} queued: {description}")
 			url = "https://ml.hotpot.ai"

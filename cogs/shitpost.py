@@ -6,7 +6,7 @@ from discord import Message, Member
 from discord.ext import commands
 from discord.ext.commands import Context
 from discord import Embed, app_commands
-from utils.helpers import is_member_in_voice_channel
+from utils.helpers import get_member_voice_channel
 
 from utils.state import TrashBot
 
@@ -56,11 +56,11 @@ class ShitpostCog(commands.Cog):
 	async def szabo(self, ctx: Context):
 		guild = ctx.bot.guilds[0]
 		member_id = ctx.bot.globals.goofies["sz"]
-		sz_vc = [c for c in guild.channels if c.type == discord.ChannelType.voice and await is_member_in_voice_channel(member_id, guild)]
+		sz_vc = await get_member_voice_channel(member_id, guild)
 
 		await ctx.message.delete()
 
-		if len(sz_vc) > 0 and len(sz_vc[0].members) > 5:
+		if sz_vc and len(sz_vc.members) > 5:
 			msg = await ctx.channel.send("**sanity check...**")
 			await asyncio.sleep(2)
 			await msg.edit(content="**sanity check...** ❌")

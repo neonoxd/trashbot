@@ -95,8 +95,7 @@ def create_autocomplete_source(source: List, current_search: str):
 		for choice in source if current_search.lower() in choice.lower()
 	]
 
-async def is_member_in_voice_channel(member_id, guild):
-    return any(
-        len([member for member in channel.members if member.id == member_id]) > 0
-        for channel in guild.voice_channels
-    )
+async def get_member_voice_channel(member_id, guild):
+    for channel in guild.voice_channels:
+        if any(member.id == member_id for member in channel.members):
+            return channel
