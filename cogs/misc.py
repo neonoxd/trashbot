@@ -78,6 +78,8 @@ class MiscCog(commands.Cog):
 					remaining_shaolin_time = f"\n{timeago.format(today_at_22, datetime.now(), 'hu')} mennie kell 😨😨"
 				else:
 					remaining_shaolin_time= f"\n{random.choice(['még fön van','lol még fentvan 🙂🙂','menj ma aludni 😂😂'])}"
+			else: #friday or saturday
+				remaining_shaolin_time= f"\n{random.choice(['ma lehet vegig 🙂','nincs limit ma 😂'])}"
 
 			await interaction.response.send_message(f"{response_text} {str(voice_channel.name)} {remaining_shaolin_time}")
 
