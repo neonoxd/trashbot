@@ -26,6 +26,17 @@ class ShitpostCog(commands.Cog):
 			await message.reply("nyomod fasz!!")
 			await interaction.response.send_message(content="hehe", ephemeral=True, delete_after=1)
 
+		@bot.tree.context_menu(name="????????")
+		async def gunyod(interaction: discord.Interaction, message: discord.Message):
+			from cogs.impl.shitpost_impl import get_mock_image
+			image_types = [".jpg", ".jpeg", ".png"]
+			if len(message.attachments) > 0 and any(attachment.filename.lower().endswith(imgtype) for imgtype in image_types for attachment in message.attachments):
+				for attachment in message.attachments:
+					await attachment.save(attachment.filename)
+					mockimg = get_mock_image(attachment.filename)
+					await message.reply(file=discord.File(mockimg, 'mock.png'))
+					await interaction.response.send_message(content="hehe", ephemeral=True, delete_after=1)
+
 	@commands.command(name='befli', hidden=True)
 	async def befli(self, ctx: Context):
 		from cogs.impl.shitpost_impl import command_befli
