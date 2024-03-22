@@ -89,6 +89,7 @@ class SteamCog(commands.Cog):
 		await interaction.response.defer(thinking=True)
 		event = await self.create_event_for_app(app_id, interaction)
 		if event is not None:
+			await asyncio.sleep(2)
 			await interaction.followup.send(event.url)
 
 	async def create_event_for_app(self, appid: int, interaction):
