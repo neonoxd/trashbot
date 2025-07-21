@@ -53,6 +53,15 @@ class SteamCog(commands.Cog):
 					data = await r.json()
 					self.logger.info(f"Search results for {app_id}")
 					return data
+ 
+	async def find_header_image_url(self, app_id: int):
+		url = f"https://store.steampowered.com/api/appdetails?appids={app_id}"
+		async with aiohttp.ClientSession() as session:
+			async with session.get(url) as r:
+				if r.status == 200:
+					data = await r.json()
+					self.logger.info(f"Search results for {app_id}")
+					return data[f"{app_id}"]["data"]["header_image"]
 
 	async def _search(self, app_name: str, user_id: int):
 		result = await self.search_app_by_name(app_name)
@@ -103,7 +112,7 @@ class SteamCog(commands.Cog):
 		app_data_d = app_data[app_id]['data']
 		app_data_release_date = app_data_d['release_date']
 
-		header_img_url = f"https://cdn.cloudflare.steamstatic.com/steam/apps/{app_id}/header.jpg"
+		header_img_url = await self.find_header_image_url(app_id)
 		steam_page_url = f"https://store.steampowered.com/app/{app_id}"
 		img_data = await get_image_as_bytes(header_img_url)
 
@@ -127,7 +136,16 @@ class SteamCog(commands.Cog):
 			await interaction.followup.send(view=SimpleView(CustomButton(interaction.user, {"event_data": event_data}, label="miez a dátum báttya??")))
 			return None
 
-		return await interaction.guild.create_scheduled_event(name=app_data_d['name'], start_time=release_date, end_time=release_date + datetime.timedelta(hours=1), description=str(app_data_d['short_description']), image=img_data, location=steam_page_url, entity_type=EntityType.external, privacy_level=PrivacyLevel.guild_only)
+		return await interaction.guild.create_scheduled_event(
+			name=app_data_d['name'], 
+			start_time=release_date, 
+			end_time=release_date + datetime.timedelta(hours=1), 
+			description=str(app_data_d['short_description']), 
+			image=img_data, 
+			location=steam_page_url, 
+			entity_type=EntityType.external, 
+			privacy_level=PrivacyLevel.guild_only
+		)
 
 
 class CustomButton(discord.ui.Button):

@@ -7,7 +7,7 @@ urllib3==1.26.13
 youtube-dl
 aiocron~=1.8
 timeago==1.0.16
-discord.py[voice]==2.3.0
+discord.py[voice]==2.5.2
 matplotlib~=3.6.2
 tabulate[widechars]
 PyNaCl
