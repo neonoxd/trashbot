@@ -19,16 +19,17 @@ class EventerCog(commands.Cog):
         event_banner="An optional promo image for the event"
     )
     async def slash_add_event(self, interaction: Interaction, event_name: str, event_link: str, event_banner: Optional[Attachment] = None):
-        await interaction.response.send_message("sec", ephemeral=True, delete_after=5)
+        await interaction.response.defer(thinking=True)
         
         content = f"📢 **{event_name}**"
         if event_banner and event_banner.content_type and event_banner.content_type.startswith("image/"):
-            msg = await interaction.channel.send(
-                content=content,
-                file=await event_banner.to_file()
-            )
+            msg = await interaction.followup.send(content=content, file=await event_banner.to_file(), wait=True)
+            
         else:
-            msg = await interaction.channel.send(content=content)
+            msg = await interaction.followup.send(content=content, wait=True)
+            
+        # ??????
+        msg.guild = interaction.guild
             
         thread = await msg.create_thread(
             name=f"{event_name}",
